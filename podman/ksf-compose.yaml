@@ -22,18 +22,12 @@ services:
       retries: 5
 
   frontaccounting:
-    image: docker.io/ubuntu:22.04
+    image: docker.io/genebarker/frontaccounting:latest
     container_name: ksf-fa
     hostname: ksf-fa
-    command: /bin/bash -c "apt-get update && apt-get install -y apache2 php php-mysql php-gd php-curl php-xml php-mbstring php-zip libapache2-mod-php && tail -f /dev/null"
-    environment:
-      - FA_DB_HOST=mariadb
-      - FA_DB_NAME=${MARIADB_DATABASE:-ksf_fa}
-      - FA_DB_USER=${MARIADB_USER:-ksf_user}
-      - FA_DB_PASSWORD=${MARIADB_PASSWORD:-ksfuser2024!}
-    volumes:
-      - fa_data:/var/www/html
-      - ./containerfiles/FA/php.ini:/etc/php/8.1/apache2/php.ini:ro
+    command: --http
+    ports:
+      - "8080:80"
     networks:
       - ksf_network
     depends_on:
