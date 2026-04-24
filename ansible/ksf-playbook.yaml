@@ -11,6 +11,7 @@
     ksf_base_dir: /opt/ksf
     ksf_user: "{{ lookup('env', 'USER') }}"
     ksf_fqdn: ksf.local
+    ksf_url: "{{ ksf_fqdn }}"  # FQDN or IP for site URLs (e.g., ksf.example.com or {{ ansible_host }})
 
   tasks:
     - name: Install required packages

@@ -70,3 +70,5 @@ volumes:
 # MARIADB_DATABASE=ksf_fa
 # MARIADB_USER=ksf_user
 # MARIADB_PASSWORD=your_user_password
+# Optionally set for reverse proxy:
+# KSF_URL=ksf.example.com  # Used for WP site URL instead of auto-detected IP
