@@ -37,6 +37,8 @@ services:
     image: docker.io/wordpress:6.4-php8.1-apache
     container_name: ksf-wp
     hostname: ksf-wp
+    ports:
+      - "8081:80"
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-wordpress}
