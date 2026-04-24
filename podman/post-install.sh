@@ -6,7 +6,7 @@
 set -e
 
 # Get FQDN from env var or default to hostname -I
-FQDN=${KSF_URL:-$(hostname -I | awk '{print $1}'})
+FQDN=${KSF_URL:-$(hostname -I | awk '{print $1}')}
 WP_URL="http://${FQDN}:8081"
 FA_URL="http://${FQDN}:8080"
 
@@ -15,9 +15,18 @@ echo "FQDN: $FQDN"
 echo "WP URL: $WP_URL"
 echo "FA URL: $FA_URL"
 
-# Update WordPress to latest
-echo "Updating WordPress..."
-podman exec ksf-wp wp core update --allow-root || true
+# Install WP-CLI if not present
+echo "Installing WP-CLI..."
+podman exec ksf-wp bash -c "curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp" || true
+
+# Install WordPress if not installed
+echo "Installing WordPress..."
+podman exec ksf-wp wp --allow-root core install \
+  --url="$WP_URL" \
+  --title="KSF Customer Portal" \
+  --admin_user=admin \
+  --admin_password=admin2024! \
+  --admin_email=admin@example.com || true
 
 # Update WordPress site URL to FQDN
 echo "Setting WordPress URLs to $WP_URL..."

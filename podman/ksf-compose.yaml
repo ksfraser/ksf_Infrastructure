@@ -12,7 +12,6 @@ services:
       MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./init-sql:/docker-entrypoint-initdb.d:ro
     networks:
       - ksf_network
     healthcheck:
@@ -43,16 +42,14 @@ services:
       WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-wordpress}
       WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
       WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
-      WORDPRESS_TABLE_PREFIX: wp_
     volumes:
       - wp_data:/var/www/html
-      - ./containerfiles/WP/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     networks:
       - ksf_network
     depends_on:
       mariadb:
         condition: service_healthy
-    # WP-CLI installed via init script, not entrypoint override
+    # WP-CLI installed via post-install.sh
 
 networks:
   ksf_network:
