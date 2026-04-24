@@ -75,19 +75,28 @@
         podman volume create ksf_fa_data 2>/dev/null || true
         podman volume create ksf_wp_data 2>/dev/null || true
 
+    - name: Open firewall ports for KSF
+      ansible.builtin.shell: |
+        firewall-cmd --permanent --add-port=8080/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port=8081/tcp 2>/dev/null || true
+        firewall-cmd --reload 2>/dev/null || true
+
     - name: Display setup complete
       ansible.builtin.debug:
         msg: |
           KSF Setup Complete!
           
-          Run these commands to start containers:
-          
-          cd {{ ksf_base_dir }}/infrastructure/podman
-          cp .env.example .env
-          # Edit .env with passwords
-          podman-compose up -d
-          
-          Or manually:
+Run these commands to start containers:
+           
+           cd {{ ksf_base_dir }}/infrastructure/podman
+           cp .env.example .env
+           # Edit .env with passwords
+           podman-compose up -d
+           
+           # Wait for containers to be healthy, then run post-install
+           bash post-install.sh
+           
+           Or manually:
           podman run -d --name ksf-mariadb \
             -e MYSQL_ROOT_PASSWORD=ksfroot2024! \
             -e MYSQL_DATABASE=ksf_fa \
