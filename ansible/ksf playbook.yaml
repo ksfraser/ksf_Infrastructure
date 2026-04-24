@@ -82,18 +82,19 @@
         owner: "{{ ksf_user }}"
         mode: '0644'
 
-    - name: Start KSF pod
-      community.general.podman_container:
-        name: ksf-compose
-        image: docker.io/podman/stable:latest
-        state: started
-        recreate: true
-        env:
-          COMPOSE_PROJECT_NAME: ksf
-        volumes:
-          - "{{ ksf_base_dir }}/infrastructure:/opt/ksf:Z"
-        networks:
-          - ksf_network
+    - name: Ensure podman-compose is available
+      ansible.builtin.shell: |
+        if ! command -v podman-compose &> /dev/null; then
+          pip install podman-compose 2>/dev/null || pip3 install podman-compose
+        fi
+      ignore_errors: yes
+
+    - name: Start KSF containers via compose
+      ansible.builtin.shell: |
+        cd {{ ksf_base_dir }}/infrastructure
+        podman-compose up -d
+      become: true
+      become_user: "{{ ksf_user }}"
 
     - name: Wait for MariaDB to be ready
       ansible.builtin.wait_for:
