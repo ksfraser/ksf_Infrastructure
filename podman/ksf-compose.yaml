@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: docker.io/mariadb:10.11
+    container_name: ksf-mariadb
+    hostname: ksf-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-ksfroot2024!}
+      MYSQL_DATABASE: ${MARIADB_DATABASE:-ksf_fa}
+      MYSQL_USER: ${MARIADB_USER:-ksf_user}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./init-sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ksf_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontaccounting:
+    image: docker.io/ubuntu:22.04
+    container_name: ksf-fa
+    hostname: ksf-fa
+    command: /bin/bash -c "apt-get update && apt-get install -y apache2 php php-mysql php-gd php-curl php-xml php-mbstring php-zip libapache2-mod-php && tail -f /dev/null"
+    environment:
+      - FA_DB_HOST=mariadb
+      - FA_DB_NAME=${MARIADB_DATABASE:-ksf_fa}
+      - FA_DB_USER=${MARIADB_USER:-ksf_user}
+      - FA_DB_PASSWORD=${MARIADB_PASSWORD:-ksfuser2024!}
+    volumes:
+      - fa_data:/var/www/html
+      - ./containerfiles/FA/php.ini:/etc/php/8.1/apache2/php.ini:ro
+    networks:
+      - ksf_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  wordpress:
+    image: docker.io/wordpress:6.4-php8.1-apache
+    container_name: ksf-wp
+    hostname: ksf-wp
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
+      WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      - wp_data:/var/www/html
+      - ./containerfiles/WP/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    networks:
+      - ksf_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+networks:
+  ksf_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  fa_data:
+  wp_data:
+
+# Environment file to customize
+# Copy .env.example to .env and customize
+# MARIADB_ROOT_PASSWORD=your_root_password
+# MARIADB_DATABASE=ksf_fa
+# MARIADB_USER=ksf_user
+# MARIADB_PASSWORD=your_user_password

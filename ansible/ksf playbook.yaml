@@ -1,0 +1,150 @@
+---
+# KSF Infrastructure Ansible Playbook
+# Provisions UAT environment with Podman
+
+- name: Setup KSF UAT Environment
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    ksf_base_dir: /opt/ksf
+    ksf_user: ksf
+    ksf_fqdn: ksf.local
+    fa_version: "2.4.4"
+    wp_version: "6.4"
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - podman
+          - buildah
+          - skopeo
+          - crun
+          - containernetworking-plugins
+          - ansible
+        state: present
+        update_cache: yes
+
+    - name: Create KSF user
+      ansible.builtin.user:
+        name: "{{ ksf_user }}"
+        shell: /bin/bash
+        create_home: yes
+
+    - name: Create base directories
+      ansible.builtin.file:
+        path: "{{ ksf_base_dir }}"
+        state: directory
+        owner: "{{ ksf_user }}"
+        mode: '0755'
+
+    - name: Create podman-compose directory
+      ansible.builtin.file:
+        path: "{{ ksf_base_dir }}/infrastructure"
+        state: directory
+        owner: "{{ ksf_user }}"
+        mode: '0755'
+
+    - name: Copy compose file
+      ansible.builtin.copy:
+        src: ../podman/ksf-compose.yaml
+        dest: "{{ ksf_base_dir }}/infrastructure/compose.yaml"
+        owner: "{{ ksf_user }}"
+        mode: '0644'
+
+    - name: Copy environment template
+      ansible.builtin.copy:
+        src: ../podman/.env.example
+        dest: "{{ ksf_base_dir }}/infrastructure/.env"
+        owner: "{{ ksf_user }}"
+        mode: '0644'
+
+    - name: Copy PHP configurations
+      ansible.builtin.copy:
+        src: ../containerfiles/
+        dest: "{{ ksf_base_dir }}/infrastructure/containerfiles/"
+        owner: "{{ ksf_user }}"
+        mode: '0644'
+
+    - name: Create DB init scripts directory
+      ansible.builtin.file:
+        path: "{{ ksf_base_dir }}/infrastructure/init-sql"
+        state: directory
+        owner: "{{ ksf_user }}"
+        mode: '0755'
+
+    - name: Create MariaDB initialization SQL
+      ansible.builtin.template:
+        src: templates/init-db.sql.j2
+        dest: "{{ ksf_base_dir }}/infrastructure/init-sql/init.sql"
+        owner: "{{ ksf_user }}"
+        mode: '0644'
+
+    - name: Start KSF pod
+      community.general.podman_container:
+        name: ksf-compose
+        image: docker.io/podman/stable:latest
+        state: started
+        recreate: true
+        env:
+          COMPOSE_PROJECT_NAME: ksf
+        volumes:
+          - "{{ ksf_base_dir }}/infrastructure:/opt/ksf:Z"
+        networks:
+          - ksf_network
+
+    - name: Wait for MariaDB to be ready
+      ansible.builtin.wait_for:
+        port: 3306
+        host: "127.0.0.1"
+        delay: 10
+        timeout: 60
+
+    - name: Display access information
+      ansible.builtin.debug:
+        msg: |
+          KSF UAT Environment deployed!
+          
+          Access URLs:
+          - FrontAccounting: http://localhost:8080
+          - WordPress: http://localhost:8081
+          
+          Credentials:
+          - WP Admin: admin / admin2024!
+          - FA Admin: admin / admin
+
+# Optional: Install KSF modules post-deployment
+- name: Install KSF Modules
+  hosts: localhost
+  become: true
+
+  vars:
+    ksf_modules:
+      - ksf_FA_ProjectManagement
+      - ksf_FA_Calendar
+      - ksf_FA_SupportTickets
+      - ksf_FA_WarrantyManagement
+      - ksf_FA_Notes
+      - ksf_FA_Workflow
+
+  tasks:
+    - name: Clone KSF module repositories
+      ansible.builtin.git:
+        repo: "https://github.com/ksfraser/{{ item }}.git"
+        dest: "/var/www/html/modules/{{ item }}"
+        version: master
+      loop: "{{ ksf_modules }}"
+      register: git_clones
+      ignore_errors: yes
+
+    - name: Enable modules in hooks
+      ansible.builtin.shell: |
+        cd /var/www/html
+        for module in /var/www/html/modules/*; do
+          if [ -f "$module/hooks.php" ]; then
+            cp -r "$module" /var/www/html/modules/
+          fi
+        done
+      ignore_errors: yes
