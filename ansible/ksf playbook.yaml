@@ -1,6 +1,6 @@
 ---
 # KSF Infrastructure Ansible Playbook
-# Provisions UAT environment with Podman
+# Sets up files and creates network, leaves container startup for manual
 
 - name: Setup KSF UAT Environment
   hosts: localhost
@@ -9,143 +9,90 @@
 
   vars:
     ksf_base_dir: /opt/ksf
-    ksf_user: ksf
+    ksf_user: "{{ lookup('env', 'USER') }}"
     ksf_fqdn: ksf.local
-    fa_version: "2.4.4"
-    wp_version: "6.4"
 
   tasks:
     - name: Install required packages
       ansible.builtin.apt:
         name:
           - podman
-          - buildah
-          - skopeo
-          - crun
-          - containernetworking-plugins
-          - ansible
+          - podman-compose
+          - ansible-core
         state: present
         update_cache: yes
+      ignore_errors: yes
 
-    - name: Create KSF user
-      ansible.builtin.user:
-        name: "{{ ksf_user }}"
-        shell: /bin/bash
-        create_home: yes
-
-    - name: Create base directories
+    - name: Create base directory
       ansible.builtin.file:
         path: "{{ ksf_base_dir }}"
         state: directory
-        owner: "{{ ksf_user }}"
         mode: '0755'
 
-    - name: Create podman-compose directory
+    - name: Create infrastructure directories
       ansible.builtin.file:
-        path: "{{ ksf_base_dir }}/infrastructure"
+        path: "{{ ksf_base_dir }}/{{ item }}"
         state: directory
-        owner: "{{ ksf_user }}"
         mode: '0755'
+      loop:
+        - infrastructure/podman
+        - infrastructure/containerfiles/FA
+        - infrastructure/containerfiles/WP
+        - infrastructure/init-sql
 
     - name: Copy compose file
       ansible.builtin.copy:
         src: ../podman/ksf-compose.yaml
-        dest: "{{ ksf_base_dir }}/infrastructure/compose.yaml"
-        owner: "{{ ksf_user }}"
+        dest: "{{ ksf_base_dir }}/infrastructure/podman/compose.yaml"
         mode: '0644'
 
     - name: Copy environment template
       ansible.builtin.copy:
         src: ../podman/.env.example
-        dest: "{{ ksf_base_dir }}/infrastructure/.env"
-        owner: "{{ ksf_user }}"
+        dest: "{{ ksf_base_dir }}/infrastructure/podman/.env"
         mode: '0644'
 
     - name: Copy PHP configurations
       ansible.builtin.copy:
         src: ../containerfiles/
         dest: "{{ ksf_base_dir }}/infrastructure/containerfiles/"
-        owner: "{{ ksf_user }}"
         mode: '0644'
+        directory_mode: '0755'
 
-    - name: Create DB init scripts directory
-      ansible.builtin.file:
-        path: "{{ ksf_base_dir }}/infrastructure/init-sql"
-        state: directory
-        owner: "{{ ksf_user }}"
-        mode: '0755'
-
-    - name: Create MariaDB initialization SQL
-      ansible.builtin.template:
-        src: templates/init-db.sql.j2
+    - name: Copy DB init SQL
+      ansible.builtin.copy:
+        src: ../init-sql/init.sql
         dest: "{{ ksf_base_dir }}/infrastructure/init-sql/init.sql"
-        owner: "{{ ksf_user }}"
         mode: '0644'
 
-    - name: Ensure podman-compose is available
+    - name: Create podman network
       ansible.builtin.shell: |
-        if ! command -v podman-compose &> /dev/null; then
-          pip install podman-compose 2>/dev/null || pip3 install podman-compose
-        fi
-      ignore_errors: yes
+        podman network create ksf_network 2>/dev/null || true
 
-    - name: Start KSF containers via compose
+    - name: Create podman volumes
       ansible.builtin.shell: |
-        cd {{ ksf_base_dir }}/infrastructure
-        podman-compose up -d
-      become: true
-      become_user: "{{ ksf_user }}"
+        podman volume create ksf_mariadb_data 2>/dev/null || true
+        podman volume create ksf_fa_data 2>/dev/null || true
+        podman volume create ksf_wp_data 2>/dev/null || true
 
-    - name: Wait for MariaDB to be ready
-      ansible.builtin.wait_for:
-        port: 3306
-        host: "127.0.0.1"
-        delay: 10
-        timeout: 60
-
-    - name: Display access information
+    - name: Display setup complete
       ansible.builtin.debug:
         msg: |
-          KSF UAT Environment deployed!
+          KSF Setup Complete!
           
-          Access URLs:
-          - FrontAccounting: http://localhost:8080
-          - WordPress: http://localhost:8081
+          Run these commands to start containers:
           
-          Credentials:
-          - WP Admin: admin / admin2024!
-          - FA Admin: admin / admin
-
-# Optional: Install KSF modules post-deployment
-- name: Install KSF Modules
-  hosts: localhost
-  become: true
-
-  vars:
-    ksf_modules:
-      - ksf_FA_ProjectManagement
-      - ksf_FA_Calendar
-      - ksf_FA_SupportTickets
-      - ksf_FA_WarrantyManagement
-      - ksf_FA_Notes
-      - ksf_FA_Workflow
-
-  tasks:
-    - name: Clone KSF module repositories
-      ansible.builtin.git:
-        repo: "https://github.com/ksfraser/{{ item }}.git"
-        dest: "/var/www/html/modules/{{ item }}"
-        version: master
-      loop: "{{ ksf_modules }}"
-      register: git_clones
-      ignore_errors: yes
-
-    - name: Enable modules in hooks
-      ansible.builtin.shell: |
-        cd /var/www/html
-        for module in /var/www/html/modules/*; do
-          if [ -f "$module/hooks.php" ]; then
-            cp -r "$module" /var/www/html/modules/
-          fi
-        done
-      ignore_errors: yes
+          cd {{ ksf_base_dir }}/infrastructure/podman
+          cp .env.example .env
+          # Edit .env with passwords
+          podman-compose up -d
+          
+          Or manually:
+          podman run -d --name ksf-mariadb \
+            -e MYSQL_ROOT_PASSWORD=ksfroot2024! \
+            -e MYSQL_DATABASE=ksf_fa \
+            -e MYSQL_USER=ksf_user \
+            -e MYSQL_PASSWORD=ksfuser2024! \
+            -v ksf_mariadb_data:/var/lib/mysql \
+            --network ksf_network \
+            mariadb:10.11
