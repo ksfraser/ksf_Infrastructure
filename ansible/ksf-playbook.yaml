@@ -1,6 +1,6 @@
 ---
 # KSF Infrastructure Ansible Playbook
-# Sets up network, volumes, and firewall ports
+# Sets up network, volumes, and runs post-install
 
 - name: Setup KSF UAT Environment
   hosts: localhost
@@ -8,7 +8,7 @@
   become: true
 
   vars:
-    ksf_base_dir: /opt/ksf/infrastructure/podman
+    ksf_base_dir: /home/kevin/Documents/ksf_Infrastructure/podman
 
   tasks:
     - name: Create podman network
@@ -16,16 +16,28 @@
 
     - name: Create podman volumes
       ansible.builtin.shell: |
-        podman volume create ksf_mariadb_data 2>/dev/null || true
-        podman volume create ksf_fa_data 2>/dev/null || true
-        podman volume create ksf_wp_data 2>/dev/null || true
+        podman volume create mariadb_data 2>/dev/null || true
+        podman volume create fa_data 2>/dev/null || true
+        podman volume create wp_data 2>/dev/null || true
 
     - name: Open firewall ports for KSF
       ansible.builtin.shell: |
         firewall-cmd --permanent --add-port=8080/tcp 2>/dev/null || true
         firewall-cmd --permanent --add-port=8081/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
+      ignore_errors: true
 
-    - name: Display setup complete
-      ansible.builtin.debug:
-        msg: "KSF Setup Complete! Run: podman-compose -f /home/kevin/Documents/ksf_Infrastructure/podman/ksf-compose.yaml up -d"
+    - name: Start Podman Compose services
+      ansible.builtin.shell: |
+        cd {{ ksf_base_dir }}
+        podman-compose -f {{ ksf_base_dir }}/ksf-compose.yaml up -d
+      args:
+        creates: "{{ ksf_base_dir }}/ksf-compose.yaml"
+
+    - name: Wait for MariaDB to be healthy
+      ansible.builtin.pause:
+        seconds: 30
+
+    - name: Run post-install script
+      ansible.builtin.shell: |
+        bash {{ ksf_base_dir }}/post-install.sh
