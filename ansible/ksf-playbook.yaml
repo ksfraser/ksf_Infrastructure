@@ -1,6 +1,6 @@
 ---
 # KSF Infrastructure Ansible Playbook
-# Sets up network, volumes, and runs post-install
+# Sets up network, volumes, copies modules, and runs post-install
 
 - name: Setup KSF UAT Environment
   hosts: localhost
@@ -9,6 +9,7 @@
 
   vars:
     ksf_base_dir: /home/kevin/Documents/ksf_Infrastructure/podman
+    fa_modules_dir: /home/kevin/Documents/ksf_Infrastructure/fa_modules
 
   tasks:
     - name: Create podman network
@@ -19,6 +20,35 @@
         podman volume create mariadb_data 2>/dev/null || true
         podman volume create fa_data 2>/dev/null || true
         podman volume create wp_data 2>/dev/null || true
+
+    - name: Ensure FA modules directory exists
+      ansible.builtin.file:
+        path: "{{ fa_modules_dir }}"
+        state: directory
+
+    - name: Copy all ksf_FA_* modules to FA modules directory
+      ansible.builtin.shell: |
+        cd /home/kevin/Documents
+        for dir in ksf_FA_*; do
+          if [ -d "$dir" ]; then
+            cp -r "$dir" "{{ fa_modules_dir }}/"
+            echo "Copied $dir"
+          fi
+        done
+      args:
+        creates: "{{ fa_modules_dir }}/ksf_FA_Assets"
+
+    - name: Install ksf_fa_downloader separately
+      ansible.builtin.shell: |
+        cp -r /home/kevin/Documents/ksf_fa_downloader "{{ fa_modules_dir }}/ksf_FA_Downloader" 2>/dev/null || true
+      ignore_errors: true
+
+    - name: Open firewall ports for KSF
+      ansible.builtin.shell: |
+        firewall-cmd --permanent --add-port=8080/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port=8081/tcp 2>/dev/null || true
+        firewall-cmd --reload 2>/dev/null || true
+      ignore_errors: true
 
     - name: Open firewall ports for KSF
       ansible.builtin.shell: |
@@ -41,3 +71,4 @@
     - name: Run post-install script
       ansible.builtin.shell: |
         bash {{ ksf_base_dir }}/post-install.sh
+      ignore_errors: true

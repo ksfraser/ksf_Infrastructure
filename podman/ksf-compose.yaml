@@ -28,6 +28,9 @@ services:
     command: --http
     ports:
       - "8080:80"
+    volumes:
+      - fa_data:/var/www/html
+      - ../fa_modules:/var/www/html/modules:z
     networks:
       - ksf_network
     depends_on:
