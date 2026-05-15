@@ -10,8 +10,17 @@
   vars:
     ksf_base_dir: /home/kevin/Documents/ksf_Infrastructure/podman
     fa_modules_dir: /home/kevin/Documents/ksf_Infrastructure/fa_modules
+    ksf_backup_dir: /home/kevin/Documents/ksf_Infrastructure/backup
+    mariadb_host: ksf-mariadb
+    mariadb_root_pass: ksfroot2024!
+    mariadb_db: ksf_fa
 
   tasks:
+    - name: Create backup directory
+      ansible.builtin.file:
+        path: "{{ ksf_backup_dir }}"
+        state: directory
+
     - name: Create podman network
       ansible.builtin.shell: podman network create ksf_network 2>/dev/null || true
 
@@ -50,13 +59,6 @@
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
 
-    - name: Open firewall ports for KSF
-      ansible.builtin.shell: |
-        firewall-cmd --permanent --add-port=8080/tcp 2>/dev/null || true
-        firewall-cmd --permanent --add-port=8081/tcp 2>/dev/null || true
-        firewall-cmd --reload 2>/dev/null || true
-      ignore_errors: true
-
     - name: Start Podman Compose services
       ansible.builtin.shell: |
         cd {{ ksf_base_dir }}
@@ -68,7 +70,58 @@
       ansible.builtin.pause:
         seconds: 30
 
+    - name: Check if backup exists and restore
+      when: backup_status.stat.exists
+      block:
+        - name: Restore MariaDB database
+          ansible.builtin.shell: |
+            podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} < {{ ksf_backup_dir }}/ksf_fa.sql 2>/dev/null || \
+            (podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} -e "CREATE DATABASE IF NOT EXISTS {{ mariadb_db }}" && \
+             podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} < {{ ksf_backup_dir }}/ksf_fa.sql)
+          ignore_errors: true
+
+        - name: Restore config.php
+          ansible.builtin.copy:
+            src: "{{ ksf_backup_dir }}/config.php"
+            dest: "{{ fa_modules_dir }}/config.php"
+            mode: '0644'
+
+        - name: Restore installed_extensions.php
+          ansible.builtin.copy:
+            src: "{{ ksf_backup_dir }}/installed_extensions.php"
+            dest: "{{ fa_modules_dir }}/company/0/installed_extensions.php"
+            mode: '0644'
+      vars:
+        backup_status:
+          stat:
+            path: "{{ ksf_backup_dir }}/ksf_fa.sql"
+
     - name: Run post-install script
       ansible.builtin.shell: |
         bash {{ ksf_base_dir }}/post-install.sh
+      ignore_errors: true
+
+    - name: Backup database and config (always runs, creates new backup)
+      ansible.builtin.shell: |
+        set -e
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        
+        # Get container IDs
+        MARIADB_CONTAINER=$(podman ps -q --filter name=ksf-mariadb | head -1)
+        FA_CONTAINER=$(podman ps -q --filter name=ksf-fa | head -1)
+        
+        if [ -n "$MARIADB_CONTAINER" ]; then
+          echo "Backing up database..."
+          podman exec $MARIADB_CONTAINER mysqldump -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} > {{ ksf_backup_dir }}/ksf_fa.sql
+          echo "Database backed up"
+        fi
+        
+        if [ -n "$FA_CONTAINER" ]; then
+          echo "Backing up config..."
+          podman exec $FA_CONTAINER cat /var/www/html/config.php > {{ ksf_backup_dir }}/config.php 2>/dev/null || true
+          podman exec $FA_CONTAINER cat /var/www/html/company/0/installed_extensions.php > {{ ksf_backup_dir }}/installed_extensions.php 2>/dev/null || true
+          echo "Config backed up"
+        fi
+        
+        echo "Backup complete at {{ ksf_backup_dir }}"
       ignore_errors: true
