@@ -2,194 +2,155 @@
 
 This directory contains the infrastructure configuration for deploying the KSF UAT (User Acceptance Testing) environment.
 
-## Components
+## Architecture Overview
 
 ```
 ksf_Infrastructure/
-├── ansible/                    # Ansible playbook
-│   └── ksf_playbook.yaml
-├── podman/                     # Podman compose + config
+├── ansible/                         # Ansible playbook + inventories
+│   ├── ksf-playbook.yaml
+│   └── inventories/
+│       └── local                    # Local development inventory
+├── podman/                          # Podman compose + config
 │   ├── ksf-compose.yaml
+│   ├── post-install.sh
 │   └── .env.example
-├── containerfiles/              # Container configurations
-│   ├── FA/php.ini
-│   └── WP/uploads.ini
-└── init-sql/                   # DB initialization
-    └── init.sql
+├── init-sql/                        # DB initialization
+│   └── init.sql
+└── fa_modules/                      # FA modules (populated by playbook)
 ```
 
-## Quick Start
+## IMPORTANT: Configuration via Inventory Files
 
-### Option 1: Manual Podman Compose (Recommended for Development)
+**DO NOT hardcode values.** All configuration is done via Ansible inventory files.
 
-```bash
-# Copy and customize environment
-cp podman/.env.example podman/.env
-nano podman/.env
-
-# Copy all ksf_FA_* modules
-cd /home/kevin/Documents
-for dir in ksf_FA_*; do
-  cp -r "$dir" ksf_Infrastructure/fa_modules/ 2>/dev/null || true
-done
-
-# Start all containers
-cd podman
-podman-compose up -d
-
-# Check status
-podman-compose ps
+### Inventory File Location
+```
+ansible/inventories/<environment>
 ```
 
-### Option 2: Ansible (Recommended for Production)
+### Required Inventory Variables
 
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `fa_port` | FrontAccounting HTTP port | 8090 |
+| `wp_port` | WordPress HTTP port | 8091 |
+| `volume_prefix` | Prefix for podman volumes (must be unique per deployment) | ksf_infrastructure |
+| `mariadb_root_pass` | MariaDB root password | ksfroot2024! |
+| `mariadb_db` | MariaDB database name | ksf_fa |
+| `fa_modules` | List of FA modules to deploy | [] (empty) |
+
+### Example: Creating a New Environment
+
+1. **Copy the local inventory:**
+   ```bash
+   cp ansible/inventories/local ansible/inventories/myenv
+   ```
+
+2. **Edit the inventory with your values:**
+   ```ini
+   # ansible/inventories/myenv
+   [ksf:vars]
+   fa_port=9000              # Changed port
+   wp_port=9001             # Changed port
+   volume_prefix=myenv_ksf   # UNIQUE prefix to avoid conflicts
+   fa_modules:
+     - ksf_FA_HRM
+     - ksf_FA_ProjectManagement
+     - export_woocommerce    # Your custom module
+   ```
+
+3. **Run the playbook:**
+   ```bash
+   ansible-playbook -i ansible/inventories/myenv ansible/ksf-playbook.yaml --ask-become-pass
+   ```
+
+## Quick Start (Using Ansible)
+
+### 1. Install Ansible
 ```bash
-# Install Ansible
 sudo apt install ansible
-
-# Ensure modules are in place
-ls /home/kevin/Documents/ksf_FA_*
-
-# Run playbook
-cd ansible
-ansible-playbook -i localhost ksf-playbook.yaml --ask-become-pass
 ```
 
-### Option 2: Ansible (Recommended)
+### 2. Configure Inventory
+Edit `ansible/inventories/local` to set:
+- `fa_port` - FA HTTP port (avoid conflicts with other deployments)
+- `wp_port` - WP HTTP port  
+- `volume_prefix` - **MUST be unique** to avoid data collision
+- `fa_modules` - List of modules to deploy
+
+### 3. Run Playbook
+```bash
+cd ansible
+ansible-playbook -i inventories/local ksf-playbook.yaml --ask-become-pass
+```
+
+## Manual Deployment (Podman Compose Only)
+
+If not using Ansible, copy `.env.example` to `.env` and set:
 
 ```bash
-# Install Ansible
-sudo apt install ansible
-
-# Run playbook
-cd ansible
-ansible-playbook -i localhost ksf_playbook.yaml --ask-become-pass
-```
-
-## Access
-
-| Service | URL | Default Credentials |
-|---------|-----|-------------------|
-| FrontAccounting | http://localhost:8080 | admin / admin |
-| WordPress | http://localhost:8081 | admin / admin2024! |
-| MariaDB | localhost:3306 | ksf_user / ksfuser2024! |
-
-## Environment Variables
-
-Edit `podman/.env`:
-
-```
+# podman/.env
+FA_PORT=8090
+WP_PORT=8091
+VOLUME_PREFIX=my_unique_prefix   # REQUIRED - must be unique per deployment!
 MARIADB_ROOT_PASSWORD=ksfroot2024!
 MARIADB_DATABASE=ksf_fa
 MARIADB_USER=ksf_user
 MARIADB_PASSWORD=ksfuser2024!
-FA_ADMIN_PASSWORD=admin
-WP_ADMIN_PASSWORD=admin2024!
 ```
 
-## Container Ports
-
-| Container | Port | Internal |
-|----------|------|----------|
-| MariaDB | 3306 | 3306 |
-| FrontAccounting | 8080 | 80 |
-| WordPress | 8081 | 80 |
-
-## Data Persistence
-
-Data is stored in Podman volumes:
-- `mariadb_data` - MySQL/MariaDB data
-- `fa_data` - FrontAccounting files  
-- `wp_data` - WordPress files
-
-## Stop
-
+Then start:
 ```bash
 cd podman
-podman-compose down     # Keep volumes
-podman-compose down -v  # Destroy volumes
+podman-compose up -d
+VOLUME_PREFIX=my_unique_prefix bash post-install.sh
 ```
 
-## Modules Auto-Installed
+## Access (Default - Update Ports per Inventory)
 
-All ksf_FA_* modules are downladed via `ksf_fa_downloader` and available in FA Module Administration.
+| Service | URL | Default Credentials |
+|---------|-----|-------------------|
+| FrontAccounting | http://localhost:8090 | admin / admin |
+| WordPress | http://localhost:8091 | admin / admin2024! |
+| MariaDB | localhost:3306 | ksf_user / ksfuser2024! |
 
-### How it Works
-1. `ksf_fa_downloader` is pre-installed in the FA modules directory
-2. On first run, go to **Setup > Download FA Modules**
-3. All 25+ modules are listed with descriptions
-4. Click **Download** next to any module you want
-5. After downloading, go to **Setup > Module Administration** to activate
+## Volume Naming Convention
 
-### Core Modules (Always Available)
-- ksf_FA_ProjectManagement
-- ksf_FA_HRM
-- ksf_FA_Timesheets
-- ksf_FA_TravelExpense
-- ksf_FA_Training
+**CRITICAL:** Volumes are named `{volume_prefix}_mariadb_data`, `{volume_prefix}_fa_data`, `{volume_prefix}_wp_data`
 
-### All Available Modules
-| Module | Description |
-|--------|-------------|
-| ksf_FA_Assets | Equipment assets with depreciation |
-| ksf_FA_Subscriptions | On-demand recurring billing |
-| ksf_FA_Service | Field service and work orders |
-| ksf_FA_KnowledgeBase | FAQ and knowledge base |
-| ksf_FA_Fleet | Vehicle fleet with inspections |
-| ksf_FA_TravelExpense | Travel and expense management |
-| ksf_FA_HRM | Human resources management |
-| ksf_FA_ProjectManagement | Project management |
-| ksf_FA_Timesheets | Time tracking |
-| ksf_FA_Leave | Leave management |
-| ksf_FA_Onboarding | Employee onboarding |
-| ksf_FA_Performance | Performance management |
-| ksf_FA_Recruitment | Recruitment management |
-| ksf_FA_Training | Training management |
-| ksf_FA_OrgChart | Organization chart |
-| ksf_FA_JobDescriptions | Job description management |
-| ksf_FA_Teams | Team management |
-| ksf_FA_Roster | Staff rostering |
-| ksf_FA_Documents | Document management |
-| ksf_FA_Forms | Dynamic form builder |
-| ksf_FA_EmailManager | Email campaign management |
-| ksf_FA_CampaignBuilder | Marketing campaign builder |
-| ksf_FA_CRM | Customer relationship management |
-| ksf_FA_Tracking | Link tracking |
-| ksf_FA_Notes | Internal notes system |
-| ksf_FA_WarrantyManagement | Warranty tracking |
-| ksf_FA_Workflow | Workflow automation |
-| ksf_FA_AsteriskPBX | Asterisk PBX with WebRTC |
-| ksf_FA_API | REST API for FA |
-| ksf_FA_Calendar | Calendar integration |
-| **ksf_fa_downloader** | Module downloader (pre-installed) |
-- ksf_FA_Assets
-- ksf_FA_Subscriptions
-- ksf_FA_Service
-- ksf_FA_KnowledgeBase
-- ksf_FA_Fleet
-- ksf_FA_TravelExpense
-- ksf_FA_HRM
-- ksf_FA_Timesheets
-- ksf_FA_Leave
-- ksf_FA_Onboarding
-- ksf_FA_Performance
-- ksf_FA_Recruitment
-- ksf_FA_Training
-- ksf_FA_OrgChart
-- ksf_FA_JobDescriptions
-- ksf_FA_Teams
-- ksf_FA_Roster
-- ksf_FA_Documents
-- ksf_FA_Forms
-- ksf_FA_EmailManager
-- ksf_FA_CampaignBuilder
-- ksf_FA_CRM
-- ksf_FA_Tracking
-- ksf_FA_AsteriskPBX
-- ksf_FA_API
-- **ksf_FA_Downloader** (for easy module installation)
+Each deployment MUST have a unique `volume_prefix` to avoid:
+- Data collision between environments
+- Accidentally deleting another team's data
+- Port conflicts
+
+### Examples
+| Environment | volume_prefix | Resulting Volumes |
+|-------------|---------------|-------------------|
+| Local Dev | `ksf_infrastructure` | ksf_infrastructure_mariadb_data, etc. |
+| Staging | `ksf_staging` | ksf_staging_mariadb_data, etc. |
+| Production | `ksf_prod` | ksf_prod_mariadb_data, etc. |
+
+## Stopping and Cleanup
+
+```bash
+# Stop containers (keep data)
+podman-compose down
+
+# Destroy containers AND volumes (CAREFUL - deletes data!)
+podman-compose down -v
+
+# Remove volumes manually
+podman volume rm ${VOLUME_PREFIX}_mariadb_data
+podman volume rm ${VOLUME_PREFIX}_fa_data
+podman volume rm ${VOLUME_PREFIX}_wp_data
+```
 
 ## Troubleshooting
+
+### Check container status
+```bash
+podman ps -a
+```
 
 ### Check container logs
 ```bash
@@ -198,11 +159,29 @@ podman logs ksf-fa
 podman logs ksf-wp
 ```
 
-### Reset everything
+### Verify volumes exist
 ```bash
-podman-compose down -v
-podman volume rm ksf_infrastructure_mariadb_data
-podman volume rm ksf_infrastructure_fa_data
-podman volume rm ksf_infrastructure_wp_data
-podman-compose up -d
+podman volume ls | grep ${VOLUME_PREFIX}
 ```
+
+### Common Issues
+
+**Port already in use:**
+```
+Error: endpoint exposure failed: exposing port 8090-8091 failed
+```
+Solution: Update `fa_port`/`wp_port` in inventory to unused ports.
+
+**Volume already exists:**
+```
+Error: volume some_name already exists
+```
+Solution: Either use a different `volume_prefix`, or manually remove:
+```bash
+podman volume rm <old_volume_name>
+```
+
+**FA modules not appearing:**
+1. Check `fa_modules` list in inventory
+2. Verify modules exist in `/home/kevin/Documents/`
+3. Check playbook output for "Skipped" messages
