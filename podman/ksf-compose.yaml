@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${MARIADB_USER:-ksf_user}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - ksf_infrastructure_mariadb_data:/var/lib/mysql
       - ../init-sql:/docker-entrypoint-initdb.d
     networks:
       - ksf_network
@@ -29,7 +29,7 @@ services:
     ports:
       - "${FA_PORT:-8090}:80"
     volumes:
-      - fa_data:/var/www/html
+      - ksf_infrastructure_fa_data:/var/www/html
       - ../fa_modules:/var/www/html/modules:z
     networks:
       - ksf_network
@@ -49,7 +49,7 @@ services:
       WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
       WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
     volumes:
-      - wp_data:/var/www/html
+      - ksf_infrastructure_wp_data:/var/www/html
     networks:
       - ksf_network
     depends_on:
@@ -63,9 +63,9 @@ networks:
     driver: bridge
 
 volumes:
-  mariadb_data:
-  fa_data:
-  wp_data:
+  ksf_infrastructure_mariadb_data:
+  ksf_infrastructure_fa_data:
+  ksf_infrastructure_wp_data:
 
 # Environment file to customize
 # Copy .env.example to .env and customize
