@@ -8,6 +8,9 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
 fa_port=8090
 wp_port=8091
 
+# Volume prefix (for data persistence uniqueness)
+volume_prefix=ksf_infrastructure
+
 # Database configuration
 mariadb_root_pass=ksfroot2024!
 mariadb_db=ksf_fa

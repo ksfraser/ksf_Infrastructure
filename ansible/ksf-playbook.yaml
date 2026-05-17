@@ -16,41 +16,12 @@
     fa_modules_dir: /home/kevin/Documents/ksf_Infrastructure/fa_modules
     ksf_backup_dir: /home/kevin/Documents/ksf_Infrastructure/backup
     mariadb_host: ksf-mariadb
-    mariadb_root_pass: ksfroot2024!
-    mariadb_db: ksf_fa
-    fa_port: 8090
-    wp_port: 8091
-    fa_modules:
-      - ksf_FA_Assets
-      - ksf_FA_Subscriptions
-      - ksf_FA_Service
-      - ksf_FA_KnowledgeBase
-      - ksf_FA_Fleet
-      - ksf_FA_TravelExpense
-      - ksf_FA_HRM
-      - ksf_FA_ProjectManagement
-      - ksf_FA_Timesheets
-      - ksf_FA_Leave
-      - ksf_FA_Onboarding
-      - ksf_FA_Performance
-      - ksf_FA_Recruitment
-      - ksf_FA_Training
-      - ksf_FA_OrgChart
-      - ksf_FA_JobDescriptions
-      - ksf_FA_Teams
-      - ksf_FA_Roster
-      - ksf_FA_Documents
-      - ksf_FA_Forms
-      - ksf_FA_EmailManager
-      - ksf_FA_CampaignBuilder
-      - ksf_FA_CRM
-      - ksf_FA_Tracking
-      - ksf_FA_Notes
-      - ksf_FA_WarrantyManagement
-      - ksf_FA_Workflow
-      - ksf_FA_AsteriskPBX
-      - ksf_FA_API
-      - ksf_FA_Calendar
+    mariadb_root_pass: "{{ mariadb_root_pass | default('ksfroot2024!') }}"
+    mariadb_db: "{{ mariadb_db | default('ksf_fa') }}"
+    fa_port: "{{ fa_port | default(8090) }}"
+    wp_port: "{{ wp_port | default(8091) }}"
+    volume_prefix: "{{ volume_prefix | default('ksf_infrastructure') }}"
+    fa_modules: "{{ fa_modules | default([]) }}"
 
   tasks:
     - name: Create backup directory
@@ -61,11 +32,11 @@
     - name: Create podman network
       ansible.builtin.shell: podman network create ksf_network 2>/dev/null || true
 
-    - name: Create podman volumes
+    - name: Create podman volumes with prefix
       ansible.builtin.shell: |
-        podman volume create mariadb_data 2>/dev/null || true
-        podman volume create fa_data 2>/dev/null || true
-        podman volume create wp_data 2>/dev/null || true
+        podman volume create {{ volume_prefix }}_mariadb_data 2>/dev/null || true
+        podman volume create {{ volume_prefix }}_fa_data 2>/dev/null || true
+        podman volume create {{ volume_prefix }}_wp_data 2>/dev/null || true
 
     - name: Ensure FA modules directory exists
       ansible.builtin.file:
@@ -103,7 +74,7 @@
       args:
         executable: /bin/bash
 
-    - name: Update compose file for port configuration
+    - name: Update compose file for port and volume configuration
       ansible.builtin.copy:
         dest: "{{ ksf_base_dir }}/ksf-compose.yaml"
         content: |
@@ -120,7 +91,7 @@
                 MYSQL_USER: ${MARIADB_USER:-ksf_user}
                 MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
               volumes:
-                - mariadb_data:/var/lib/mysql
+                - {{ volume_prefix }}_mariadb_data:/var/lib/mysql
                 - ../init-sql:/docker-entrypoint-initdb.d
               networks:
                 - ksf_network
@@ -138,7 +109,7 @@
               ports:
                 - "{{ fa_port }}:80"
               volumes:
-                - fa_data:/var/www/html
+                - {{ volume_prefix }}_fa_data:/var/www/html
                 - ../fa_modules:/var/www/html/modules:z
               networks:
                 - ksf_network
@@ -158,7 +129,7 @@
                 WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
                 WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
               volumes:
-                - wp_data:/var/www/html
+                - {{ volume_prefix }}_wp_data:/var/www/html
               networks:
                 - ksf_network
               depends_on:
@@ -171,9 +142,9 @@
               driver: bridge
           
           volumes:
-            mariadb_data:
-            fa_data:
-            wp_data:
+            {{ volume_prefix }}_mariadb_data:
+            {{ volume_prefix }}_fa_data:
+            {{ volume_prefix }}_wp_data:
         mode: '0644'
 
     - name: Wait for MariaDB to be healthy
