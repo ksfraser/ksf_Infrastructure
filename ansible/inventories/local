@@ -1,0 +1,47 @@
+# KSF Infrastructure - Local Development Inventory
+# Usage: ansible-playbook -i inventories/local ksf-playbook.yaml
+
+localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
+
+[ksf:vars]
+# Port configuration
+fa_port=8090
+wp_port=8091
+
+# Database configuration
+mariadb_root_pass=ksfroot2024!
+mariadb_db=ksf_fa
+
+# FA Modules to deploy (from /home/kevin/Documents/)
+fa_modules:
+  - ksf_FA_Assets
+  - ksf_FA_Subscriptions
+  - ksf_FA_Service
+  - ksf_FA_KnowledgeBase
+  - ksf_FA_Fleet
+  - ksf_FA_TravelExpense
+  - ksf_FA_HRM
+  - ksf_FA_ProjectManagement
+  - ksf_FA_Timesheets
+  - ksf_FA_Leave
+  - ksf_FA_Onboarding
+  - ksf_FA_Performance
+  - ksf_FA_Recruitment
+  - ksf_FA_Training
+  - ksf_FA_OrgChart
+  - ksf_FA_JobDescriptions
+  - ksf_FA_Teams
+  - ksf_FA_Roster
+  - ksf_FA_Documents
+  - ksf_FA_Forms
+  - ksf_FA_EmailManager
+  - ksf_FA_CampaignBuilder
+  - ksf_FA_CRM
+  - ksf_FA_Tracking
+  - ksf_FA_Notes
+  - ksf_FA_WarrantyManagement
+  - ksf_FA_Workflow
+  - ksf_FA_AsteriskPBX
+  - ksf_FA_API
+  - ksf_FA_Calendar
+  - ksf_fa_downloader

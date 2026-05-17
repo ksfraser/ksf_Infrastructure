@@ -1,6 +1,10 @@
 ---
 # KSF Infrastructure Ansible Playbook
 # Sets up network, volumes, copies modules, and runs post-install
+#
+# Usage:
+#   ansible-playbook -i inventories/local ksf-playbook.yaml
+#   ansible-playbook -i inventories/production ksf-playbook.yaml
 
 - name: Setup KSF UAT Environment
   hosts: localhost
@@ -14,6 +18,39 @@
     mariadb_host: ksf-mariadb
     mariadb_root_pass: ksfroot2024!
     mariadb_db: ksf_fa
+    fa_port: 8090
+    wp_port: 8091
+    fa_modules:
+      - ksf_FA_Assets
+      - ksf_FA_Subscriptions
+      - ksf_FA_Service
+      - ksf_FA_KnowledgeBase
+      - ksf_FA_Fleet
+      - ksf_FA_TravelExpense
+      - ksf_FA_HRM
+      - ksf_FA_ProjectManagement
+      - ksf_FA_Timesheets
+      - ksf_FA_Leave
+      - ksf_FA_Onboarding
+      - ksf_FA_Performance
+      - ksf_FA_Recruitment
+      - ksf_FA_Training
+      - ksf_FA_OrgChart
+      - ksf_FA_JobDescriptions
+      - ksf_FA_Teams
+      - ksf_FA_Roster
+      - ksf_FA_Documents
+      - ksf_FA_Forms
+      - ksf_FA_EmailManager
+      - ksf_FA_CampaignBuilder
+      - ksf_FA_CRM
+      - ksf_FA_Tracking
+      - ksf_FA_Notes
+      - ksf_FA_WarrantyManagement
+      - ksf_FA_Workflow
+      - ksf_FA_AsteriskPBX
+      - ksf_FA_API
+      - ksf_FA_Calendar
 
   tasks:
     - name: Create backup directory
@@ -35,36 +72,109 @@
         path: "{{ fa_modules_dir }}"
         state: directory
 
-    - name: Copy all ksf_FA_* modules to FA modules directory
+    - name: Copy configured FA modules to modules directory
       ansible.builtin.shell: |
         cd /home/kevin/Documents
-        for dir in ksf_FA_*; do
-          if [ -d "$dir" ]; then
-            cp -r "$dir" "{{ fa_modules_dir }}/"
-            echo "Copied $dir"
+        for module in {{ fa_modules | join(' ') }}; do
+          if [ -d "$module" ]; then
+            cp -r "$module" "{{ fa_modules_dir }}/"
+            echo "Copied $module"
+          else
+            echo "Skipped $module (not found)"
           fi
         done
       args:
-        creates: "{{ fa_modules_dir }}/ksf_FA_Assets"
-
-    - name: Install ksf_fa_downloader separately
-      ansible.builtin.shell: |
-        cp -r /home/kevin/Documents/ksf_fa_downloader "{{ fa_modules_dir }}/ksf_FA_Downloader" 2>/dev/null || true
-      ignore_errors: true
+        executable: /bin/bash
 
     - name: Open firewall ports for KSF
       ansible.builtin.shell: |
-        firewall-cmd --permanent --add-port=8090/tcp 2>/dev/null || true
-        firewall-cmd --permanent --add-port=8091/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port={{ fa_port }}/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port={{ wp_port }}/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
 
     - name: Start Podman Compose services
       ansible.builtin.shell: |
         cd {{ ksf_base_dir }}
+        # Update compose file ports from inventory vars
+        sed -i 's/"8080:80"/"{{ fa_port }}:80"/g' {{ ksf_base_dir }}/ksf-compose.yaml
+        sed -i 's/"8081:80"/"{{ wp_port }}:80"/g' {{ ksf_base_dir }}/ksf-compose.yaml
         podman-compose -f {{ ksf_base_dir }}/ksf-compose.yaml up -d
       args:
-        creates: "{{ ksf_base_dir }}/ksf-compose.yaml"
+        executable: /bin/bash
+
+    - name: Update compose file for port configuration
+      ansible.builtin.copy:
+        dest: "{{ ksf_base_dir }}/ksf-compose.yaml"
+        content: |
+          version: '3.8'
+          
+          services:
+            mariadb:
+              image: docker.io/mariadb:10.11
+              container_name: ksf-mariadb
+              hostname: ksf-mariadb
+              environment:
+                MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-ksfroot2024!}
+                MYSQL_DATABASE: ${MARIADB_DATABASE:-ksf_fa}
+                MYSQL_USER: ${MARIADB_USER:-ksf_user}
+                MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+              volumes:
+                - mariadb_data:/var/lib/mysql
+                - ../init-sql:/docker-entrypoint-initdb.d
+              networks:
+                - ksf_network
+              healthcheck:
+                test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+          
+            frontaccounting:
+              image: docker.io/genebarker/frontaccounting:latest
+              container_name: ksf-fa
+              hostname: ksf-fa
+              command: --http
+              ports:
+                - "{{ fa_port }}:80"
+              volumes:
+                - fa_data:/var/www/html
+                - ../fa_modules:/var/www/html/modules:z
+              networks:
+                - ksf_network
+              depends_on:
+                mariadb:
+                  condition: service_healthy
+          
+            wordpress:
+              image: docker.io/wordpress:6.4-php8.1-apache
+              container_name: ksf-wp
+              hostname: ksf-wp
+              ports:
+                - "{{ wp_port }}:80"
+              environment:
+                WORDPRESS_DB_HOST: mariadb
+                WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
+                WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
+                WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+              volumes:
+                - wp_data:/var/www/html
+              networks:
+                - ksf_network
+              depends_on:
+                mariadb:
+                  condition: service_healthy
+          
+          networks:
+            ksf_network:
+              name: ksf_network
+              driver: bridge
+          
+          volumes:
+            mariadb_data:
+            fa_data:
+            wp_data:
+        mode: '0644'
 
     - name: Wait for MariaDB to be healthy
       ansible.builtin.pause:
@@ -96,8 +206,10 @@
           stat:
             path: "{{ ksf_backup_dir }}/ksf_fa.sql"
 
-    - name: Run post-install script
+    - name: Run post-install script with configured ports
       ansible.builtin.shell: |
+        export FA_PORT={{ fa_port }}
+        export WP_PORT={{ wp_port }}
         bash {{ ksf_base_dir }}/post-install.sh
       ignore_errors: true
 

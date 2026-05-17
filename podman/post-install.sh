@@ -2,17 +2,24 @@
 # KSF Post-Install Script
 # Usage: bash post-install.sh [fqdn]
 #   fqdn - Optional FQDN or IP (defaults to hostname -I)
+#   Environment variables:
+#     FA_PORT - FrontAccounting port (default: 8090)
+#     WP_PORT - WordPress port (default: 8091)
+#     KSF_URL - Override FQDN detection
 
 set -e
 
+FA_PORT=${FA_PORT:-8090}
+WP_PORT=${WP_PORT:-8091}
+
 FQDN=${KSF_URL:-$(hostname -I | awk '{print $1}')}
-WP_URL="http://${FQDN}:8091"
-FA_URL="http://${FQDN}:8090"
+WP_URL="http://${FQDN}:${WP_PORT}"
+FA_URL="http://${FQDN}:${FA_PORT}"
 
 echo "=== KSF Post-Install ==="
 echo "FQDN: $FQDN"
-echo "WP URL: $WP_URL"
-echo "FA URL: $FA_URL"
+echo "FA Port: $FA_PORT -> $FA_URL"
+echo "WP Port: $WP_PORT -> $WP_URL"
 
 echo "Installing WP-CLI..."
 podman exec ksf-wp bash -c "command -v wp >/dev/null 2>&1 || { curl -sO https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp; }" || true
