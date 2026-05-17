@@ -54,8 +54,8 @@
 
     - name: Open firewall ports for KSF
       ansible.builtin.shell: |
-        firewall-cmd --permanent --add-port=8080/tcp 2>/dev/null || true
-        firewall-cmd --permanent --add-port=8081/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port=8090/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port=8091/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
 

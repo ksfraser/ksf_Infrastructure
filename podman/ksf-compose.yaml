@@ -27,7 +27,7 @@ services:
     hostname: ksf-fa
     command: --http
     ports:
-      - "8080:80"
+      - "8090:80"
     volumes:
       - fa_data:/var/www/html
       - ../fa_modules:/var/www/html/modules:z
@@ -42,7 +42,7 @@ services:
     container_name: ksf-wp
     hostname: ksf-wp
     ports:
-      - "8081:80"
+      - "8091:80"
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}

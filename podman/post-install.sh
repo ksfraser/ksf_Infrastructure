@@ -6,8 +6,8 @@
 set -e
 
 FQDN=${KSF_URL:-$(hostname -I | awk '{print $1}')}
-WP_URL="http://${FQDN}:8081"
-FA_URL="http://${FQDN}:8080"
+WP_URL="http://${FQDN}:8091"
+FA_URL="http://${FQDN}:8090"
 
 echo "=== KSF Post-Install ==="
 echo "FQDN: $FQDN"
