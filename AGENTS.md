@@ -97,6 +97,81 @@ add_access_extensions();   // ← required on every direct-access module page
 Without this call, `can_access_page()` returns false for all extension areas
 and the user sees a security error (~855 bytes blank page).
 
+## KSF Inter-Module Query Hook System
+
+Module entry-point scripts define constants and config that are unavailable
+when hooks.php is loaded (install_hooks() runs early in session.inc, before
+any page script is reached). To solve this, KSF modules implement a
+standardised hook-based query protocol:
+
+### Defined Hook Names
+
+| Hook Name | FA Function | Direction | Purpose |
+|---|---|---|---|
+| `ksf_get_value` | `hook_invoke_first` | Consumer → Provider | Query a single named value |
+| `ksf_get_values` | `hook_invoke_all` | Consumer → All Providers | Query multiple values |
+| `ksf_set_value` | `hook_invoke_all` | Sender → All Modules | Push a value / notify |
+
+### Consumer Pattern (any module page or service)
+
+```php
+// Single value — first provider that recognises the key responds
+$apiVersion = hook_invoke_first('ksf_get_value', 'calendar.api_version');
+if ($apiVersion !== null) {
+    // calendar module is installed and responded
+}
+
+// Multiple values — all providers respond with their matching keys
+$all = hook_invoke_all('ksf_get_values', ['calendar.api_version', 'rbac.hooks_version']);
+```
+
+### Provider Pattern (in hooks.php)
+
+```php
+function ksf_get_value($key, $opts = array()) {
+    $registry = [
+        'my_module.version'  => '1.2.0',
+        'my_module.api_key'  => defined('MY_API_KEY') ? MY_API_KEY : null,
+        'my_module.pref'     => function_exists('get_company_pref')
+            ? get_company_pref('my_pref') : null,
+    ];
+    return array_key_exists($key, $registry) ? $registry[$key] : null;
+}
+```
+
+### Key Namespacing Convention
+
+Keys MUST be namespaced as `<module>.<value_name>` to prevent collisions
+(e.g. `calendar.api_version`, `rbac.hooks_version`).
+
+### Full Template
+
+A ready-to-copy hooks.php template with all patterns is at:
+`doc/templates/hooks-template.php`
+
+### Extending for Module-Specific Queries
+
+Beyond the generic `ksf_get_value` pattern, modules may register
+domain-specific hook names for richer queries:
+
+```php
+// In hooks.php
+function calendar_entry_create(&$data, $opts = array()) { ... }
+function calendar_entries_query(&$data, $opts = array())  { ... }
+```
+
+These follow FA's standard convention: `&$data` passed by reference,
+`$opts` for context, return null for "not handled".
+
+### Why Not a Service Locator / DI Container?
+
+- FA has no DI container and adding one is a breaking change.
+- `hook_invoke_first` / `hook_invoke_all` are already available and tested.
+- The pattern works identically in FA 2.4+ without any core modifications.
+- Modules that don't implement a given hook simply don't respond — no crash.
+
+---
+
 ## FA install.sql / Schema Convention
 
 - Use `@TB_PREF@` as placeholder in SQL files (e.g. `@TB_PREF@fa_cal_entries`)

@@ -424,5 +424,124 @@ upload_max_filesize = 64M
 
 ---
 
-*Document Version: 1.0.0*
-*Last Updated: 2026-05-13*
+## 12. FA Module Hook Query Pattern
+
+### 12.1 Problem Statement
+
+FA module hooks.php files are loaded early by `install_hooks()` during
+`session.inc` initialisation. Constants and configuration values defined in
+module entry-point scripts (e.g. `cal.php`, `customers.php`) are NOT available
+at hooks load time. This means:
+
+- Module A cannot read Module B's configuration unless Module B's entry point
+  has been called first in the same request.
+- `defined()` checks against constants defined in other entry points return
+  false during hook execution, leading to inconsistent behaviour.
+
+### 12.2 Solution: Hook-Based Value Registry
+
+The KSF framework defines a standardised inter-module query protocol using
+FA's native `hook_invoke_first()` and `hook_invoke_all()` functions. Each
+module's `hooks.php` advertises the values it owns:
+
+```
+┌─────────────────┐         hook_invoke_first('ksf_get_value', 'calendar.api_version')
+│  Consumer Page  │──────────────────────────────────────────────────────────────────┐
+│  (e.g. cal.php) │                                                                  │
+└─────────────────┘                                                                  ▼
+                                                                            ┌─────────────────┐
+                                                                            │  Provider A      │
+                                                                            │  ksf_get_value() │── Returns '2.4.3' → hook_invoke_first stops
+                                                                            └─────────────────┘
+                                                                            ┌─────────────────┐
+                                                                            │  Provider B      │
+                                                                            │  ksf_get_value() │── Returns null ("not mine"), chain continues
+                                                                            └─────────────────┘
+```
+
+### 12.3 Protocol
+
+| Hook Name | Direction | Dispatch | Purpose |
+|---|---|---|---|
+| `ksf_get_value` | Consumer → Single Provider | `hook_invoke_first` | Query a single namespaced value |
+| `ksf_get_values` | Consumer → All Providers | `hook_invoke_all` | Query multiple values at once |
+| `ksf_set_value` | Sender → All Modules | `hook_invoke_all` | Push a value to interested modules |
+
+### 12.4 Provider Contract
+
+Every module's `hooks.php` SHOULD implement `ksf_get_value()` and
+`ksf_get_values()` methods. The method signature follows FA's hook
+convention:
+
+```php
+function ksf_get_value($key, $opts = array())
+{
+    // array_key_exists check — not isset() — so null values are valid
+    return array_key_exists($key, $this->_values())
+        ? $this->_values()[$key]
+        : null;
+}
+```
+
+### 12.5 Key Namespacing
+
+All value keys MUST be namespaced as `<module>.<name>` to prevent
+collisions:
+
+```
+calendar.api_version     → "2.4.3"
+calendar.hooks_version   → "2.0"
+rbac.hooks_version       → "2.0"
+crm.default_terms        → "Net 30"
+```
+
+### 12.6 Consumer Contract
+
+Consumers use `hook_invoke_first` for single-value queries:
+
+```php
+$version = hook_invoke_first('ksf_get_value', 'calendar.api_version');
+if ($version !== null) {
+    // Calendar module is installed — use its advertised version
+}
+```
+
+And `hook_invoke_all` for bulk queries:
+
+```php
+$results = hook_invoke_all('ksf_get_values', [
+    'calendar.api_version',
+    'rbac.hooks_version',
+]);
+// $results is an array of arrays, one per module that responded
+```
+
+### 12.7 Reference
+
+See `doc/templates/hooks-template.php` for a complete, ready-to-copy
+hooks.php template that implements all three hook methods.
+
+---
+
+## 13. Module Development Workflow
+
+### 13.1 Creating a New Module
+
+1. Copy `doc/templates/hooks-template.php` → `fa_modules/ksf_FA_<Name>/hooks.php`
+2. Replace `<ModuleName>`, `<NNN>`, `<MODULENAME>` placeholders
+3. Add `sql/install.sql` with `@TB_PREF@` placeholders
+4. Create page scripts with `add_access_extensions()` guard
+5. Add `composer.json` with `ksfraser/*` dependencies
+6. Register security areas in `install_access()`
+
+### 13.2 Adding Inter-Module Values
+
+1. Add entries to the `_get_advertised_values()` array in hooks.php
+2. Use the `<module>.<name>` namespacing convention
+3. Guard PHP constants with `defined()` checks
+4. Guard `get_company_pref()` calls with `function_exists()`
+
+---
+
+*Document Version: 1.1.0*
+*Last Updated: 2026-05-24*
