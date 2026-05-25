@@ -270,6 +270,46 @@ $payload = [
 - FA's `activate_extension()` → `update_databases()` substitutes automatically
 - Manual substitute for testing: `sed 's/@TB_PREF@/0_/g' install.sql | mysql ...`
 
+## CRM Tag Type Constants
+
+The CRM module defines tag types extending FA's `0_tags` + `0_tag_associations` tables. These are managed via `ksf_FA_CRM/pages/crm_tags.php` (not FA's `admin/tags.php`).
+
+| Constant | Value | Entity | DB Table |
+|----------|-------|--------|----------|
+| `TAG_CUSTOMER` | 3 | Customer | `debtors_master` |
+| `TAG_CONTACT` | 4 | Contact | `crm_contacts` |
+| `TAG_OPPORTUNITY` | 5 | Opportunity | `crm_opportunities` |
+| `TAG_LEAD` | 6 | Lead | `crm_leads` |
+| `TAG_COMMUNICATION` | 7 | Communication | `crm_communications` |
+
+Usage in pages (uses FA's existing tag helpers):
+```php
+include_once($path_to_root . "/admin/db/tags_db.inc");
+include_once($path_to_root . "/modules/ksf_FA_CRM/includes/crm_tags.inc");
+
+// Load existing tags
+$tags_result = get_tags_associated_with_record(TAG_CUSTOMER, $entity_id);
+$tagids = array();
+while ($tag = db_fetch($tags_result))
+    $tagids[] = $tag['id'];
+$_POST['entity_tags'] = $tagids;
+
+// Render tag selector
+tag_list_row(_("Tags:"), 'entity_tags', null, TAG_CUSTOMER, true);
+
+// Save
+update_tag_associations(TAG_CUSTOMER, $entity_id, $_POST['entity_tags']);
+```
+
+## CRM Module Split
+
+The monolith `ksf_CRM` has been split into two repositories:
+
+| Repository | Type | Namespace | Contents |
+|-----------|------|-----------|---------|
+| `ksf_CRM` | Business logic | `Ksfraser\CRM\*` | Entities, services, events — no FA deps |
+| `ksf_FA_CRM` | FA adapter | `Ksfraser\FA\CRM\*` | hooks.php, pages/, includes/, sql/ |
+
 ## Dependencies
 
 - **FrontAccounting 2.4+**

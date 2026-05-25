@@ -48,6 +48,60 @@
 
 ---
 
+### 1.3 Module Architecture (CRM Split)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    ksf_CRM (Business Logic)                   │
+│  Ksfraser\CRM\                                                │
+│  ├── Entity\Customer.php        # Domain entity               │
+│  ├── Entity\Contact.php                                       │
+│  ├── Entity\Opportunity.php                                   │
+│  ├── Entity\Communication.php                                 │
+│  ├── Service\CustomerService.php  # Business logic            │
+│  ├── Service\OpportunityService.php                           │
+│  ├── Service\CommunicationService.php                         │
+│  └── Event\*                      # PSR-14 events            │
+└──────────────────────┬───────────────────────────────────────┘
+                       │ depends on (composer)
+┌──────────────────────▼──────────────────────────────────────┐
+│                 ksf_FA_CRM (FA Adapter)                      │
+│  Ksfraser\FA\CRM\                                            │
+│  ├── hooks.php                 # FA module hooks             │
+│  ├── includes/crm_db.inc       # FA CRUD layer (TB_PREF)     │
+│  ├── includes/crm_ui.inc       # FA UI helpers               │
+│  ├── includes/crm_tags.inc     # Tag constants + helpers     │
+│  ├── pages/*.php               # FA UI pages (13 files)      │
+│  ├── sql/install.sql           # DB schema (@TB_PREF@)       │
+│  ├── src/Ksfraser/FA/CRM/                                    │
+│  │   ├── Entities.php           # FA adapter entities        │
+│  │   ├── CRMService.php         # FA adapter service          │
+│  │   └── Events.php             # FA adapter PSR-14 events   │
+│  └── Tests/                     # PHPUnit tests              │
+└──────────┬──────────────────────────────────────────────────┘
+           │ hooks into
+┌──────────▼──────────────────────────────────────────────────┐
+│           FrontAccounting (Docker)                           │
+│  /var/www/html/modules/ksf_FA_CRM/                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Contact Tagging System:**
+
+CRM uses FA's existing `0_tags` + `0_tag_associations` tables with custom type constants (defined in `ksf_FA_CRM/includes/crm_tags.inc`):
+
+| Constant | Value | Entity |
+|----------|-------|--------|
+| TAG_CUSTOMER | 3 | debtors_master |
+| TAG_CONTACT | 4 | crm_persons |
+| TAG_OPPORTUNITY | 5 | CRM opportunities |
+| TAG_LEAD | 6 | CRM leads |
+| TAG_COMMUNICATION | 7 | Communications |
+
+Tag admin page: `/modules/ksf_FA_CRM/pages/crm_tags.php` (SA_CRM_TAGS security)
+
+---
+
 ## 2. Container Configuration
 
 ### 2.1 Podman Compose Structure
