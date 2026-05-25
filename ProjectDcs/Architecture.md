@@ -500,19 +500,18 @@ crm.default_terms        → "Net 30"
 Consumers use `hook_invoke_first` for single-value queries:
 
 ```php
-$version = hook_invoke_first('ksf_get_value', 'calendar.api_version');
+$key = 'calendar.api_version';
+$version = hook_invoke_first('ksf_get_value', $key);
 if ($version !== null) {
     // Calendar module is installed — use its advertised version
 }
 ```
 
-And `hook_invoke_all` for bulk queries:
+And `hook_invoke_all` for bulk queries (FA passes `$data` by reference, so always use a variable):
 
 ```php
-$results = hook_invoke_all('ksf_get_values', [
-    'calendar.api_version',
-    'rbac.hooks_version',
-]);
+$queryKeys = ['calendar.api_version', 'rbac.hooks_version'];
+$results = hook_invoke_all('ksf_get_values', $queryKeys);
 // $results is an array of arrays, one per module that responded
 ```
 
@@ -543,5 +542,176 @@ hooks.php template that implements all three hook methods.
 
 ---
 
-*Document Version: 1.1.0*
+## 14. FA Module CRUD Event System
+
+### 14.1 Problem Statement
+
+FA's native `db_prewrite()` / `db_postwrite()` hooks fire for core FA tables
+(e.g. `0_debtors_master`, `0_suppliers`) but do NOT fire for module-created
+custom tables. When a KSF module creates, updates, or deletes a record in its
+own tables, other modules have no standard way to react.
+
+### 14.2 Solution: Two-Level CRUD Event Dispatch
+
+The KSF framework defines a standardised event dispatch via FA's native
+`hook_invoke_all()` with two levels of granularity:
+
+```
+┌──────────────────────┐
+│  Service Layer       │  emitCreated('calendar', 'entry', 42, $data)
+│  (uses Trait)        │──────────┐
+└──────────────────────┘          │
+                                  ▼
+                    ┌─────────────────────────────┐
+                    │  hook_invoke_all()           │
+                    │  "calendar_created_entry"    │  ← Specific hook
+                    └─────────────────────────────┘
+                                  │
+                                  ▼
+                    ┌─────────────────────────────┐
+                    │  hook_invoke_all()           │
+                    │  "ksf_crud_event"            │  ← Generic broadcast
+                    └─────────────────────────────┘
+                                  │
+                    ┌─────────────┼─────────────┐
+                    ▼             ▼             ▼
+              ┌──────────┐  ┌──────────┐  ┌──────────┐
+              │ Module A │  │ Module B │  │ Module C │
+              │ listener │  │ listener │  │ listener │
+              └──────────┘  └──────────┘  └──────────┘
+```
+
+### 14.3 Standard Hook Names
+
+| Hook Name | Dispatch | Example |
+|---|---|---|
+| `<module>_<action>_<recordType>` | Specific | `calendar_created_entry` |
+| `ksf_crud_event` | Broadcast | Catches all CRUD events |
+
+**Valid actions**: `created`, `updated`, `deleted`
+
+### 14.4 Emitter Contract
+
+Service classes emit events via `Ksfraser\Traits\CrudEventEmitterTrait`:
+
+```php
+use Ksfraser\Traits\CrudEventEmitterTrait;
+
+class CustomerService {
+    use CrudEventEmitterTrait;
+
+    public function create(array $data): Customer {
+        $customer = $this->repo->save($data);
+        $this->emitCreated('crm', 'customer', $customer->getId(), $data);
+        return $customer;
+    }
+
+    public function delete(int $id): void {
+        $this->repo->softDelete($id);
+        $this->emitDeleted('crm', 'customer', $id, ['reason' => 'user_request']);
+    }
+}
+```
+
+### 14.5 Listener Contract (hooks.php)
+
+Modules react by implementing a method named after the hook in their hooks.php:
+
+```php
+class hooks_ksf_FA_Calendar extends hooks {
+
+    // Specific: only fires for CRM customer creation
+    function crm_created_customer(&$payload, $opts = []) {
+        // Auto-create a calendar welcome event for the new customer
+        $customerName = $payload['data']['name'] ?? '';
+        $this->_createWelcomeEvent($customerName);
+    }
+
+    // Generic: catches ALL CRUD events from any module
+    function ksf_crud_event(&$payload, $opts = []) {
+        if ($payload['action'] === 'deleted' && $payload['module'] === 'crm') {
+            $this->_cleanupRelatedData(
+                $payload['record_type'],
+                $payload['record_id']
+            );
+        }
+    }
+}
+```
+
+### 14.6 Payload Structure
+
+```php
+[
+    'action'      => 'created',          // created | updated | deleted
+    'module'      => 'calendar',         // Module slug
+    'record_type' => 'entry',            // Record type slug
+    'record_id'   => 42,                 // Primary key (int|string)
+    'data'        => [
+        // Arbitrary context from the emitter
+        'title' => 'Meeting',
+        'changed_fields' => ['start_date'],
+    ],
+]
+```
+
+### 14.7 Trait Reference
+
+The `Ksfraser\Traits\CrudEventEmitterTrait` (published in `ksfraser/traits`)
+provides four protected methods:
+
+| Method | Signature | Dispatches |
+|---|---|---|
+| `emitCrudEvent()` | `(action, module, recordType, recordId, data)` | Both specific + generic |
+| `emitCreated()` | `(module, recordType, recordId, data)` | `<module>_created_<type>` + `ksf_crud_event` |
+| `emitUpdated()` | `(module, recordType, recordId, data)` | `<module>_updated_<type>` + `ksf_crud_event` |
+| `emitDeleted()` | `(module, recordType, recordId, data)` | `<module>_deleted_<type>` + `ksf_crud_event` |
+
+### 14.8 Relation to Other Hook Systems
+
+| System | Scope | When to Use |
+|---|---|---|
+| FA `db_prewrite`/`db_postwrite` | Core FA tables only | Extending stock FA behaviour |
+| KSF `ksf_get_value` / `ksf_get_values` | Config/constant queries | Reading values across modules |
+| KSF CRUD events (`ksf_crud_event`) | Module custom tables | Reacting to record changes |
+| KSF PSR-14 events (RbacService) | In-process PHP events | Service-layer orchestration |
+
+---
+
+## 15. Module Development Workflow
+
+### 15.1 Creating a New Module
+
+1. Copy `doc/templates/hooks-template.php` → `fa_modules/ksf_FA_<Name>/hooks.php`
+2. Replace `<ModuleName>`, `<NNN>`, `<MODULENAME>` placeholders
+3. Add `sql/install.sql` with `@TB_PREF@` placeholders
+4. Create page scripts with `add_access_extensions()` guard
+5. Add `composer.json` with `ksfraser/*` dependencies
+6. Register security areas in `install_access()`
+
+### 15.2 Adding Inter-Module Values
+
+1. Add entries to the `_get_advertised_values()` array in hooks.php
+2. Use the `<module>.<name>` namespacing convention
+3. Guard PHP constants with `defined()` checks
+4. Guard `get_company_pref()` calls with `function_exists()`
+
+### 15.3 Adding CRUD Event Emission
+
+1. Add `use Ksfraser\Traits\CrudEventEmitterTrait;` to each service class
+2. Call `$this->emitCreated(...)` / `emitUpdated(...)` / `emitDeleted(...)`
+   after each persistence operation
+3. Document the emitted events in the module's Architecture.md under
+   "CRUD Events"
+
+### 15.4 Adding CRUD Event Listening
+
+1. Add a method to the module's `hooks.php` named after the event
+   (e.g. `calendar_created_entry`)
+2. Check `$payload['action']` and `$payload['module']` in the generic
+   `ksf_crud_event` handler for broad listeners
+
+---
+
+*Document Version: 1.2.0*
 *Last Updated: 2026-05-24*

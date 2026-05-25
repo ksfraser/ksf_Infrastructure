@@ -133,7 +133,11 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     // SOLUTION: A standardized hook-based registry. Modules advertise their
     // values here in hooks.php. Consumers query them at any time via:
     //
-    //   $value = hook_invoke_first('ksf_get_value', '<module>.<key>');
+    //   $key   = '<module>.<key>';
+    //   $value = hook_invoke_first('ksf_get_value', $key);
+    //
+    // IMPORTANT: FA's hook_invoke_first/all declare &$data (by-reference).
+    // ALWAYS pass a variable, never a literal.
     //
     // BENEFITS:
     //   - No load-order dependency (hook_invoke_first finds the responder)
@@ -148,11 +152,15 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     // Check if $key matches one of this module's advertised values.
     // Return the value, or null to pass the query to the next module.
     //
-    // @param string $key   Namespaced key: "<module>.<value_name>"
-    // @param array  $opts  Reserved for future options
-    // @return mixed|null   The value if recognized, null if not mine
+    // NOTE: FA calls hook methods as $hook->$method($data, $opts). The first
+    // parameter ($data) is passed by reference from hook_invoke_first/all.
+    // For query hooks we declare &$key by convention but only read it.
+    //
+    // @param mixed $key   Namespaced key: "<module>.<value_name>"
+    // @param mixed $opts  Reserved (defaults to null per FA convention)
+    // @return mixed|null  The value if recognized, null if not mine
     // -----------------------------------------------------------------------
-    function ksf_get_value($key, $opts = array())
+    function ksf_get_value(&$key, $opts = null)
     {
         $values = $this->_get_advertised_values();
 
@@ -165,11 +173,11 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     // Called when another module wants all advertised values from all modules.
     // Return an array of {key => value} pairs that belong to this module.
     //
-    // @param array $keys  List of requested keys (empty = return all)
-    // @param array $opts  Reserved
+    // @param mixed $keys  List of requested keys (null = return all)
+    // @param mixed $opts  Reserved
     // @return array       Associative array of key => value pairs
     // -----------------------------------------------------------------------
-    function ksf_get_values($keys = array(), $opts = array())
+    function ksf_get_values(&$keys = null, $opts = null)
     {
         $values = $this->_get_advertised_values();
 
@@ -183,21 +191,83 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     // -----------------------------------------------------------------------
     // 3c. ksf_set_value — Receive a value pushed from another module
     //
-    // Called via hook_invoke_all('ksf_set_value', ...) so every module gets
-    // notified. Modules that recognise the key may store or act on it.
+    // Called via hook_invoke_all('ksf_set_value', $payload) so every module
+    // gets notified. Modules that recognise the key may store or act on it.
     // This is "fire and forget" — no return value is used.
     //
-    // @param string $key    Namespaced key
-    // @param mixed  $value  The value being set
-    // @param array  $opts   Optional context (e.g. ['ttl' => 3600])
+    // NOTE: $data is a compound array expected to contain 'key' and 'value'.
+    // This conforms to FA's standard calling convention ($hook->$method($data, $opts)).
+    //
+    // Caller:
+    //   $payload = ['key' => '<module>.some_setting', 'value' => '...'];
+    //   hook_invoke_all('ksf_set_value', $payload);
+    //
+    // @param mixed $data  Compound array with 'key' and 'value' entries
+    // @param mixed $opts  Reserved
     // -----------------------------------------------------------------------
-    function ksf_set_value($key, $value, $opts = array())
+    function ksf_set_value(&$data, $opts = null)
     {
-        // Example: accept a config override pushed by the system module
+        // $key   = $data['key']   ?? null;
+        // $value = $data['value'] ?? null;
         // if ($key === '<module>.some_setting') {
         //     $this->_cache[$key] = $value;
         // }
     }
+
+    // =======================================================================
+    // 3d. CRUD Event Listener Stubs
+    //
+    // These methods react to CRUD events emitted by other modules via the
+    // KSF CrudEventEmitterTrait. A module may listen for:
+    //
+    //   1. SPECIFIC events — method named <module>_<action>_<recordType>
+    //      e.g. calendar_created_entry, crm_updated_customer
+    //
+    //   2. GENERIC events — method named ksf_crud_event; check $payload
+    //      for action/module/record_type to decide if relevant.
+    //
+    // Uncomment and customise the handlers below for events your module
+    // needs to react to.
+    //
+    // See: ksfraser/traits — Ksfraser\Traits\CrudEventEmitterTrait
+    // =======================================================================
+
+    // -----------------------------------------------------------------------
+    // 3d-i. Specific listener example — react to calendar entry creation
+    // -----------------------------------------------------------------------
+    // function calendar_created_entry(&$payload, $opts = null)
+    // {
+    //     $entryId = $payload['record_id'];
+    //     $data    = $payload['data'];
+    //     // React to calendar entry creation
+    // }
+
+    // -----------------------------------------------------------------------
+    // 3d-ii. Specific listener example — react to CRM customer update
+    // -----------------------------------------------------------------------
+    // function crm_updated_customer(&$payload, $opts = null)
+    // {
+    //     $customerId = $payload['record_id'];
+    //     $changed    = $payload['data']['changed_fields'] ?? array();
+    //     // React to customer update
+    // }
+
+    // -----------------------------------------------------------------------
+    // 3d-iii. Generic listener — catches ALL CRUD events from any module
+    // -----------------------------------------------------------------------
+    // function ksf_crud_event(&$payload, $opts = null)
+    // {
+    //     switch ($payload['action']) {
+    //         case 'created':
+    //             // $payload['module'], $payload['record_type'], $payload['record_id']
+    //             break;
+    //         case 'updated':
+    //             break;
+    //         case 'deleted':
+    //             // Clean up related data when a record is deleted
+    //             break;
+    //     }
+    // }
 
     // =======================================================================
     // 4. Private helpers

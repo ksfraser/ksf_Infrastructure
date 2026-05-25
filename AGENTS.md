@@ -115,20 +115,22 @@ standardised hook-based query protocol:
 ### Consumer Pattern (any module page or service)
 
 ```php
-// Single value — first provider that recognises the key responds
-$apiVersion = hook_invoke_first('ksf_get_value', 'calendar.api_version');
+// Single value — use a variable (FA passes $data by reference)
+$key = 'calendar.api_version';
+$apiVersion = hook_invoke_first('ksf_get_value', $key);
 if ($apiVersion !== null) {
     // calendar module is installed and responded
 }
 
-// Multiple values — all providers respond with their matching keys
-$all = hook_invoke_all('ksf_get_values', ['calendar.api_version', 'rbac.hooks_version']);
+// Multiple values — same rule, no array literals by reference
+$queryKeys = ['calendar.api_version', 'rbac.hooks_version'];
+$all = hook_invoke_all('ksf_get_values', $queryKeys);
 ```
 
 ### Provider Pattern (in hooks.php)
 
 ```php
-function ksf_get_value($key, $opts = array()) {
+function ksf_get_value(&$key, $opts = null) {
     $registry = [
         'my_module.version'  => '1.2.0',
         'my_module.api_key'  => defined('MY_API_KEY') ? MY_API_KEY : null,
@@ -169,6 +171,87 @@ These follow FA's standard convention: `&$data` passed by reference,
 - `hook_invoke_first` / `hook_invoke_all` are already available and tested.
 - The pattern works identically in FA 2.4+ without any core modifications.
 - Modules that don't implement a given hook simply don't respond — no crash.
+
+---
+
+## KSF CRUD Event Hook System
+
+FA's `hook_invoke_all()` enables any module to react when another module
+creates, updates, or deletes a record. The KSF framework standardises this
+with a two-level dispatch pattern.
+
+### Hook Names
+
+| Hook Name | Dispatch | Purpose |
+|---|---|---|
+| `<module>_<action>_<recordType>` | `hook_invoke_all` | Targeted — only interested modules implement |
+| `ksf_crud_event` | `hook_invoke_all` | Broadcast — all modules receive the full payload |
+
+**Actions**: `created`, `updated`, `deleted`
+
+### Emitter Pattern (service or page script)
+
+Use `Ksfraser\Traits\CrudEventEmitterTrait` in any service class:
+
+```php
+use Ksfraser\Traits\CrudEventEmitterTrait;
+
+class CalendarService {
+    use CrudEventEmitterTrait;
+
+    public function createEntry(array $data): int {
+        $id = $this->repo->insert($data);
+        $this->emitCreated('calendar', 'entry', $id, $data);
+        return $id;
+    }
+}
+```
+
+### Listener Pattern (in hooks.php)
+
+```php
+class hooks_ksf_FA_SomeModule extends hooks {
+
+    // Specific listener — only fires for calendar_created_entry
+    function calendar_created_entry(&$payload, $opts = []) {
+        $entryId = $payload['record_id'];
+        // create a related record in this module
+    }
+
+    // Generic listener — catches all CRUD events from any module
+    function ksf_crud_event(&$payload, $opts = []) {
+        if ($payload['action'] === 'deleted' && $payload['module'] === 'crm') {
+            // clean up related data
+        }
+    }
+}
+```
+
+### Payload Structure
+
+```php
+$payload = [
+    'action'      => 'created',        // string: created|updated|deleted
+    'module'      => 'calendar',       // string: module slug
+    'record_type' => 'entry',          // string: record type slug
+    'record_id'   => 42,               // int|string: primary key
+    'data'        => [...],            // array: additional context
+];
+```
+
+### Comparison: FA Native vs KSF CRUD Events
+
+| Aspect | FA `db_prewrite`/`db_postwrite` | KSF `ksf_crud_event` |
+|--------|----------------------------------|----------------------|
+| Scope | Core FA tables (`0_debtors_master`, etc.) | Any module's custom tables |
+| Module tables | Not fired (bypassed) | Primary use case |
+| Granularity | Table-level | Record-type + action |
+| Trait available | No | `CrudEventEmitterTrait` |
+
+### See Also
+
+- `ksfraser/traits` — `Ksfraser\Traits\CrudEventEmitterTrait`
+- `doc/templates/hooks-template.php` — ready-to-copy hooks.php with CRUD stubs
 
 ---
 
