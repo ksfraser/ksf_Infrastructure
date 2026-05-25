@@ -129,17 +129,26 @@ $all = hook_invoke_all('ksf_get_values', $queryKeys);
 
 ### Provider Pattern (in hooks.php)
 
+Use `Ksfraser\Traits\HookQueryProviderTrait` (published in `ksfraser/traits`):
+
 ```php
-function ksf_get_value(&$key, $opts = null) {
-    $registry = [
-        'my_module.version'  => '1.2.0',
-        'my_module.api_key'  => defined('MY_API_KEY') ? MY_API_KEY : null,
-        'my_module.pref'     => function_exists('get_company_pref')
-            ? get_company_pref('my_pref') : null,
-    ];
-    return array_key_exists($key, $registry) ? $registry[$key] : null;
+class hooks_ksf_FA_MyModule extends hooks {
+    use \Ksfraser\Traits\HookQueryProviderTrait;
+
+    protected function _getAdvertisedValues(): array
+    {
+        return array(
+            'my_module.version'  => '1.2.0',
+            'my_module.api_key'  => defined('MY_API_KEY') ? MY_API_KEY : null,
+            'my_module.pref'     => function_exists('get_company_pref')
+                ? get_company_pref('my_pref') : null,
+        );
+    }
 }
 ```
+
+The trait provides `ksf_get_value()`, `ksf_get_values()`, and
+`ksf_set_value()` — no need to implement them manually.
 
 ### Key Namespacing Convention
 
