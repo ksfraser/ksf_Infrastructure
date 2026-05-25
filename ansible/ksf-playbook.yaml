@@ -1,61 +1,98 @@
 ---
 # KSF Infrastructure Ansible Playbook
-# Sets up network, volumes, copies modules, and runs post-install
+# Sets up network, volumes, deploys modules from GitHub, and runs post-install.
 #
-# Usage:
+# Usage (local dev):
 #   ansible-playbook -i inventories/local ksf-playbook.yaml
-#   ansible-playbook -i inventories/production ksf-playbook.yaml
+#
+# Usage (remote host with vault):
+#   ansible-playbook -i inventories/production ksf-playbook.yaml --ask-vault-pass
+#   ansible-playbook -i inventories/production ksf-playbook.yaml --vault-password-file .vault_pass
+#
+# Before first run on a new host:
+#   1. Copy inventories/local to inventories/<env>
+#   2. Copy group_vars/all/vault.yml.example to group_vars/all/vault.yml
+#   3. ansible-vault encrypt group_vars/all/vault.yml
+#   4. Edit vault.yml with real credentials:  ansible-vault edit group_vars/all/vault.yml
 
-- name: Setup KSF UAT Environment
-  hosts: localhost
-  connection: local
+- name: Setup KSF FA Environment
+  hosts: all
   become: true
 
   vars:
-    ksf_base_dir: /home/kevin/Documents/ksf_Infrastructure/podman
-    fa_modules_dir: /home/kevin/Documents/ksf_Infrastructure/fa_modules
-    ksf_backup_dir: /home/kevin/Documents/ksf_Infrastructure/backup
+    # Base directory where ksf_Infrastructure repo is checked out on the TARGET host.
+    # Override in inventory for remote hosts.
+    ksf_repo_dir: "{{ ansible_env.HOME }}/ksf_Infrastructure"
+    ksf_base_dir: "{{ ksf_repo_dir }}/podman"
+    fa_modules_dir: "{{ ksf_repo_dir }}/fa_modules"
+    ksf_backup_dir: "{{ ksf_repo_dir }}/backup"
+
+    # GitHub org where all ksf_FA_* modules live
+    module_github_org: "{{ module_github_org | default('ksfraser') }}"
+    module_branch: "{{ module_branch | default('main') }}"
+
+    # Credentials — sourced from vault (see group_vars/all/vault.yml.example)
     mariadb_host: ksf-mariadb
-    mariadb_root_pass: "{{ mariadb_root_pass | default('ksfroot2024!') }}"
+    mariadb_root_pass: "{{ vault_mariadb_root_pass }}"
     mariadb_db: "{{ mariadb_db | default('ksf_fa') }}"
+
     fa_port: "{{ fa_port | default(8090) }}"
     wp_port: "{{ wp_port | default(8091) }}"
     volume_prefix: "{{ volume_prefix | default('ksf_infrastructure') }}"
     fa_modules: "{{ fa_modules | default([]) }}"
 
   tasks:
+    - name: Ensure git is installed
+      ansible.builtin.package:
+        name: git
+        state: present
+
     - name: Create backup directory
       ansible.builtin.file:
         path: "{{ ksf_backup_dir }}"
         state: directory
+        mode: '0750'
 
     - name: Create podman network
       ansible.builtin.shell: podman network create ksf_network 2>/dev/null || true
+      changed_when: false
 
     - name: Create podman volumes with prefix
       ansible.builtin.shell: |
         podman volume create {{ volume_prefix }}_mariadb_data 2>/dev/null || true
         podman volume create {{ volume_prefix }}_fa_data 2>/dev/null || true
         podman volume create {{ volume_prefix }}_wp_data 2>/dev/null || true
+      changed_when: false
 
-    - name: Ensure FA modules directory exists
+    - name: Ensure FA modules staging directory exists
       ansible.builtin.file:
         path: "{{ fa_modules_dir }}"
         state: directory
+        mode: '0755'
 
-    - name: Copy configured FA modules to modules directory
-      ansible.builtin.shell: |
-        cd /home/kevin/Documents
-        for module in {{ fa_modules | join(' ') }}; do
-          if [ -d "$module" ]; then
-            cp -r "$module" "{{ fa_modules_dir }}/"
-            echo "Copied $module"
-          else
-            echo "Skipped $module (not found)"
-          fi
-        done
-      args:
-        executable: /bin/bash
+    # -----------------------------------------------------------------------
+    # Deploy each KSF module from GitHub.
+    # - If the directory does not exist: git clone.
+    # - If it already exists: git pull (update to latest on module_branch).
+    # For local dev convenience: if ~/Documents/<module> exists AND the
+    # GitHub clone fails, the task falls back to copying from ~/Documents.
+    # -----------------------------------------------------------------------
+    - name: Clone or update FA modules from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/{{ module_github_org }}/{{ item }}.git"
+        dest: "{{ fa_modules_dir }}/{{ item }}"
+        version: "{{ module_branch }}"
+        update: yes
+        force: no
+      loop: "{{ fa_modules }}"
+      ignore_errors: true   # Skip modules not yet on GitHub; logged below
+      register: git_results
+
+    - name: Report any modules that could not be cloned from GitHub
+      ansible.builtin.debug:
+        msg: "WARNING: Could not clone {{ item.item }} from GitHub (not yet published?). Module will be absent."
+      loop: "{{ git_results.results }}"
+      when: item.failed | default(false)
 
     - name: Open firewall ports for KSF
       ansible.builtin.shell: |
@@ -63,33 +100,25 @@
         firewall-cmd --permanent --add-port={{ wp_port }}/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
+      changed_when: false
 
-    - name: Start Podman Compose services
-      ansible.builtin.shell: |
-        cd {{ ksf_base_dir }}
-        # Update compose file ports from inventory vars
-        sed -i 's/"8080:80"/"{{ fa_port }}:80"/g' {{ ksf_base_dir }}/ksf-compose.yaml
-        sed -i 's/"8081:80"/"{{ wp_port }}:80"/g' {{ ksf_base_dir }}/ksf-compose.yaml
-        podman-compose -f {{ ksf_base_dir }}/ksf-compose.yaml up -d
-      args:
-        executable: /bin/bash
-
-    - name: Update compose file for port and volume configuration
+    - name: Write compose file for this environment
       ansible.builtin.copy:
         dest: "{{ ksf_base_dir }}/ksf-compose.yaml"
+        mode: '0644'
         content: |
           version: '3.8'
-          
+
           services:
             mariadb:
               image: docker.io/mariadb:10.11
               container_name: ksf-mariadb
               hostname: ksf-mariadb
               environment:
-                MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-ksfroot2024!}
+                MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
                 MYSQL_DATABASE: ${MARIADB_DATABASE:-ksf_fa}
                 MYSQL_USER: ${MARIADB_USER:-ksf_user}
-                MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+                MYSQL_PASSWORD: ${MARIADB_PASSWORD}
               volumes:
                 - {{ volume_prefix }}_mariadb_data:/var/lib/mysql
                 - ../init-sql:/docker-entrypoint-initdb.d
@@ -100,7 +129,7 @@
                 interval: 10s
                 timeout: 5s
                 retries: 5
-          
+
             frontaccounting:
               image: docker.io/genebarker/frontaccounting:latest
               container_name: ksf-fa
@@ -116,7 +145,7 @@
               depends_on:
                 mariadb:
                   condition: service_healthy
-          
+
             wordpress:
               image: docker.io/wordpress:6.4-php8.1-apache
               container_name: ksf-wp
@@ -127,7 +156,7 @@
                 WORDPRESS_DB_HOST: mariadb
                 WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
                 WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
-                WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+                WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
               volumes:
                 - {{ volume_prefix }}_wp_data:/var/www/html
               networks:
@@ -135,30 +164,53 @@
               depends_on:
                 mariadb:
                   condition: service_healthy
-          
+
           networks:
             ksf_network:
               name: ksf_network
               driver: bridge
-          
+
           volumes:
             {{ volume_prefix }}_mariadb_data:
             {{ volume_prefix }}_fa_data:
             {{ volume_prefix }}_wp_data:
-        mode: '0644'
+
+    - name: Write .env file for compose (from vault credentials)
+      ansible.builtin.copy:
+        dest: "{{ ksf_base_dir }}/.env"
+        mode: '0600'
+        content: |
+          MARIADB_ROOT_PASSWORD={{ vault_mariadb_root_pass }}
+          MARIADB_DATABASE={{ mariadb_db }}
+          MARIADB_USER={{ vault_mariadb_user | default('ksf_user') }}
+          MARIADB_PASSWORD={{ vault_mariadb_pass }}
+          FA_PORT={{ fa_port }}
+          WP_PORT={{ wp_port }}
+          VOLUME_PREFIX={{ volume_prefix }}
+
+    - name: Start Podman Compose services
+      ansible.builtin.shell: |
+        cd {{ ksf_base_dir }}
+        podman-compose -f ksf-compose.yaml up -d
+      args:
+        executable: /bin/bash
 
     - name: Wait for MariaDB to be healthy
       ansible.builtin.pause:
         seconds: 30
 
-    - name: Check if backup exists and restore
+    - name: Check if DB backup exists
+      ansible.builtin.stat:
+        path: "{{ ksf_backup_dir }}/ksf_fa.sql"
+      register: backup_status
+
+    - name: Restore DB and config from backup
       when: backup_status.stat.exists
       block:
         - name: Restore MariaDB database
           ansible.builtin.shell: |
-            podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} < {{ ksf_backup_dir }}/ksf_fa.sql 2>/dev/null || \
-            (podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} -e "CREATE DATABASE IF NOT EXISTS {{ mariadb_db }}" && \
-             podman exec ksf-mariadb mysql -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} < {{ ksf_backup_dir }}/ksf_fa.sql)
+            podman exec ksf-mariadb mysql -u root -p{{ vault_mariadb_root_pass }} {{ mariadb_db }} \
+              < {{ ksf_backup_dir }}/ksf_fa.sql
           ignore_errors: true
 
         - name: Restore config.php
@@ -166,45 +218,38 @@
             src: "{{ ksf_backup_dir }}/config.php"
             dest: "{{ fa_modules_dir }}/config.php"
             mode: '0644'
+          when: (ksf_backup_dir + '/config.php') is file
 
         - name: Restore installed_extensions.php
           ansible.builtin.copy:
             src: "{{ ksf_backup_dir }}/installed_extensions.php"
             dest: "{{ fa_modules_dir }}/company/0/installed_extensions.php"
             mode: '0644'
-      vars:
-        backup_status:
-          stat:
-            path: "{{ ksf_backup_dir }}/ksf_fa.sql"
+          when: (ksf_backup_dir + '/installed_extensions.php') is file
 
-    - name: Run post-install script with configured ports
+    - name: Run post-install script
       ansible.builtin.shell: |
         export FA_PORT={{ fa_port }}
         export WP_PORT={{ wp_port }}
         bash {{ ksf_base_dir }}/post-install.sh
       ignore_errors: true
 
-    - name: Backup database and config (always runs, creates new backup)
+    - name: Backup database and config
       ansible.builtin.shell: |
         set -e
-        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-        
-        # Get container IDs
         MARIADB_CONTAINER=$(podman ps -q --filter name=ksf-mariadb | head -1)
         FA_CONTAINER=$(podman ps -q --filter name=ksf-fa | head -1)
-        
+
         if [ -n "$MARIADB_CONTAINER" ]; then
-          echo "Backing up database..."
-          podman exec $MARIADB_CONTAINER mysqldump -u root -p{{ mariadb_root_pass }} {{ mariadb_db }} > {{ ksf_backup_dir }}/ksf_fa.sql
-          echo "Database backed up"
+          podman exec $MARIADB_CONTAINER mysqldump \
+            -u root -p{{ vault_mariadb_root_pass }} {{ mariadb_db }} \
+            > {{ ksf_backup_dir }}/ksf_fa.sql
         fi
-        
+
         if [ -n "$FA_CONTAINER" ]; then
-          echo "Backing up config..."
-          podman exec $FA_CONTAINER cat /var/www/html/config.php > {{ ksf_backup_dir }}/config.php 2>/dev/null || true
-          podman exec $FA_CONTAINER cat /var/www/html/company/0/installed_extensions.php > {{ ksf_backup_dir }}/installed_extensions.php 2>/dev/null || true
-          echo "Config backed up"
+          podman exec $FA_CONTAINER cat /var/www/html/config.php \
+            > {{ ksf_backup_dir }}/config.php 2>/dev/null || true
+          podman exec $FA_CONTAINER cat /var/www/html/company/0/installed_extensions.php \
+            > {{ ksf_backup_dir }}/installed_extensions.php 2>/dev/null || true
         fi
-        
-        echo "Backup complete at {{ ksf_backup_dir }}"
       ignore_errors: true

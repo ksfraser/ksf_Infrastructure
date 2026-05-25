@@ -1,5 +1,8 @@
 # KSF Infrastructure - Local Development Inventory
-# Usage: ansible-playbook -i inventories/local ksf-playbook.yaml
+# Usage: ansible-playbook -i inventories/local ksf-playbook.yaml --ask-vault-pass
+#
+# Credentials come from group_vars/all/vault.yml (ansible-vault encrypted).
+# See group_vars/all/vault.yml.example for the required structure.
 
 localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
 
@@ -11,11 +14,15 @@ wp_port=8091
 # Volume prefix (for data persistence uniqueness)
 volume_prefix=ksf_infrastructure
 
-# Database configuration
-mariadb_root_pass=ksfroot2024!
+# Database name (non-sensitive)
 mariadb_db=ksf_fa
 
-# FA Modules to deploy (from /home/kevin/Documents/)
+# GitHub org for module repos
+module_github_org=ksfraser
+module_branch=main
+
+# FA Modules to deploy — each must have a GitHub repo at:
+#   https://github.com/<module_github_org>/<module_name>
 fa_modules:
   - ksf_FA_Assets
   - ksf_FA_Subscriptions

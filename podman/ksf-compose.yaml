@@ -6,10 +6,10 @@ services:
     container_name: ksf-mariadb
     hostname: ksf-mariadb
     environment:
-      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-ksfroot2024!}
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MARIADB_DATABASE:-ksf_fa}
       MYSQL_USER: ${MARIADB_USER:-ksf_user}
-      MYSQL_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
       - ${VOLUME_PREFIX:-ksf_infrastructure}_mariadb_data:/var/lib/mysql
       - ../init-sql:/docker-entrypoint-initdb.d
@@ -45,9 +45,9 @@ services:
       - "${WP_PORT:-8091}:80"
     environment:
       WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
-      WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
-      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD:-ksfuser2024!}
+        WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
+        WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
+        WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
       - ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:/var/www/html
     networks:

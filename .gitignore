@@ -1,0 +1,43 @@
+# -----------------------------------------------------------------------
+# ksf_Infrastructure .gitignore
+# -----------------------------------------------------------------------
+
+# fa_modules/ is a RUNTIME staging directory.
+# Ansible populates it by cloning each ksf_FA_* repo from GitHub.
+# Each module has its own repo - nothing here belongs in version control.
+fa_modules/
+
+# Backup directory contains DB dumps and live FA config files (credentials).
+# backup/*.sql contains the DB; backup/config*.php contains DB host/pass.
+backup/*.sql
+backup/config.php
+backup/config_db.php
+backup/config
+backup/installed_extensions.php
+backup/installed_languages.inc
+backup/hooks_*.php
+
+# Podman/Docker runtime environment file (contains real credentials).
+# Use .env.example as the committed template.
+podman/.env
+docker/**/.env
+
+# Ansible vault password file (never commit)
+.vault_pass
+*.vault_pass
+
+# Unencrypted vault file — only the ansible-vault encrypted version should be committed.
+# The example/template (vault.yml.example) IS committed.
+ansible/group_vars/all/vault.yml.unencrypted
+
+# Ansible retry files
+*.retry
+
+# Editor/OS artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

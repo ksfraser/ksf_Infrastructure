@@ -1,0 +1,21 @@
+# ansible/group_vars/all/vault.yml.example
+#
+# This file documents the structure of the encrypted vault.
+# DO NOT put real credentials here — this file IS committed to git.
+#
+# To create your vault:
+#   cp vault.yml.example vault.yml
+#   # Edit vault.yml with real values
+#   ansible-vault encrypt vault.yml
+#
+# To edit an encrypted vault:
+#   ansible-vault edit vault.yml
+#
+# To run a playbook with vault:
+#   ansible-playbook ... --ask-vault-pass
+#   ansible-playbook ... --vault-password-file ~/.vault_pass   # never commit .vault_pass
+
+---
+vault_mariadb_root_pass: "CHANGE_ME_strong_root_password"
+vault_mariadb_user: "ksf_user"
+vault_mariadb_pass: "CHANGE_ME_strong_user_password"
