@@ -54,4 +54,5 @@ fa_modules:
   - ksf_FA_AsteriskPBX
   - ksf_FA_API
   - ksf_FA_Calendar
+  - ksf_FA_DataIntegrity
   - ksf_fa_downloader
