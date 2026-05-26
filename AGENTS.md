@@ -266,9 +266,180 @@ $payload = [
 
 ## FA install.sql / Schema Convention
 
-- Use `@TB_PREF@` as placeholder in SQL files (e.g. `@TB_PREF@fa_cal_entries`)
-- FA's `activate_extension()` → `update_databases()` substitutes automatically
-- Manual substitute for testing: `sed 's/@TB_PREF@/0_/g' install.sql | mysql ...`
+**Use `0_` as the table prefix literal in all SQL files.**
+
+`db_import()` (called by `update_databases()`) substitutes `0_` with the actual
+company table prefix via `str_replace("0_", $connection["tbpref"], $line)`.
+**`@TB_PREF@` and `{TB_PREF}` are NOT recognised — they are NOT substituted.**
+
+```sql
+-- CORRECT
+CREATE TABLE IF NOT EXISTS `0_ksf_integrity_log` ( ... );
+
+-- WRONG — these are silently treated as literal table names
+CREATE TABLE IF NOT EXISTS `@TB_PREF@ksf_integrity_log` ( ... );
+CREATE TABLE IF NOT EXISTS `{TB_PREF}ksf_integrity_log` ( ... );
+```
+
+### `activate_extension()` Table-Check Convention
+
+The second element of each update array is the **bare table name** (without prefix)
+that `check_table()` uses to determine whether the SQL has already been applied:
+
+```php
+function activate_extension($company, $check_only = true)
+{
+    // 'install.sql' => array('<bare_table_name_to_probe>')
+    $updates = array(
+        'install.sql' => array('ksf_integrity_log'),
+    );
+    return $this->update_databases($company, $updates, $check_only);
+}
+```
+
+If `{tbpref}ksf_integrity_log` exists the SQL is skipped; otherwise it runs.
+Pass the **first (or most diagnostic) table** created by the SQL file.
+
+---
+
+## FA Module `_init/config` Convention
+
+Every FA module **must** have `_init/config` as a **gzip-compressed** file in
+`Key: Value` format. Plain-text or `ini`-style files (`name=value`) are **not**
+read correctly by FA's `get_control_file()`.
+
+### Canonical format
+
+```
+Name: ksf_FA_<ModuleName>
+Version: <FA_version>-<build>
+Description: KSF FrontAccounting Module
+```
+
+- `<FA_version>` must match the FA version the module targets (e.g. `2.4.3`)
+- `<build>` is a zero-based integer incremented on each module release (`0`, `1`, …)
+- **Current required minimum**: `2.4.3-0`
+
+### How to create / update
+
+```bash
+# Create
+printf 'Name: ksf_FA_MyModule\nVersion: 2.4.3-0\nDescription: KSF FrontAccounting Module\n\n' \
+  | gzip -9 > _init/config
+
+# Verify
+zcat _init/config
+```
+
+---
+
+## FA hooks.php — Canonical Class Pattern
+
+Every module **must** have a `hooks_<module_name> extends hooks` class.
+Plain functions (`hook_menu_insert`, `hook_db_install`, etc.) are the old FA 2.3
+style and do **not** support install tabs, security areas, or DB activation.
+
+```php
+<?php
+// Security section — pick a unique number not used by any other module.
+// Core FA uses 1–53. KSF modules start at 114. Increment by 1 for each new module.
+// Current highest: SS_WORKFLOW = 143. Next available: 144.
+define('SS_ksf_FA_MyModule', 144 << 8);
+
+class hooks_ksf_FA_MyModule extends hooks
+{
+    var $module_name = 'ksf_FA_MyModule';  // must match the directory name
+    var $version     = '1.0.0';
+
+    /**
+     * Register application tab(s) in FA's main menu.
+     */
+    function install_tabs($app)
+    {
+        set_ext_domain('modules/ksf_FA_MyModule');
+        $app->add_application(new mymodule_app());
+        set_ext_domain();
+    }
+
+    /**
+     * Declare security areas. Return [ $security_areas, $security_sections ].
+     */
+    function install_access()
+    {
+        $security_sections[SS_ksf_FA_MyModule] = _("My Module");
+        $security_areas['SA_MYMODULE_VIEW'] = array(
+            SS_ksf_FA_MyModule | 1, _("View My Module"),
+        );
+        $security_areas['SA_MYMODULE_MANAGE'] = array(
+            SS_ksf_FA_MyModule | 2, _("Manage My Module"),
+        );
+        return array($security_areas, $security_sections);
+    }
+
+    /**
+     * Run sql/install.sql when the module is activated.
+     * $check_only=true means probe only (used by the extension manager UI).
+     */
+    function activate_extension($company, $check_only = true)
+    {
+        $updates = array(
+            'install.sql' => array('ksf_mymodule_records'),
+        );
+        return $this->update_databases($company, $updates, $check_only);
+    }
+}
+
+class mymodule_app extends application
+{
+    function __construct()
+    {
+        parent::__construct("MyModule", _($this->help_context = "&My Module"));
+
+        $this->add_module(_("My Module"));
+        $this->add_lapp_function(
+            0, _("&Overview"),
+            "modules/ksf_FA_MyModule/pages/overview.php",
+            'SA_MYMODULE_VIEW', MENU_INQUIRY
+        );
+        $this->add_extensions();
+    }
+}
+```
+
+### `add_lapp_function` menu type constants
+
+| Constant | FA Menu Section |
+|---|---|
+| `MENU_MAIN` | Main entry (top of sub-menu) |
+| `MENU_ENTRY` | Data entry form |
+| `MENU_INQUIRY` | Inquiry / report (read-only) |
+| `MENU_REPORT` | Report |
+| `MENU_SETTINGS` | Configuration |
+
+### HookQueryProviderTrait — IMPORTANT WARNING
+
+`\Ksfraser\Traits\HookQueryProviderTrait` requires `vendor/autoload.php` to be
+loaded at hooks-load time. **Do NOT** add `use \Ksfraser\Traits\HookQueryProviderTrait`
+to a `hooks.php` class unless `vendor/autoload.php` is unconditionally included at the
+top of hooks.php **and** the vendor directory is present in the deployed module.
+
+If `vendor/` is absent (clean clone, no `composer install`) the `require_once` will
+fatal-error and crash FA's bootstrap for **all** pages — not just the module's own pages.
+
+Safe alternative: load `vendor/autoload.php` lazily inside the individual hook methods
+that actually need Composer classes, guarded by `file_exists()`:
+
+```php
+function my_hook_method(&$data, $opts = array())
+{
+    $autoload = __DIR__ . '/vendor/autoload.php';
+    if (!file_exists($autoload)) {
+        return null; // Composer deps not installed — skip gracefully
+    }
+    require_once $autoload;
+    // ... use namespaced classes here ...
+}
+```
 
 ## CRM Tag Type Constants
 
