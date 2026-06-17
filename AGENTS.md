@@ -155,6 +155,12 @@ The trait provides `ksf_get_value()`, `ksf_get_values()`, and
 Keys MUST be namespaced as `<module>.<value_name>` to prevent collisions
 (e.g. `calendar.api_version`, `rbac.hooks_version`).
 
+## API Response Pattern
+
+- All AJAX/API endpoints must emit JSON through one guarded request wrapper.
+- Convert PHP warnings/notices to exceptions, discard stray buffered output, and return a single JSON error object on failure.
+- Never allow hooks or legacy FA output to write directly to the response body for API routes.
+
 ### Full Template
 
 A ready-to-copy hooks.php template with all patterns is at:
@@ -486,3 +492,18 @@ The monolith `ksf_CRM` has been split into two repositories:
 - **FrontAccounting 2.4+**
 - **MariaDB 10.5+**
 - **PHP 7.4** (hard constraint — no PHP 8+ syntax)
+
+## Development Workflow
+
+All development is done in the **devel tree** (`~/Documents/ksf_Infrastructure`).
+
+### Workflow Steps
+1. **Develop** in this repo (feature branches preferred)
+2. **Test**: run repo-appropriate tests
+3. **Lint**: `php -l` on modified PHP files (no syntax errors)
+4. **Commit** and **Push** branch to GitHub
+5. **Merge** to `master` when ready
+6. **Push** `master` to GitHub
+
+*No UAT bind point in `~/ksf_Infrastructure/fa_modules/ksf_Infrastructure` — this repo is consumed via Composer path repos or other means.*
+
