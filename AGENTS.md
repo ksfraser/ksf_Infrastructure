@@ -498,10 +498,10 @@ The monolith `ksf_CRM` has been split into two repositories:
 All development is done in the **devel tree** (`~/Documents/ksf_Infrastructure`).
 
 ### Workflow Steps
-1. **Develop** in this repo (feature branches preferred)
+1. **Develop** in this repo (feature/fix branches preferred — e.g. `feature/description` or `fix/description`)
 2. **Test**: run repo-appropriate tests
 3. **Lint**: `php -l` on modified PHP files (no syntax errors)
-4. **Commit** and **Push** branch to GitHub
+4. **ALWAYS COMMIT** and **PUSH** branch to GitHub (do not wait for user permission)
 5. **Merge** to `master` when ready
 6. **Push** `master` to GitHub
 
