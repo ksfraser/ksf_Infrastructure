@@ -22,6 +22,22 @@
  */
 
 // ---------------------------------------------------------------------------
+// 0. Bootstrap — Composer autoloader + dependency self-healing
+// ---------------------------------------------------------------------------
+// if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+//     require_once __DIR__ . '/vendor/autoload.php';
+// }
+// $depsPath = dirname(__DIR__) . '/ksf_FA_Common/src/Utils/ComposerDependencies.php';
+// if (file_exists($depsPath)) {
+//     require_once $depsPath;
+//     \KsfCommon\Utils\ComposerDependencies::ensure(__DIR__);
+// }
+//
+// (Uncomment in your actual hooks.php — see ksf_FA_Calendar/hooks.php for a
+//  working example.  \KsfCommon\Utils\ComposerDependencies is a single SRP
+//  class that runs `composer install` once if vendor/autoload.php is missing.)
+
+// ---------------------------------------------------------------------------
 // 1. Security section constant (unique per module)
 // ---------------------------------------------------------------------------
 // Shift value: pick a unique number not used by other modules.
