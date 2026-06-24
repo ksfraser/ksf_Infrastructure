@@ -45,9 +45,9 @@ services:
       - "${WP_PORT:-8091}:80"
     environment:
       WORDPRESS_DB_HOST: mariadb
-        WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
-        WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
-        WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
+      WORDPRESS_DB_NAME: ${MARIADB_DATABASE:-ksf_wp}
+      WORDPRESS_DB_USER: ${MARIADB_USER:-ksf_user}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
       - ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:/var/www/html
     networks:
@@ -56,6 +56,19 @@ services:
       mariadb:
         condition: service_healthy
     # WP-CLI installed via post-install.sh
+
+  stockmarket-python-worker:
+    profiles: ["stockmarket"]
+    container_name: stockmarket-python-worker
+    build:
+      context: ../containerfiles/python
+      dockerfile: Podfile
+    volumes:
+      - ${STOCKMARKET_PYTHON_DIR:-/home/ksf_stockmarket/ksf_stockmarket/python}:/app/python:Z
+    networks:
+      - ksf_network
+    environment:
+      WORKER_PORT: ${STOCKMARKET_WORKER_PORT:-8000}
 
 networks:
   ksf_network:
@@ -66,6 +79,7 @@ volumes:
   ${VOLUME_PREFIX:-ksf_infrastructure}_mariadb_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_fa_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:
+  ${VOLUME_PREFIX:-ksf_infrastructure}_stockmarket_python_data:
 
 # Environment file to customize
 # Copy .env.example to .env and customize

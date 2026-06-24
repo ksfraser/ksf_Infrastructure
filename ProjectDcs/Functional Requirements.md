@@ -285,6 +285,19 @@ This document details functional requirements for ksf_Infrastructure, covering c
 
 ---
 
+### FR-INF-022: Optional Python Worker Container
+**Priority**: Medium
+**Description**: Infrastructure may optionally run a FastAPI worker for externalized Python execution.
+
+**Acceptance Criteria**:
+- [ ] `stockmarket-python-worker` service defined in compose
+- [ ] Scripts mounted as host volume, not baked into image
+- [ ] Worker exposed via compose profile `stockmarket`
+- [ ] Ansible variable `enable_stockmarket_python_worker` gating service start
+- [ ] PHP `proc_open()` remains primary; curl fallback to worker when `PYTHON_WORKER_URL` is configured
+
+---
+
 ## 11. Acceptance Test Matrix
 
 | FR ID | Requirement | Test Cases | Status |

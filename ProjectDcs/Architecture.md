@@ -202,6 +202,26 @@ RUN chown -R www-data:www-data /var/www/html
 RUN a2enmod rewrite
 ```
 
+### 2.3 Stock Market Python Worker (Optional)
+
+```yaml
+services:
+  stockmarket-python-worker:
+    profiles: ["stockmarket"]
+    container_name: stockmarket-python-worker
+    build:
+      context: ../containerfiles/python
+      dockerfile: Podfile
+    volumes:
+      - ${STOCKMARKET_PYTHON_DIR:-/home/ksf_stockmarket/ksf_stockmarket/python}:/app/python:Z
+    networks:
+      - ksf_network
+    environment:
+      WORKER_PORT: ${STOCKMARKET_WORKER_PORT:-8000}
+```
+
+This service mounts the `ksf_stockmarket/python` scripts as a volume rather than baking them into the image. It is exposed via the `stockmarket` compose profile so it is omitted unless explicitly enabled.
+
 ---
 
 ## 3. Network Architecture
@@ -219,6 +239,7 @@ RUN a2enmod rewrite
 | MariaDB | 3306 | 3306 | TCP |
 | FrontAccounting | 80 | 8080 | TCP |
 | WordPress | 80 | 8081 | TCP |
+| Stock Market Worker | 8000 | 8000 | TCP |
 
 ### 3.3 Service Discovery
 
@@ -227,6 +248,7 @@ RUN a2enmod rewrite
 | MariaDB | ksf-mariadb | 3306 |
 | FrontAccounting | ksf-fa | 80 |
 | WordPress | ksf-wp | 80 |
+| Stock Market Worker | stockmarket-python-worker | 8000 |
 
 ---
 

@@ -38,6 +38,9 @@ ansible/inventories/<environment>
 | `mariadb_root_pass` | MariaDB root password | ksfroot2024! |
 | `mariadb_db` | MariaDB database name | ksf_fa |
 | `fa_modules` | List of FA modules to deploy | [] (empty) |
+| `stockmarket_worker_port` | Stock market Python worker HTTP port | 8000 |
+| `enable_stockmarket_python_worker` | Enable the optional Python worker container | false |
+| `stockmarket_python_dir` | Host path mounted into the Python worker container | /home/ksf_stockmarket/ksf_stockmarket/python |
 
 ### Example: Creating a New Environment
 
@@ -113,6 +116,7 @@ VOLUME_PREFIX=my_unique_prefix bash post-install.sh
 | FrontAccounting | http://localhost:8090 | admin / admin |
 | WordPress | http://localhost:8091 | admin / admin2024! |
 | MariaDB | localhost:3306 | ksf_user / ksfuser2024! |
+| Stock Market Python Worker | http://localhost:8000/health | Same host network (optional) |
 
 ## Volume Naming Convention
 

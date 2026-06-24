@@ -1,0 +1,9 @@
+# Python 3.11 worker image requirements
+fastapi==0.111.*
+uvicorn[standard]==0.29.*
+pydantic-settings==2.2.*
+yfinance==0.2.*
+pandas==2.2.*
+numpy==1.26.*
+pymysql==1.1.*
+requests==2.32.*

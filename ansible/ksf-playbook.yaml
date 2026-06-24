@@ -40,6 +40,9 @@
     wp_port: "{{ wp_port | default(8091) }}"
     volume_prefix: "{{ volume_prefix | default('ksf_infrastructure') }}"
     fa_modules: "{{ fa_modules | default([]) }}"
+    stockmarket_python_dir: "{{ stockmarket_python_dir | default('/home/ksf_stockmarket/ksf_stockmarket/python') }}"
+    stockmarket_worker_port: "{{ stockmarket_worker_port | default(8000) }}"
+    enable_stockmarket_python_worker: "{{ enable_stockmarket_python_worker | default(false) }}"
 
   tasks:
     - name: Ensure git is installed
@@ -62,6 +65,7 @@
         podman volume create {{ volume_prefix }}_mariadb_data 2>/dev/null || true
         podman volume create {{ volume_prefix }}_fa_data 2>/dev/null || true
         podman volume create {{ volume_prefix }}_wp_data 2>/dev/null || true
+        podman volume create {{ volume_prefix }}_stockmarket_python_data 2>/dev/null || true
       changed_when: false
 
     - name: Ensure FA modules staging directory exists
@@ -95,9 +99,10 @@
       when: item.failed | default(false)
 
     - name: Open firewall ports for KSF
-      ansible.builtin.shell: |
+      ansible.builtin.shell: |-
         firewall-cmd --permanent --add-port={{ fa_port }}/tcp 2>/dev/null || true
         firewall-cmd --permanent --add-port={{ wp_port }}/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port={{ stockmarket_worker_port }}/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
       changed_when: false
@@ -165,6 +170,19 @@
                 mariadb:
                   condition: service_healthy
 
+            stockmarket-python-worker:
+              profiles: ["stockmarket"]
+              container_name: stockmarket-python-worker
+              build:
+                context: ../containerfiles/python
+                dockerfile: Podfile
+              volumes:
+                - {{ stockmarket_python_dir }}:/app/python:Z
+              networks:
+                - ksf_network
+              environment:
+                WORKER_PORT: {{ stockmarket_worker_port }}
+
           networks:
             ksf_network:
               name: ksf_network
@@ -174,6 +192,7 @@
             {{ volume_prefix }}_mariadb_data:
             {{ volume_prefix }}_fa_data:
             {{ volume_prefix }}_wp_data:
+            {{ volume_prefix }}_stockmarket_python_data:
 
     - name: Write .env file for compose (from vault credentials)
       ansible.builtin.copy:
@@ -187,11 +206,14 @@
           FA_PORT={{ fa_port }}
           WP_PORT={{ wp_port }}
           VOLUME_PREFIX={{ volume_prefix }}
+          STOCKMARKET_PYTHON_DIR={{ stockmarket_python_dir }}
+          STOCKMARKET_WORKER_PORT={{ stockmarket_worker_port }}
+          ENABLE_PYTHON_CONTAINER={{ enable_stockmarket_python_worker | ternary('1','0') }}
 
     - name: Start Podman Compose services
-      ansible.builtin.shell: |
+      ansible.builtin.shell: |-
         cd {{ ksf_base_dir }}
-        podman-compose -f ksf-compose.yaml up -d
+        {% if enable_stockmarket_python_worker %}podman-compose -f ksf-compose.yaml --profile stockmarket up -d{% else %}podman-compose -f ksf-compose.yaml up -d{% endif %}
       args:
         executable: /bin/bash
 

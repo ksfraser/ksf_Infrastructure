@@ -32,6 +32,7 @@ Organizations need reliable, repeatable deployment processes. ksf_Infrastructure
 | Database Initialization | Yes |
 | FrontAccounting Modules | Yes |
 | WordPress Integration | Yes |
+| Optional Python Worker | Yes |
 | SSL/TLS | No (Future) |
 | Load Balancing | No (Future) |
 
@@ -47,6 +48,7 @@ ksf_Infrastructure/
 │   └── ksf_playbook.yaml
 ├── containerfiles/             # Container configs
 │   ├── FA/php.ini
+│   ├── python/Podfile         # Optional FastAPI Python worker
 │   └── WP/uploads.ini
 ├── fa_modules/                 # FA module storage
 ├── init-sql/                   # Database setup
