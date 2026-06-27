@@ -1,0 +1,6 @@
+fastapi==0.111.*
+uvicorn[standard]==0.29.*
+pytesseract==0.3.*
+Pillow==10.4.*
+python-multipart==0.0.*
+pydantic==2.*

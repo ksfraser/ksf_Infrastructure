@@ -38,7 +38,10 @@
 
     fa_port: "{{ fa_port | default(8090) }}"
     wp_port: "{{ wp_port | default(8091) }}"
+    pma_port: "{{ pma_port | default(8082) }}"
+    ocr_port: "{{ ocr_port | default(8100) }}"
     volume_prefix: "{{ volume_prefix | default('ksf_infrastructure') }}"
+    enable_ocr_worker: "{{ enable_ocr_worker | default(false) }}"
     fa_modules: "{{ fa_modules | default([]) }}"
     stockmarket_python_dir: "{{ stockmarket_python_dir | default('/home/ksf_stockmarket/ksf_stockmarket/python') }}"
     stockmarket_worker_port: "{{ stockmarket_worker_port | default(8000) }}"
@@ -102,7 +105,9 @@
       ansible.builtin.shell: |-
         firewall-cmd --permanent --add-port={{ fa_port }}/tcp 2>/dev/null || true
         firewall-cmd --permanent --add-port={{ wp_port }}/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port={{ pma_port }}/tcp 2>/dev/null || true
         firewall-cmd --permanent --add-port={{ stockmarket_worker_port }}/tcp 2>/dev/null || true
+        firewall-cmd --permanent --add-port={{ ocr_port }}/tcp 2>/dev/null || true
         firewall-cmd --reload 2>/dev/null || true
       ignore_errors: true
       changed_when: false
@@ -170,6 +175,34 @@
                 mariadb:
                   condition: service_healthy
 
+
+            phpmyadmin:
+              image: docker.io/phpmyadmin/phpmyadmin:latest
+              container_name: ksf-pma
+              hostname: ksf-pma
+              ports:
+                - "{{ pma_port }}:80"
+              environment:
+                PMA_HOST: ksf-mariadb
+                PMA_PORT: '3306'
+                UPLOAD_LIMIT: 256M
+              networks:
+                - ksf_network
+              depends_on:
+                mariadb:
+                  condition: service_healthy
+
+            tesseract-ocr:
+              profiles: ["ocr"]
+              container_name: ksf-tesseract
+              hostname: ksf-tesseract
+              build:
+                context: ../containerfiles/tesseract
+                dockerfile: Podfile
+              ports:
+                - "{{ ocr_port }}:8100"
+              networks:
+                - ksf_network
             stockmarket-python-worker:
               profiles: ["stockmarket"]
               container_name: stockmarket-python-worker
@@ -205,15 +238,21 @@
           MARIADB_PASSWORD={{ vault_mariadb_pass }}
           FA_PORT={{ fa_port }}
           WP_PORT={{ wp_port }}
+          PMA_PORT={{ pma_port }}
           VOLUME_PREFIX={{ volume_prefix }}
           STOCKMARKET_PYTHON_DIR={{ stockmarket_python_dir }}
           STOCKMARKET_WORKER_PORT={{ stockmarket_worker_port }}
+          OCR_PORT={{ ocr_port }}
           ENABLE_PYTHON_CONTAINER={{ enable_stockmarket_python_worker | ternary('1','0') }}
+          ENABLE_OCR_CONTAINER={{ enable_ocr_worker | ternary('1','0') }}
 
     - name: Start Podman Compose services
       ansible.builtin.shell: |-
         cd {{ ksf_base_dir }}
-        {% if enable_stockmarket_python_worker %}podman-compose -f ksf-compose.yaml --profile stockmarket up -d{% else %}podman-compose -f ksf-compose.yaml up -d{% endif %}
+        {% set profiles = [] %}
+        {% if enable_stockmarket_python_worker | bool %}{% set profiles = profiles + ['stockmarket'] %}{% endif %}
+        {% if enable_ocr_worker | bool %}{% set profiles = profiles + ['ocr'] %}{% endif %}
+        {% if profiles %}podman-compose -f ksf-compose.yaml --profile {{ profiles | join(' --profile ') }} up -d{% else %}podman-compose -f ksf-compose.yaml up -d{% endif %}
       args:
         executable: /bin/bash
 

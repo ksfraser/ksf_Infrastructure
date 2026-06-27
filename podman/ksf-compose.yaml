@@ -57,6 +57,34 @@ services:
         condition: service_healthy
     # WP-CLI installed via post-install.sh
 
+  phpmyadmin:
+    image: docker.io/phpmyadmin/phpmyadmin:latest
+    container_name: ksf-pma
+    hostname: ksf-pma
+    ports:
+      - "${PMA_PORT:-8082}:80"
+    environment:
+      PMA_HOST: ksf-mariadb
+      PMA_PORT: '3306'
+      UPLOAD_LIMIT: 256M
+    networks:
+      - ksf_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  tesseract-ocr:
+    profiles: ["ocr"]
+    container_name: ksf-tesseract
+    hostname: ksf-tesseract
+    build:
+      context: ../containerfiles/tesseract
+      dockerfile: Podfile
+    ports:
+      - "${OCR_PORT:-8100}:8100"
+    networks:
+      - ksf_network
+
   stockmarket-python-worker:
     profiles: ["stockmarket"]
     container_name: stockmarket-python-worker
