@@ -507,3 +507,27 @@ All development is done in the **devel tree** (`~/Documents/ksf_Infrastructure`)
 
 *No UAT bind point in `~/ksf_Infrastructure/fa_modules/ksf_Infrastructure` — this repo is consumed via Composer path repos or other means.*
 
+## FA Core Patches
+
+This repo carries two copies of patched FA core files:
+
+| Copy | Path | Purpose |
+|------|------|---------|
+| Active deployment | `fa_modules/includes/<file>` | Running UAT instance |
+| Docker reference | `docker/fa-alpine/fa_files/includes/<file>` | Source for container builds |
+
+When deploying ACPT / PROD, **both** copies must be patched identically.
+
+### Patch Inventory
+
+| File | Function | Issue | Fix |
+|------|----------|-------|-----|
+| `includes/packages.inc` | `check_src_ext_version()` | Local modules without `_init/config` get version `'-'`; `strspn('-', digits) = 0` produces empty numeric part, causing string comparison `'' < '2' = true` → false (incompatible) | Return `true` (compatible) when the extracted numeric part is empty — absence of version info is not grounds for rejection |
+
+### Applying When Deploying to New Environments
+
+1. Copy the patched file from `fa_modules/includes/` to the target FA installation's `includes/` directory
+2. For Docker-based deployments, also patch the reference copy in `docker/fa-alpine/fa_files/includes/` before rebuilding the image
+3. Run `php -l includes/<file>` to verify syntax
+4. Test by activating any local KSF module (e.g. ksf_FA_Attachments) in the Install/Activate extensions page
+
