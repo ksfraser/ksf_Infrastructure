@@ -5,8 +5,8 @@ LABEL description="KSF DB sync cron container (local MariaDB -> webhost clone/ba
 
 # mariadb-client: mysqldump / mysql for Option A
 # python3 + pymysql: outbox setup + delta sync (Option B)
-# dcron: the schedule daemon (PID 1, foreground)
-RUN apk add --no-cache mariadb-client python3 dcron py3-pymysql
+# crond (busybox): the schedule daemon (PID 1, foreground)
+RUN apk add --no-cache mariadb-client python3 py3-pymysql
 
 WORKDIR /usr/local/bin
 

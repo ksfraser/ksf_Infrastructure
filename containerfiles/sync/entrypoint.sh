@@ -7,4 +7,4 @@ set -e
 python3 /usr/local/bin/setup_outbox.py || echo "setup_outbox failed (will retry next start)"
 
 # Run the schedule daemon as PID 1 (foreground).
-exec dcron -f -l 2
+exec crond -f
