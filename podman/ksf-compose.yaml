@@ -26,6 +26,10 @@ services:
     container_name: ksf-fa
     hostname: ksf-fa
     command: --http
+    environment:
+      DB_DSN: mysql:host=ksf-mariadb;dbname=ksf_fa;charset=utf8
+      DB_USER: ${MARIADB_USER:-ksf_user}
+      DB_PASS: ${MARIADB_PASSWORD}
     ports:
       - "${FA_PORT:-8090}:80"
     volumes:
@@ -73,6 +77,40 @@ services:
       mariadb:
         condition: service_healthy
 
+  db-sync:
+    container_name: ksf-db-sync
+    hostname: ksf-db-sync
+    build:
+      context: ../containerfiles/sync
+      dockerfile: Podfile
+    environment:
+      # source of truth (local MariaDB)
+      LOCAL_DB_HOST: ksf-mariadb
+      LOCAL_DB_PORT: '3306'
+      LOCAL_DB_NAME: ${MARIADB_DATABASE:-ksf_fa}
+      LOCAL_DB_USER: ${MARIADB_USER:-ksf_user}
+      LOCAL_DB_PASS: ${MARIADB_PASSWORD}
+      LOCAL_DB_ROOT_PASS: ${MARIADB_ROOT_PASSWORD}
+      # clone / offsite backup target (webhost)
+      WEBHOST_DB_HOST: ${WEBHOST_DB_HOST}
+      WEBHOST_DB_PORT: ${WEBHOST_DB_PORT:-3306}
+      WEBHOST_DB_NAME: ${WEBHOST_DB_NAME:-ksf_fa}
+      WEBHOST_DB_USER: ${WEBHOST_DB_USER}
+      WEBHOST_DB_PASS: ${WEBHOST_DB_PASS}
+      SYNC_BATCH_SIZE: ${SYNC_BATCH_SIZE:-2000}
+      SYNC_MAX_ATTEMPTS: ${SYNC_MAX_ATTEMPTS:-10}
+      BACKUP_DIR: /backups
+      BACKUP_RETAIN_DAYS: ${BACKUP_RETAIN_DAYS:-7}
+      TZ: ${TZ:-America/Toronto}
+    volumes:
+      - ${VOLUME_PREFIX:-ksf_infrastructure}_backups:/backups
+    networks:
+      - ksf_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+
   tesseract-ocr:
     profiles: ["ocr"]
     container_name: ksf-tesseract
@@ -108,6 +146,7 @@ volumes:
   ${VOLUME_PREFIX:-ksf_infrastructure}_fa_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_stockmarket_python_data:
+  ${VOLUME_PREFIX:-ksf_infrastructure}_backups:
 
 # Environment file to customize
 # Copy .env.example to .env and customize

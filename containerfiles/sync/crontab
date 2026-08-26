@@ -1,0 +1,2 @@
+*/5 * * * * /usr/local/bin/sync_outbox.py >> /backups/sync.log 2>&1
+0 3 * * * /usr/local/bin/nightly_dump.py >> /backups/sync.log 2>&1

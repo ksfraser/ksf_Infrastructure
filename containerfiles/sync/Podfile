@@ -1,0 +1,24 @@
+FROM docker.io/alpine:3.19
+
+LABEL maintainer="KSF Development Team"
+LABEL description="KSF DB sync cron container (local MariaDB -> webhost clone/backup)"
+
+# mariadb-client: mysqldump / mysql for Option A
+# python3 + pymysql: outbox setup + delta sync (Option B)
+# dcron: the schedule daemon (PID 1, foreground)
+RUN apk add --no-cache mariadb-client python3 dcron py3-pymysql
+
+WORKDIR /usr/local/bin
+
+COPY setup_outbox.py sync_outbox.py nightly_dump.py entrypoint.sh crontab /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/*.py
+
+# dcron spool dir + install the schedule for root
+RUN mkdir -p /var/spool/cron/crontabs \
+    && cp /usr/local/bin/crontab /var/spool/cron/crontabs/root \
+    && chmod 0600 /var/spool/cron/crontabs/root
+
+# mountpoint for local rotating dumps (backed by a named volume)
+RUN mkdir -p /backups
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
