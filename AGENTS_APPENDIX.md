@@ -91,4 +91,27 @@ for m in ksf_FA_Calendar ksf_FA_Square ksf_FA_Woocommerce ksf_FA_DataIntegrity k
   find /var/www/html/modules/$m -name "*.php" -not -path "*/vendor/*" -not -path "*/tests/*" \
     -exec php -l {} \;
 done | grep -v "No syntax errors"'
+
+## FA Module Version — `_init/config` vs company `installed_extensions.php`
+
+The `Version:` line in a module's `_init/config` MUST use the FA `2.4.X-Y` scheme
+(e.g. `2.4.3-1`). Do NOT ship stale values like `1.0.0-0` or `2.0.0`.
+
+FA shows a module as **`Unknown`** on the Admin → Install/Activate extensions screen
+when the `Version:` in `_init/config` does not match the *stored* version for that
+module in the per-company `company/<id>/installed_extensions.php`.
+
+**When bumping a module version:**
+1. Update `Version:` in the module's `_init/config` (source repo), commit + push.
+2. Deploy the module to `fa_modules/<module>/` (bind-mounted to
+   `/var/www/html/modules/`).
+3. Update the matching stored `'version' => '...'` entry for that module in the
+   live company file
+   (`~/.local/share/containers/storage/volumes/podman_fa_company/_data/0/installed_extensions.php`)
+   so FA's version check agrees and the "Unknown" state clears.
+
+Both the source version and the stored company version must be kept in sync.
+`_init/config` may be gzip-compressed OR plain text — probe for the gzip magic
+bytes (`1f 8b`) before decompressing, and preserve the original format when
+editing.
 ```
