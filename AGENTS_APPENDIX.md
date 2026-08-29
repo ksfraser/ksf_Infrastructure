@@ -115,3 +115,22 @@ Both the source version and the stored company version must be kept in sync.
 bytes (`1f 8b`) before decompressing, and preserve the original format when
 editing.
 ```
+
+---
+
+## Architecture-doc hardlinks (cross-repo guidance)
+
+Canonical ecosystem/architecture notes live at `/home/kevin/Documents/` and are
+hardlinked (mode 0444) into the FA/WP module repos:
+
+| Doc | Purpose |
+|-----|---------|
+| `MODULE_DIRECTORY.md` | Ecosystem map — read first |
+| `APP_TAB_ARCHITECTURE.md` | Host/child/plugin tab architecture + unified-tabs roadmap |
+| `PACKAGIST.md` | Our packagist packages catalogue — check before reinventing |
+
+Rule for every FA/WP related repo: hardlink these at repo root
+(`ln -f /home/kevin/Documents/<doc> <repo>/<doc>`), keep mode 0444, and re-run
+`ln -f` after any git operation (hardlinks do not survive pull/checkout/clone).
+For clone portability, commit plain copies. Full ritual + carrier list:
+`APP_TAB_ARCHITECTURE.md` Appendix A/B and `/home/kevin/Documents/AGENTS_APPENDIX.md`.

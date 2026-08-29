@@ -54,6 +54,19 @@ if (file_exists($moduleAutoload)) {
     require_once $moduleAutoload;
 }
 
+if (!defined('SS_ksf_FA_<ModuleName>')) {
+    define('SS_ksf_FA_<ModuleName>', 115 << 8);
+}
+
+if (!defined('SA_<MODULENAME>VIEW')) {
+    define('SA_<MODULENAME>VIEW', SS_ksf_FA_<ModuleName> | 1);
+}
+if (!defined('SA_<MODULENAME>MANAGE')) {
+    define('SA_<MODULENAME>MANAGE', SS_ksf_FA_<ModuleName> | 1);
+}
+
+
+
 // ---------------------------------------------------------------------------
 // 2. Main hooks class
 // ---------------------------------------------------------------------------
@@ -87,6 +100,9 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     //
     // Use switch($app->id) to target existing apps ('CRM', 'HR', 'Projects',
     // 'GL', 'AP', 'AR', 'Stock', 'Manufacturing', 'System', etc.).
+    //
+    //    Native FA apps: GL, system, stock, AP, orders, stock
+    //
     // =======================================================================
     function install_options($app)
     {
@@ -132,6 +148,9 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     // =======================================================================
     function activate_extension($company, $check_only = true)
     {
+        if (!$check_only) {
+            $this->register_hooks();
+        }
         $updates = array();
 
         if (file_exists(dirname(__FILE__) . '/sql/install.sql')) {
@@ -142,15 +161,53 @@ class hooks_ksf_FA_<ModuleName> extends hooks
             $updates['update.sql'] = array($this->module_name);
         }
 
+        $sqlDir = __DIR__ . '/sql';
+        //Add additional sql files here
+        $files = array(
+            'install.sql',
+            'update.sql',
+            'preseed.sql'
+        );
+        foreach ($files as $file) {
+            if (file_exists($sqlDir . '/' . $file)) {
+                $updates[$file] = array($this->module_name);
+            }
+        }
         if (!empty($updates)) {
             return $this->update_databases($company, $updates, $check_only);
         }
 
         return true;
     }
+    public function deactivate()
+    {
+        unset($GLOBALS['<module>_services_cache']);
+        $GLOBALS['<module>_tab_registry'] = null;
+        return true;
+    }
+    public function register_hooks()
+    {
+        // FA hook_invoke_all() calls hook methods directly on this class.
+    }
 
     // =======================================================================
-    // 3. KSF QUERY HOOK SYSTEM + CRUD EVENT LISTENER STUBS
+    // 3a. predefined hook functions
+    //
+    //
+    //
+    //
+    // =======================================================================
+    function db_prewrite( &$cart, $trans_type )
+    {
+    }
+    public function post_item_write($itemData, $stockId = '')
+    {
+    }
+    public function pre_item_delete($stockId = '')
+    {
+    }
+    // =======================================================================
+    // 3b. KSF QUERY HOOK SYSTEM + CRUD EVENT LISTENER STUBS
     //
     // Provided by Ksfraser\Traits\HookQueryProviderTrait (see the `use` statement
     // at the top of this class). The trait implements the standard FA hook
@@ -217,6 +274,86 @@ class hooks_ksf_FA_<ModuleName> extends hooks
     //     }
     // }
 
+    // -----------------------------------------------------------------------
+    // 3c Tabs on our app
+    // -----------------------------------------------------------------------
+
+    public function display_tab_headers($tabs, $index = '')
+    {
+        if ($this->can_check_access() && !$this->has_<module>_access()) {
+            return $tabs;
+        }
+
+        $resolvedindex = $index;
+        if ($resolvedindex === '' && isset($_POST['<module>_id'])) {
+            $resolvedindex = (string)$_POST['<module>_id'];
+        }
+
+        if (is_object($tabs) && method_exists($tabs, 'createTab')) {
+            foreach ($this->get_tab_registry()->getAvailableTabs((string)$resolvedindex) as $tab) {
+                $tabs->createTab($tab->getTabKey(), $tab->getTabLabel());
+            }
+            return $tabs;
+        }
+
+        if (!is_array($tabs)) {
+            return $tabs;
+        }
+
+        foreach ($this->get_tab_registry()->getAvailableTabs((string)$resolvedindex) as $tab) {
+            $tabs[$tab->getTabKey()] = array(
+                $tab->getTabLabel(),
+                $resolvedindex
+            );
+        }
+
+        return $tabs;
+    }
+
+    public function display_tab_content($index = '', $selectedTab = '')
+    {
+        $this->load_plugins_on_demand();
+
+        if ($this->can_check_access() && !$this->has_<module>_access()) {
+            return false;
+        }
+
+        $resolvedindex = $index;
+        if ($resolvedindex === '' && isset($_POST['<module>_id'])) {
+            $resolvedindex = (string)$_POST['<module>_id'];
+        }
+
+        $tab = $this->get_tab_registry()->getTab((string)$selectedTab);
+        if ($tab !== null) {
+            $tab->renderTabContent((string)$resolvedindex);
+            return true;
+        }
+
+        return false;
+    }
+
+//Child modules should be able to insert their tabs onto this registry because of the globals.
+    private function get_tab_registry(): TabRegistry
+    {
+        //THIS CHECK IS FOR PARENT APP TABS
+        if (isset($GLOBALS['<module>_tab_registry'])
+            && $GLOBALS['<module>_tab_registry'] instanceof TabRegistry) {
+            return $GLOBALS['<module>_tab_registry'];
+        }
+
+        $services = $this->get_services();
+        $registry = new TabRegistry();
+        //For sub modules
+        //$registry = $GLOBALS['<module>_tab_registry'];
+
+        //Add new menu tabs
+        //$registry->register(new AttributesTab($services['service'], $services['handler']));
+        //$registry->register(new ShippingTab($services['shipping_dao']));
+        
+        $GLOBALS['<module>_tab_registry'] = $registry;
+        return $registry;
+    }
+
     // =======================================================================
     // 4. Private helpers
     // =======================================================================
@@ -281,6 +418,28 @@ class hooks_ksf_FA_<ModuleName> extends hooks
         if ($return_code !== 0) {
             error_log('KSF Module: composer install failed: ' . implode("\n", $output));
         }
+    }
+    private function can_check_access()
+    {
+        return function_exists('user_check_access');
+    }
+    private function has_<module>_access()
+    {
+        global $security_areas;
+
+        if (!isset($security_areas['SA_<MODULENAME>'])
+            && !isset($security_areas['SA_<MODULENAME>VIEW'])) {
+            return true;
+        }
+
+        $hasAccess = false;
+        if (isset($security_areas['SA_<MODULENAME>VIEW'])) {
+            $hasAccess = $hasAccess || user_check_access('SA_<MODULENAME>VIEW');
+        }
+        if (isset($security_areas['SA_<MODULENAME>MANAGE'])) {
+            $hasAccess = $hasAccess || user_check_access('SA_<MODULENAME>MANAGE');
+        }
+        return $hasAccess;
     }
 }
 
