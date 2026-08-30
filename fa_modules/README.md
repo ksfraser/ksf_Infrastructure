@@ -16,6 +16,13 @@ Consumers (Square, Woo, ImportStagingProcessing, PAV) pull runtime
 dependencies **from Packagist only** — no local path repositories, no
 `ksf_staging_dto/` copies, no manual symlinks into `vendor/`.
 
+`ksfraser/fa-classes` (DTO/Repository/Schema for native FA tables, from
+`ksf_FA_Classes`) is also on Packagist now (v1.6.0, source ref `1eaf2a0`,
+same code as the tagged commit). Consumers `ksf_FA_DataIntegrity` and
+`ksf_FA_InvoiceAllocation` were normalized off their `dev-php73` VCS pin /
+local path overrides onto Packagist `fa-classes ^1.0`
+(`ksf-modules-dao v0.5.1`, `validation v0.1.0` satisfy its requirements).
+
 Installed versions (2026-08-29):
 
 | Package | Version | Used by |
