@@ -791,3 +791,31 @@ provides four protected methods:
 
 *Document Version: 1.2.0*
 *Last Updated: 2026-05-24*
+## 16. Troubleshooting Session — 2026-07-29
+
+### 16.1 Problem: P1/P2/S1/S2 Recalc White Screen + Missing FA Header Tabs
+
+Two issues manifested on the UAT container after enabling the `ksf_FA_Upc2Item` module.
+
+### 16.2 Issue 1: FA Header Tabs Missing
+
+**Root Cause**: `ksf_FA_Upc2Item/hooks.php` called `$this->add_module_app()` in `install_options()`, a method that does **not** exist on the `hooks` class. The `Call to undefined method` exception triggered `exception_handler()` → `end_page()`, killing the page before app tabs rendered.
+
+**Fix**: Replaced `$this->add_module_app()` with `$app->add_lapp_function()` (the correct FA API for adding menu items to existing application tabs).
+
+**Prevention**: `install_options($app)` must call methods on `$app` (the `application` instance), not on `$this` (the `hooks` instance). Valid `$app->id` values: `orders` (Sales), `AP` (Purchases), `stock` (Items and Inventory), `manuf` (Manufacturing), `assets` (Fixed Assets), `proj` (Dimensions), `GL` (Banking and General Ledger), `system` (Setup).
+
+### 16.3 Issue 2: Compile-Time By-Reference Violation
+
+**Root Cause**: `ksf_FA_Documents/includes/documents_db.inc` passed array literals to `hook_invoke_first($method, &$data)`, which declares `$data` as a by-reference parameter. PHP 7.4 detects the violation at **compile time** when the calling file is compiled AFTER `hooks.inc` (which defines the function signature). Since `documents_db.inc` is eagerly loaded via Composer `autoload.files`, the fatal error occurs on every request.
+
+**Affected calls** (2 locations):
+- `documents_db.inc:429` — `hook_invoke_first('document_upload_attachment', [...])`
+- `documents_db.inc:466` — `hook_invoke_first('document_get_attachments', [...])`
+
+**Fix**: Assign array to variable before passing to `hook_invoke_first`.
+
+### 16.4 CLI Test Caveat
+
+The by-reference compile-time check only fires in **separate-file** compilation. In `php -r` (single string), PHP defers the check to runtime.
+
