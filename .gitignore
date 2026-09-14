@@ -41,3 +41,12 @@ ansible/group_vars/all/vault.yml.unencrypted
 *~
 .DS_Store
 Thumbs.db
+
+# SSH keys / credentials — NEVER commit
+.ssh/
+
+# Python bytecode caches
+__pycache__/
+
+# Runtime/build artifact: nested git clones staged while building the alpine image
+docker/fa-alpine/fa_files/modules/

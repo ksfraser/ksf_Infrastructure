@@ -1,0 +1,29 @@
+[15-May-2026 20:37:05 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:37:05 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:37:05 Europe/Berlin] 0::session.inc:490:[before upgrade] include(./company/0/installed_extensions.php): failed to open stream: No such file or directory
+[15-May-2026 20:37:05 Europe/Berlin] 0::session.inc:490:[before upgrade] include(): Failed opening './company/0/installed_extensions.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:37:05 Europe/Berlin] 0::hooks.inc:238:[before upgrade] Invalid argument supplied for foreach()
+[15-May-2026 20:37:05 Europe/Berlin] 0::current_user.inc:735:[before upgrade] opendir(./company/0/js_cache/0): failed to open dir: No such file or directory
+[15-May-2026 20:38:38 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:38:38 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:38:38 Europe/Berlin] 0::session.inc:490:[before upgrade] include(./company/0/installed_extensions.php): failed to open stream: No such file or directory
+[15-May-2026 20:38:38 Europe/Berlin] 0::session.inc:490:[before upgrade] include(): Failed opening './company/0/installed_extensions.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:38:38 Europe/Berlin] 0::hooks.inc:238:[before upgrade] Invalid argument supplied for foreach()
+[15-May-2026 20:39:27 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:39:27 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:53:16 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(../tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:53:16 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening '../tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:53:23 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(../tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:53:23 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(): Failed opening '../tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 20:53:27 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 20:53:27 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 22:50:04 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 22:50:04 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 22:51:06 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 22:51:06 Europe/Berlin] ::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 22:53:29 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 22:53:29 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 22:53:34 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(./tmp/faillog.php): failed to open stream: No such file or directory
+[15-May-2026 22:53:34 Europe/Berlin] 0::session.inc:440:[before upgrade] include_once(): Failed opening './tmp/faillog.php' for inclusion (include_path='.:/usr/share/php:/usr/share/pear')
+[15-May-2026 22:53:34 Europe/Berlin] 0:admin:current_user.inc:735: opendir(./company/0/js_cache/1): failed to open dir: No such file or directory
+[15-May-2026 22:53:47 Europe/Berlin] 0:admin:maintenance_db.inc:152: fopen(../company/0/installed_extensions.php): failed to open stream: Permission denied

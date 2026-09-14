@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir='ltr' >
+<head profile="http://www.w3.org/2005/10/profile"><title>Customers</title><meta http-equiv='X-UA-Compatible' content='IE=10'>
+<meta http-equiv='Content-type' content='text/html; charset='><link href='../../themes/default/images/favicon.ico' rel='icon' type='image/x-icon'> 
+<link href='../../themes/default/default.css' rel='stylesheet' type='text/css'> 
+<script language="javascript" type="text/javascript" src="../../company/0/js_cache/6/JsHttpRequest.js"></script><script language="javascript" type="text/javascript" src="../../company/0/js_cache/6/behaviour.js"></script><script language="javascript" type="text/javascript" src="../../company/0/js_cache/6/utils.js"></script><script language="javascript" type="text/javascript" src="../../company/0/js_cache/6/inserts.js"></script><script language="javascript" type="text/javascript" src="../../company/0/js_cache/6/date_picker.js"></script></head> 
+<body><table class='callout_main' border='0' cellpadding='0' cellspacing='0'>
+<tr>
+<td colspan='2' rowspan='2'>
+<table class='main_page' border='0' cellpadding='0' cellspacing='0'>
+<tr>
+<td>
+<table width='100%' border='0' cellpadding='0' cellspacing='0'>
+<tr>
+<td class='quick_menu'>
+<table cellpadding='0' cellspacing='0' width='100%'><tr><td><div class='tabs'><a class='selected' href='../../index.php?application=orders' accesskey='S'><u>S</u>ales</a><a class='menu_tab' href='../../index.php?application=AP' accesskey='P'><u>P</u>urchases</a><a class='menu_tab' href='../../index.php?application=stock' accesskey='I'><u>I</u>tems and Inventory</a><a class='menu_tab' href='../../index.php?application=manuf' accesskey='M'><u>M</u>anufacturing</a><a class='menu_tab' href='../../index.php?application=assets' accesskey='F'><u>F</u>ixed Assets</a><a class='menu_tab' href='../../index.php?application=proj' accesskey='D'><u>D</u>imensions</a><a class='menu_tab' href='../../index.php?application=GL' accesskey='B'><u>B</u>anking and General Ledger</a><a class='menu_tab' href='../../index.php?application=system' accesskey='E'>S<u>e</u>tup</a></div></td></tr></table><table class='logoutBar'><tr><td class='headingtext3'>ksf_fa | 192.168.1.88 | opencode</td><td class='logoutBarRight'><img id='ajaxmark' src='../../themes/default/images/ajax-loader.gif' align='center' style='visibility:hidden;' alt='ajaxmark'></td><td class='logoutBarRight'><a href='../../admin/dashboard.php?sel_app=orders'><img src='../../themes/default/images/report.png' style='width:14px;height:14px;border:0;vertical-align:middle;' alt='Dashboard'>&nbsp;&nbsp;Dashboard</a>&nbsp;&nbsp;&nbsp;
+<a class='shortcut' href='../../admin/display_prefs.php?'><img src='../../themes/default/images/preferences.gif' style='width:14px;height:14px; border:0;vertical-align:middle;' alt='Preferences'>&nbsp;&nbsp;Preferences</a>&nbsp;&nbsp;&nbsp;
+  <a class='shortcut' href='../../admin/change_current_user_password.php?selected_id=opencode'><img src='../../themes/default/images/lock.gif' style='width:14px;height:14px;border:0;vertical-align:middle;' alt='Change Password'>&nbsp;&nbsp;Change password</a>&nbsp;&nbsp;&nbsp;
+<a target = '_blank' onclick="javascript:openWindow(this.href,this.target); return false;" href='http://frontaccounting.com/fawiki/index.php?n=Help.Customers&amp;ctxhelp=1&amp;lang=C'><img src='../../themes/default/images/help.gif' style='width:14px;height:14px;border:0;vertical-align:middle;'' alt='Help'>&nbsp;&nbsp;Help</a>&nbsp;&nbsp;&nbsp;<a class='shortcut' href='../../access/logout.php?'><img src='../../themes/default/images/login.gif' style='width:14px;height:14px;border:0;vertical-align:middle;' alt='Logout'>&nbsp;&nbsp;Logout</a>&nbsp;&nbsp;&nbsp;</td></tr><tr><td colspan=3></td></tr></table></td></tr></table><center><table id='title'><tr><td width='100%' class='titletext'>Customers</td><td align=right></td></tr></table></center><div id='msgbox'></div><div id='_page_body'><form method='post' action='/sales/manage/customers.php' >
+<center><table class='tablestyle_noborder' cellpadding='2' cellspacing='0'>
+<tr>
+<td>Select a customer: </td>
+<td nowrap><span id='_customer_id_sel'><select id='customer_id' autocomplete='off'  name='customer_id' class='combo2' title='Select customer' ><option selected value=''>New customer</option>
+<option   value='1'>Donald Easter</option>
+<option   value='2'>MoneyMaker&nbsp;-&nbsp;EUR</option>
+</select>
+</span>
+<input  type='submit' class='combo_select' style='border:0;background:url(../../themes/default/images/button_ok.png) no-repeat;display:none;' aspect='fallback' name='_customer_id_update' value=' ' title='Select'> 
+<img src="../../themes/default/images/view.gif" style="vertical-align:middle;width:12px;height:12px;border:0;" onclick="javascript:lookupWindow(&quot;../../sales/inquiry/customers_list.php?popup=1&client_id=customer_id&quot;, &quot;&quot;);" title="Search customers" style="cursor:pointer;" /></td>
+<td>Show inactive:</td>
+<td ><input type='checkbox' name='show_inactive' value='1' onclick='JsHttpRequest.request("_show_inactive_update", this.form);' >
+</td></tr>
+</table></center>
+<div id='tabs'><ul class='ajaxtabs' rel='_tabs_div'>
+<li><button type='submit' name='tabs_settings' class='current'  accesskey='G' disabled ><span><u>G</u>eneral settings</span></button>
+</li>
+<li><button type='submit' name='tabs_contacts' class='ajaxbutton'  accesskey='C' disabled ><span><u>C</u>ontacts</span></button>
+</li>
+<li><button type='submit' name='tabs_transactions' class='ajaxbutton'  accesskey='T' disabled ><span><u>T</u>ransactions</span></button>
+</li>
+<li><button type='submit' name='tabs_orders' class='ajaxbutton'  accesskey='O' disabled ><span>Sales <u>O</u>rders</span></button>
+</li>
+</ul>
+<div class='spaceBox'></div>
+<input type='hidden' name='_tabs_sel' value='settings'>
+<div class='contentBox' id='_tabs_div'>
+<center><table class='tablestyle2' cellpadding='2' cellspacing='0'>
+<tr valign=top><td>
+<table class='tablestyle_inner'>
+<tr><td colspan=2 class='tableheader'>Name and Address</td></tr>
+<tr><td class='label'>Customer Name:</td><td><input  type="text" name="CustName" size="40" maxlength="80" value=""></td>
+</tr>
+<tr><td class='label'>Customer Short Name:</td><td><input  type="text" name="cust_ref" size="30" maxlength="30" value=""></td>
+</tr>
+<tr><td class='label'>Address:</td><td><textarea name='address' cols='35' rows='5'></textarea></td>
+</tr>
+<tr><td class='label'>GSTNo:</td><td><input  type="text" name="tax_id" size="40" maxlength="40" value=""></td>
+</tr>
+<tr><td class='label'>Customer's Currency:</td><td><span id='_curr_code_sel'><select id='curr_code' autocomplete='off'  name='curr_code' class='combo' title='' ><option   value='CAD'>CA Dollars</option>
+<option   value='EUR'>Euro</option>
+<option   value='GBP'>Pounds</option>
+<option selected  value='USD'>US Dollars</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Sales Type/Price List:</td><td><span id='_sales_type_sel'><select id='sales_type' autocomplete='off'  name='sales_type' class='combo' title='' ><option   value='1'>Retail</option>
+<option   value='2'>Wholesale</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td colspan=2 class='tableheader'>Branch</td></tr>
+<tr><td class='label'>Phone:</td><td><input  type="text" name="phone" size="32" maxlength="30" value=""></td>
+</tr>
+<tr><td class='label'>Secondary Phone Number:</td><td><input  type="text" name="phone2" size="32" maxlength="30" value=""></td>
+</tr>
+<tr><td class='label'>Fax Number:</td><td><input  type="text" name="fax" size="32" maxlength="30" value=""></td>
+</tr>
+<tr><td class='label'>E-mail:</td><td><input  type="text" name="email" size="35" maxlength="55" value=""></td>
+</tr>
+<tr><td class='label'>Bank Account Number:</td><td><input  type="text" name="bank_account" size="30" maxlength="60" value=""></td>
+</tr>
+<tr><td class='label'>Sales Person:</td><td>
+<span id='_salesman_sel'><select id='salesman' autocomplete='off'  name='salesman' class='combo' title='' ><option   value='1'>Sales Person</option>
+</select>
+</span>
+</td>
+</tr>
+</table>
+</td><td style='border-left:1px solid #cccccc;' >
+<table class='tablestyle_inner'>
+<tr><td colspan=2 class='tableheader'>Sales</td></tr>
+<tr><td class='label'>Discount Percent:</td>
+<td><input class='amount' type="text" name="discount" size="7" maxlength="12" dec="1" value="0.0"><span id='_discount_label'> %</span></td>
+</tr>
+<tr><td class='label'>Prompt Payment Discount Percent:</td>
+<td><input class='amount' type="text" name="pymt_discount" size="7" maxlength="12" dec="1" value="0.0"><span id='_pymt_discount_label'> %</span></td>
+</tr>
+<tr><td class='label'>Credit Limit:</td>
+<td><input class='amount' type="text" name="credit_limit" size="15" maxlength="15" dec="2" value="1,000.00"></td>
+</tr>
+<tr><td class='label'>Payment Terms:</td><td><span id='_payment_terms_sel'><select id='payment_terms' autocomplete='off'  name='payment_terms' class='combo' title='' ><option   value='4'>Cash Only</option>
+<option   value='1'>Due 15th Of the Following Month</option>
+<option   value='2'>Due By End Of The Following Month</option>
+<option   value='3'>Payment due within 10 days</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Credit Status:</td><td><span id='_credit_status_sel'><select id='credit_status' autocomplete='off'  name='credit_status' class='combo' title='' ><option   value='1'>Good History</option>
+<option   value='4'>In liquidation</option>
+<option   value='3'>No more work until payment received</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Dimension 1:</td><td><span id='_dimension_id_sel'><select id='dimension_id' autocomplete='off'  name='dimension_id' class='combo' title='' ><option selected value='0'> </option>
+<option   value='1'>001/2016  Cost Centre</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>General Notes:</td><td><textarea name='notes' cols='35' rows='5'></textarea></td>
+</tr>
+<tr><td colspan=2 class='tableheader'>Branch</td></tr>
+<tr><td class='label'>Default Inventory Location:</td><td><span id='_location_sel'><select id='location' autocomplete='off'  name='location' class='combo' title='' ><option   value='DEF'>Default</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Default Shipping Company:</td><td><span id='_ship_via_sel'><select id='ship_via' autocomplete='off'  name='ship_via' class='combo' title='' ><option   value='1'>Default</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Sales Area:</td><td><span id='_area_sel'><select id='area' autocomplete='off'  name='area' class='combo' title='' ><option   value='1'>Global</option>
+</select>
+</span>
+</td>
+</tr>
+<tr><td class='label'>Tax Group:</td><td><span id='_tax_group_id_sel'><select id='tax_group_id' autocomplete='off'  name='tax_group_id' class='combo' title='' ><option   value='1'>Tax</option>
+<option   value='2'>Tax Exempt</option>
+</select>
+</span>
+</td>
+</tr>
+</table>
+<input type="hidden" name="dimension2_id" value="0"></td></tr>
+</table></center>
+<br><div id='controls'><center><button class="ajaxsubmit" type="submit" aspect='default'  name="submit"  id="submit" value="Add New Customer"><img src='../../themes/default/images/ok.gif' height='12' alt=''><span>Add New Customer</span></button>
+</center></div><br></div></div><input type="hidden" name="_focus" value="customer_id"><input type="hidden" name="_modified" value="0"><input type="hidden" name="_confirmed" value=""><input type="hidden" name="_token" value="IUiNjObFZ6QhoqaSitHxuQxx"></form>
+<center><center><table width='20%' cellpadding='2' cellspacing='0'>
+<tr>
+<td align=center><a href='javascript:goBack();'>Back</a></td>
+</tr>
+</table></center>
+</center><br></div></td></tr></table>
+<table class='bottomBar2'>
+<tr><td class='bottomBarCell'>09/14/2026 | 06:22 am</td>
+<td id='hotkeyshelp'></td></tr></table>
+</td></tr> </table>
+<table align='center' id='footer'>
+<tr>
+<td align='center' class='footer'><a target='_blank' href='http://frontaccounting.com' tabindex='-1'><font color='#ffffff'>FrontAccounting 2.4.3 - Theme: default - </font></a></td>
+</tr>
+<tr>
+<td align='center' class='footer'><a target='_blank' href='http://frontaccounting.com' tabindex='-1'><font color='#ffff00'>FrontAccounting</font></a></td>
+</tr>
+</table><br><br>
+<script type='text/javascript'>
+		_focus = 'customer_id';
+		_validate = [  ];
+		var editors = [  ];
+	</script>
+<script type="text/javascript"><!--
+function openWindow(url, title)
+{
+ var left = (screen.width - 900) / 2;
+ var top = (screen.height - 500) / 2;
+ return window.open(url, title, 'width=900,height=500,left='+left+',top='+top+',screenX='+left+',screenY='+top+',status=no,scrollbars=yes');
+}
+function lookupWindow(url, title) {
+    	var u = url.split('#');
+    	if (u.length == 2) {
+      		var element = document.getElementById(u[1]);
+      		var options = element.options;
+      		url = u[0] + '&' + u[1] + '=' + options[element.selectedIndex].value;
+    	}
+    	openWindow(url, title);
+	}
+var user = {
+theme: '../../themes/default/',
+loadtxt: 'Requesting data...',
+date: '09/14/2026',
+datesys: 0,
+datefmt: 0,
+datesep: '/',
+ts: ',',
+ds: '.',
+pdec : 2}
+
+--></script>
+</body></html>

@@ -1,0 +1,14 @@
+---
+# Handlers for ksf.gpg-agent role
+
+- name: Restart GPG Agent
+  containers.podman.container:
+    name: ksf-gpg-agent
+    state: restarted
+  ignore_errors: true
+
+- name: Stop GPG Agent
+  containers.podman.container:
+    name: ksf-gpg-agent
+    state: stopped
+  ignore_errors: true

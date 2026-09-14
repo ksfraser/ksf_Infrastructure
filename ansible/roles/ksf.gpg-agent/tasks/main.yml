@@ -1,0 +1,75 @@
+---
+# ksf.gpg-agent role
+# Deploys GPG Agent relay service as a sidecar container
+
+- name: Ensure gpg-agent container is stopped
+  containers.podman.container:
+    name: ksf-gpg-agent
+    state: stopped
+  ignore_errors: true
+
+- name: Ensure gpg-agent container is absent
+  containers.podman.container_absent:
+    name: ksf-gpg-agent
+  ignore_errors: true
+
+- name: Create gpg-agent pod if it doesn't exist
+  containers.podman.pod:
+    name: ksf-pod
+    state: absent
+  ignore_errors: true
+
+- name: Create gpg-agent data directory
+  ansible.builtin.file:
+    path: "{{ ksf_data_dir }}/gpg-agent"
+    state: directory
+    mode: '0755'
+
+- name: Copy GPG Agent relay script
+  ansible.builtin.copy:
+    src: "{{ ksf_repo_dir }}/fa_modules/ksf_GPG/src/Agent/GpgAgentRelay.php"
+    dest: "{{ ksf_data_dir }}/gpg-agent/GpgAgentRelay.php"
+    mode: '0755'
+
+- name: Build GPG Agent container image
+  containers.podman.container:
+    name: ksf-gpg-agent
+    image: "{{ gpg_agent_image | default('alpine:3.18') }}"
+    state: started
+    restart: "{{ gpg_agent_restart | default('unless-stopped') }}"
+    pod: ksf-pod
+    ports:
+      - "127.0.0.1:7890:7890"
+    volume_volumes:
+      - "{{ ksf_data_dir }}/gpg-agent:/agent:z"
+      - "gpg-agent-log:/var/log"
+    env:
+      PHP_CLI_ARGS: "/agent/GpgAgentRelay.php"
+    command: >
+      sh -c 'apk add --no-cache gnupg php php-cli socat &&
+             gpg-agent --daemon --allow-loopback-pinentry --max-cache-ttl 86400 &&
+             while true; do sleep 86400; done'
+    auto_remove: false
+    recreate: "{{ gpg_agent_recreate | default(false) }}"
+  register: gpg_agent_result
+
+- name: Wait for GPG Agent to be ready
+  ansible.builtin.wait_for:
+    host: "127.0.0.1"
+    port: 7890
+    delay: 2
+    timeout: 10
+  when: gpg_agent_result is changed
+
+- name: Check GPG Agent status
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:7890/status"
+    method: GET
+    return_content: true
+  register: gpg_status
+  failed_when: false
+  changed_when: false
+
+- name: Display GPG Agent status
+  ansible.builtin.debug:
+    msg: "GPG Agent status: {{ gpg_status.content | default('unreachable') }}"

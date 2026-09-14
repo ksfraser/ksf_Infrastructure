@@ -1,12 +1,11 @@
-FROM docker.io/tesseractshadow/tesseractocr:latest
+FROM docker.io/python:3.11-slim
 
 LABEL maintainer="KSF Development Team"
 LABEL description="KSF Tesseract OCR REST API Service"
 
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-venv \
+    tesseract-ocr \
+    tesseract-ocr-eng \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 

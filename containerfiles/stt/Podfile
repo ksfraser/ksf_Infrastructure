@@ -1,0 +1,19 @@
+FROM docker.io/python:3.11-slim
+
+LABEL maintainer="KSF Development Team"
+LABEL description="KSF STT Service (faster-whisper)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY stt_api.py /app/stt_api.py
+
+WORKDIR /app
+
+EXPOSE 10300
+
+CMD ["uvicorn", "stt_api:app", "--host", "0.0.0.0", "--port", "10300"]

@@ -10,6 +10,10 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
 # Port configuration
 fa_port=8090
 wp_port=8091
+pma_port=8082
+ocr_port=8100
+tts_port=10200
+stt_port=10300
 
 # Volume prefix (for data persistence uniqueness)
 volume_prefix=ksf_infrastructure
@@ -17,12 +21,16 @@ volume_prefix=ksf_infrastructure
 # Database name (non-sensitive)
 mariadb_db=ksf_fa
 
+# Enable/disable optional workers
+enable_ocr_worker=false
+enable_tts_worker=false
+enable_stt_worker=false
+
 # GitHub org for module repos
 module_github_org=ksfraser
 module_branch=main
 
-# FA Modules to deploy — each must have a GitHub repo at:
-#   https://github.com/<module_github_org>/<module_name>
+# FA Modules to deploy
 fa_modules:
   - ksf_FA_Assets
   - ksf_FA_Subscriptions
@@ -56,3 +64,12 @@ fa_modules:
   - ksf_FA_Calendar
   - ksf_FA_DataIntegrity
   - ksf_fa_downloader
+
+# Firewall ports for firewall role
+firewall_allowed_tcp_ports:
+  - { port: "8090", proto: tcp }
+  - { port: "8091", proto: tcp }
+  - { port: "8082", proto: tcp }
+  - { port: "8100", proto: tcp }
+  - { port: "10200", proto: tcp }
+  - { port: "10300", proto: tcp }

@@ -22,7 +22,7 @@ services:
       retries: 5
 
   frontaccounting:
-    image: docker.io/genebarker/frontaccounting:latest
+    image: localhost/ksf-fa:latest
     container_name: ksf-fa
     hostname: ksf-fa
     command: --http
@@ -31,10 +31,36 @@ services:
       DB_USER: ${MARIADB_USER:-ksf_user}
       DB_PASS: ${MARIADB_PASSWORD}
     ports:
-      - "${FA_PORT:-8090}:80"
+      - "${FA_PORT:-8080}:80"
     volumes:
-      - ${VOLUME_PREFIX:-ksf_infrastructure}_fa_data:/var/www/html
-      - ../fa_modules:/var/www/html/modules:z
+      - ../fa/2.4.3:/var/www/html:ro
+      - ../fa_modules:/var/www/html/modules:rw
+      - ../fa/ksf_fa/config/config_db.php:/var/www/html/config_db.php:rw
+      - ../fa/ksf_fa/installed_extensions.php:/var/www/html/installed_extensions.php:rw
+      - ../fa/ksf_fa/company/0:/var/www/html/company/0:rw
+    networks:
+      - ksf_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  ksfii-app:
+    image: localhost/ksf-iiapp:latest
+    container_name: ksfii-app
+    hostname: ksfii-app
+    command: --http
+    environment:
+      DB_DSN: mysql:host=ksf-mariadb;dbname=ksf_fa;charset=utf8
+      DB_USER: ${MARIADB_USER:-ksf_user}
+      DB_PASS: ${MARIADB_PASSWORD}
+    ports:
+      - "${KSFII_FA_PORT:-8090}:80"
+    volumes:
+      - ../fa/2.4.3:/var/www/html:ro
+      - ../fa_modules:/var/www/html/modules:rw
+      - ../fa/ksfii_app/config/config_db.php:/var/www/html/config_db.php:rw
+      - ../fa/ksfii_app/installed_extensions.php:/var/www/html/installed_extensions.php:rw
+      - ../fa/ksfii_app/company/0:/var/www/html/company/0:rw
     networks:
       - ksf_network
     depends_on:
@@ -59,7 +85,6 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-    # WP-CLI installed via post-install.sh
 
   phpmyadmin:
     image: docker.io/phpmyadmin/phpmyadmin:latest
@@ -84,14 +109,12 @@ services:
       context: ../containerfiles/sync
       dockerfile: Podfile
     environment:
-      # source of truth (local MariaDB)
       LOCAL_DB_HOST: ksf-mariadb
       LOCAL_DB_PORT: '3306'
       LOCAL_DB_NAME: ${MARIADB_DATABASE:-ksf_fa}
       LOCAL_DB_USER: ${MARIADB_USER:-ksf_user}
       LOCAL_DB_PASS: ${MARIADB_PASSWORD}
       LOCAL_DB_ROOT_PASS: ${MARIADB_ROOT_PASSWORD}
-      # clone / offsite backup target (webhost)
       WEBHOST_DB_HOST: ${WEBHOST_DB_HOST}
       WEBHOST_DB_PORT: ${WEBHOST_DB_PORT:-3306}
       WEBHOST_DB_NAME: ${WEBHOST_DB_NAME:-ksf_fa}
@@ -136,6 +159,24 @@ services:
     environment:
       WORKER_PORT: ${STOCKMARKET_WORKER_PORT:-8000}
 
+  gpg-agent:
+    profiles: ["gpg-agent"]
+    container_name: ksf-gpg-agent
+    hostname: ksf-gpg-agent
+    image: docker.io/alpine:3.18
+    ports:
+      - "127.0.0.1:7890:7890"
+    volumes:
+      - ../fa_modules/ksf_GPG/src/Agent/GpgAgentRelay.php:/agent/GpgAgentRelay.php:ro
+      - gpg-agent-log:/var/log
+    networks:
+      - ksf_network
+    command: >
+      sh -c 'apk add --no-cache gnupg php php-cli socat &&
+             gpg-agent --daemon --allow-loopback-pinentry --max-cache-ttl 86400 &&
+             exec php /agent/GpgAgentRelay.php'
+    restart: unless-stopped
+
 networks:
   ksf_network:
     name: ksf_network
@@ -144,15 +185,8 @@ networks:
 volumes:
   ${VOLUME_PREFIX:-ksf_infrastructure}_mariadb_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_fa_data:
+  ${VOLUME_PREFIX:-ksf_infrastructure}_iiapp_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_stockmarket_python_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_backups:
-
-# Environment file to customize
-# Copy .env.example to .env and customize
-# MARIADB_ROOT_PASSWORD=your_root_password
-# MARIADB_DATABASE=ksf_fa
-# MARIADB_USER=ksf_user
-# MARIADB_PASSWORD=your_user_password
-# Optionally set for reverse proxy:
-# KSF_URL=ksf.example.com  # Used for WP site URL instead of auto-detected IP
+  gpg-agent-log:

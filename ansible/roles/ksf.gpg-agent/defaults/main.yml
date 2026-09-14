@@ -1,0 +1,7 @@
+---
+# Default variables for ksf.gpg-agent role
+
+gpg_agent_image: "alpine:3.18"
+gpg_agent_restart: "unless-stopped"
+gpg_agent_recreate: false
+ksf_data_dir: "{{ ansible_env.HOME }}/.local/share/ksf"

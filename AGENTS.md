@@ -1,533 +1,239 @@
-# AGENTS.md - ksf_Infrastructure
-
-## Architecture Overview
-
-**Infrastructure** repository containing init SQL, Docker/Podman configs, Ansible playbooks, and deployment clones for the FA ecosystem.
-
-### Core Principles
-- **IaC**: Infrastructure as Code
-- **DRY**: Don't Repeat Yourself
-- **Versioned**: All infrastructure is version-controlled
-
-## Repository Structure
-
-```
-ksf_Infrastructure/
-├── fa_modules/             # Deployment clones — git pull only, never dev here
-│   ├── ksf_FA_Calendar/
-│   ├── ksf_Calendar/
-│   └── ...
-├── podman/                 # Podman Compose configs
-│   ├── ksf-compose.yaml
-│   ├── .env                # credentials (gitignored)
-│   └── .env.example
-├── ansible/                # Ansible provisioning
-│   ├── ksf-playbook.yaml
-│   └── inventories/
-├── docker/fa-alpine/       # FA Docker image + reference FA source files
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── fa_files/includes/  # FA include reference (session, db, access)
-└── ProjectDocs/
-    ├── Requirements.md
-    └── Architecture.md
-```
-
-## Container Topology
-
-- Runtime: **Podman** (`/usr/bin/podman`) — not Docker
-- `ksf-fa` — Apache + PHP 7.4; FA root at `/var/www/html/`
-- `ksf-mariadb` — MariaDB
-- `ksf-wp` — WordPress
-- FA modules volume: Podman named volume `fa_modules` → `/var/www/html/modules`
-  - Updated by running `git pull` in `fa_modules/<module>/` subdirectories
-- Apache error.log → `/dev/stderr`; view PHP errors with:
-  ```
-  podman logs ksf-fa 2>&1 1>/dev/null
-  ```
-
-## FA Database Credentials
-
-| Field | Value |
-|-------|-------|
-| Host | `ksf-mariadb` |
-| DB | `ksf_fa` |
-| User | `ksf_user` / `ksfuser2024!` |
-| Root | `ksfroot2024!` |
-| Table prefix | `0_` (constant `TB_PREF`) |
-
-## FA DB Layer — Correct API
-
-FA's `$db` is a raw `mysqli` object. **Do not** call `$db->query($sql, $params)`.
-
-```php
-// CORRECT — use FA procedural wrappers
-global $db;
-$escaped = mysqli_real_escape_string($db, $value);  // escape params manually
-$result  = db_query("SELECT * FROM " . TB_PREF . "table WHERE col='" . $escaped . "'");
-$row     = db_fetch_assoc($result);   // returns false (not null) when exhausted
-$count   = db_num_rows($result);
-$id      = db_insert_id();            // handles sql_trail case
-$aff     = db_num_affected_rows();
-
-// db_query() substitutes TB_PREF via str_replace — multi-company safe
-// db_escape() is NOT safe for SQL params — it HTML-decodes/encodes first
-```
-
-## FA Page Security — CRITICAL for Module Pages
-
-FA module pages are standalone PHP files accessed directly as URLs
-(e.g. `/modules/ksf_FA_Calendar/cal.php`) — they are NOT included from `index.php`.
-
-`page_header()` calls `check_page_security($page_security)` which looks up
-`$security_areas[$page_security]`. Extension module security areas (registered
-via `hooks.php`) are only populated by `add_access_extensions()`. Stock FA only
-calls this from `index.php` and `admin/security_roles.php`.
-
-**Every module page entry script must call `add_access_extensions()` after
-`session.inc` and before `page_header()`:**
-
-```php
-$path_to_root = "../..";
-include_once($path_to_root . "/includes/session.inc");
-add_access_extensions();   // ← required on every direct-access module page
-// ... set $page_security, include header.inc, call page_header() ...
-```
-
-Without this call, `can_access_page()` returns false for all extension areas
-and the user sees a security error (~855 bytes blank page).
-
-## KSF Inter-Module Query Hook System
-
-Module entry-point scripts define constants and config that are unavailable
-when hooks.php is loaded (install_hooks() runs early in session.inc, before
-any page script is reached). To solve this, KSF modules implement a
-standardised hook-based query protocol:
-
-### Defined Hook Names
-
-| Hook Name | FA Function | Direction | Purpose |
-|---|---|---|---|
-| `ksf_get_value` | `hook_invoke_first` | Consumer → Provider | Query a single named value |
-| `ksf_get_values` | `hook_invoke_all` | Consumer → All Providers | Query multiple values |
-| `ksf_set_value` | `hook_invoke_all` | Sender → All Modules | Push a value / notify |
-
-### Consumer Pattern (any module page or service)
-
-```php
-// Single value — use a variable (FA passes $data by reference)
-$key = 'calendar.api_version';
-$apiVersion = hook_invoke_first('ksf_get_value', $key);
-if ($apiVersion !== null) {
-    // calendar module is installed and responded
-}
-
-// Multiple values — same rule, no array literals by reference
-$queryKeys = ['calendar.api_version', 'rbac.hooks_version'];
-$all = hook_invoke_all('ksf_get_values', $queryKeys);
-```
-
-### Provider Pattern (in hooks.php)
-
-Use `Ksfraser\Traits\HookQueryProviderTrait` (published in `ksfraser/traits`):
-
-```php
-class hooks_ksf_FA_MyModule extends hooks {
-    use \Ksfraser\Traits\HookQueryProviderTrait;
-
-    protected function _getAdvertisedValues(): array
-    {
-        return array(
-            'my_module.version'  => '1.2.0',
-            'my_module.api_key'  => defined('MY_API_KEY') ? MY_API_KEY : null,
-            'my_module.pref'     => function_exists('get_company_pref')
-                ? get_company_pref('my_pref') : null,
-        );
-    }
-}
-```
-
-The trait provides `ksf_get_value()`, `ksf_get_values()`, and
-`ksf_set_value()` — no need to implement them manually.
-
-### Key Namespacing Convention
-
-Keys MUST be namespaced as `<module>.<value_name>` to prevent collisions
-(e.g. `calendar.api_version`, `rbac.hooks_version`).
-
-## API Response Pattern
-
-- All AJAX/API endpoints must emit JSON through one guarded request wrapper.
-- Convert PHP warnings/notices to exceptions, discard stray buffered output, and return a single JSON error object on failure.
-- Never allow hooks or legacy FA output to write directly to the response body for API routes.
-
-### Full Template
-
-A ready-to-copy hooks.php template with all patterns is at:
-`doc/templates/hooks-template.php`
-
-### Extending for Module-Specific Queries
-
-Beyond the generic `ksf_get_value` pattern, modules may register
-domain-specific hook names for richer queries:
-
-```php
-// In hooks.php
-function calendar_entry_create(&$data, $opts = array()) { ... }
-function calendar_entries_query(&$data, $opts = array())  { ... }
-```
-
-These follow FA's standard convention: `&$data` passed by reference,
-`$opts` for context, return null for "not handled".
-
-### Why Not a Service Locator / DI Container?
-
-- FA has no DI container and adding one is a breaking change.
-- `hook_invoke_first` / `hook_invoke_all` are already available and tested.
-- The pattern works identically in FA 2.4+ without any core modifications.
-- Modules that don't implement a given hook simply don't respond — no crash.
-
----
-
-## KSF CRUD Event Hook System
-
-FA's `hook_invoke_all()` enables any module to react when another module
-creates, updates, or deletes a record. The KSF framework standardises this
-with a two-level dispatch pattern.
-
-### Hook Names
-
-| Hook Name | Dispatch | Purpose |
-|---|---|---|
-| `<module>_<action>_<recordType>` | `hook_invoke_all` | Targeted — only interested modules implement |
-| `ksf_crud_event` | `hook_invoke_all` | Broadcast — all modules receive the full payload |
-
-**Actions**: `created`, `updated`, `deleted`
-
-### Emitter Pattern (service or page script)
-
-Use `Ksfraser\Traits\CrudEventEmitterTrait` in any service class:
-
-```php
-use Ksfraser\Traits\CrudEventEmitterTrait;
-
-class CalendarService {
-    use CrudEventEmitterTrait;
-
-    public function createEntry(array $data): int {
-        $id = $this->repo->insert($data);
-        $this->emitCreated('calendar', 'entry', $id, $data);
-        return $id;
-    }
-}
-```
-
-### Listener Pattern (in hooks.php)
-
-```php
-class hooks_ksf_FA_SomeModule extends hooks {
-
-    // Specific listener — only fires for calendar_created_entry
-    function calendar_created_entry(&$payload, $opts = []) {
-        $entryId = $payload['record_id'];
-        // create a related record in this module
-    }
-
-    // Generic listener — catches all CRUD events from any module
-    function ksf_crud_event(&$payload, $opts = []) {
-        if ($payload['action'] === 'deleted' && $payload['module'] === 'crm') {
-            // clean up related data
-        }
-    }
-}
-```
-
-### Payload Structure
-
-```php
-$payload = [
-    'action'      => 'created',        // string: created|updated|deleted
-    'module'      => 'calendar',       // string: module slug
-    'record_type' => 'entry',          // string: record type slug
-    'record_id'   => 42,               // int|string: primary key
-    'data'        => [...],            // array: additional context
-];
-```
-
-### Comparison: FA Native vs KSF CRUD Events
-
-| Aspect | FA `db_prewrite`/`db_postwrite` | KSF `ksf_crud_event` |
-|--------|----------------------------------|----------------------|
-| Scope | Core FA tables (`0_debtors_master`, etc.) | Any module's custom tables |
-| Module tables | Not fired (bypassed) | Primary use case |
-| Granularity | Table-level | Record-type + action |
-| Trait available | No | `CrudEventEmitterTrait` |
-
-### See Also
-
-- `ksfraser/traits` — `Ksfraser\Traits\CrudEventEmitterTrait`
-- `doc/templates/hooks-template.php` — ready-to-copy hooks.php with CRUD stubs
-
----
-
-## FA install.sql / Schema Convention
-
-**Use `0_` as the table prefix literal in all SQL files.**
-
-`db_import()` (called by `update_databases()`) substitutes `0_` with the actual
-company table prefix via `str_replace("0_", $connection["tbpref"], $line)`.
-**`@TB_PREF@` and `{TB_PREF}` are NOT recognised — they are NOT substituted.**
-
-```sql
--- CORRECT
-CREATE TABLE IF NOT EXISTS `0_ksf_integrity_log` ( ... );
-
--- WRONG — these are silently treated as literal table names
-CREATE TABLE IF NOT EXISTS `@TB_PREF@ksf_integrity_log` ( ... );
-CREATE TABLE IF NOT EXISTS `{TB_PREF}ksf_integrity_log` ( ... );
-```
-
-### `activate_extension()` Table-Check Convention
-
-The second element of each update array is the **bare table name** (without prefix)
-that `check_table()` uses to determine whether the SQL has already been applied:
-
-```php
-function activate_extension($company, $check_only = true)
-{
-    // 'install.sql' => array('<bare_table_name_to_probe>')
-    $updates = array(
-        'install.sql' => array('ksf_integrity_log'),
-    );
-    return $this->update_databases($company, $updates, $check_only);
-}
-```
-
-If `{tbpref}ksf_integrity_log` exists the SQL is skipped; otherwise it runs.
-Pass the **first (or most diagnostic) table** created by the SQL file.
-
----
-
-## FA Module `_init/config` Convention
-
-Every FA module **must** have `_init/config` as a **gzip-compressed** file in
-`Key: Value` format. Plain-text or `ini`-style files (`name=value`) are **not**
-read correctly by FA's `get_control_file()`.
-
-### Canonical format
-
-```
-Name: ksf_FA_<ModuleName>
-Version: <FA_version>-<build>
-Description: KSF FrontAccounting Module
-```
-
-- `<FA_version>` must match the FA version the module targets (e.g. `2.4.3`)
-- `<build>` is a zero-based integer incremented on each module release (`0`, `1`, …)
-- **Current required minimum**: `2.4.3-0`
-
-### How to create / update
-
-```bash
-# Create
-printf 'Name: ksf_FA_MyModule\nVersion: 2.4.3-0\nDescription: KSF FrontAccounting Module\n\n' \
-  | gzip -9 > _init/config
-
-# Verify
-zcat _init/config
-```
-
----
-
-## FA hooks.php — Canonical Class Pattern
-
-Every module **must** have a `hooks_<module_name> extends hooks` class.
-Plain functions (`hook_menu_insert`, `hook_db_install`, etc.) are the old FA 2.3
-style and do **not** support install tabs, security areas, or DB activation.
-
-```php
-<?php
-// Security section — pick a unique number not used by any other module.
-// Core FA uses 1–53. KSF modules start at 114. Increment by 1 for each new module.
-// Current highest: SS_WORKFLOW = 143. Next available: 144.
-define('SS_ksf_FA_MyModule', 144 << 8);
-
-class hooks_ksf_FA_MyModule extends hooks
-{
-    var $module_name = 'ksf_FA_MyModule';  // must match the directory name
-    var $version     = '1.0.0';
-
-    /**
-     * Register application tab(s) in FA's main menu.
-     */
-    function install_tabs($app)
-    {
-        set_ext_domain('modules/ksf_FA_MyModule');
-        $app->add_application(new mymodule_app());
-        set_ext_domain();
-    }
-
-    /**
-     * Declare security areas. Return [ $security_areas, $security_sections ].
-     */
-    function install_access()
-    {
-        $security_sections[SS_ksf_FA_MyModule] = _("My Module");
-        $security_areas['SA_MYMODULE_VIEW'] = array(
-            SS_ksf_FA_MyModule | 1, _("View My Module"),
-        );
-        $security_areas['SA_MYMODULE_MANAGE'] = array(
-            SS_ksf_FA_MyModule | 2, _("Manage My Module"),
-        );
-        return array($security_areas, $security_sections);
-    }
-
-    /**
-     * Run sql/install.sql when the module is activated.
-     * $check_only=true means probe only (used by the extension manager UI).
-     */
-    function activate_extension($company, $check_only = true)
-    {
-        $updates = array(
-            'install.sql' => array('ksf_mymodule_records'),
-        );
-        return $this->update_databases($company, $updates, $check_only);
-    }
-}
-
-class mymodule_app extends application
-{
-    function __construct()
-    {
-        parent::__construct("MyModule", _($this->help_context = "&My Module"));
-
-        $this->add_module(_("My Module"));
-        $this->add_lapp_function(
-            0, _("&Overview"),
-            "modules/ksf_FA_MyModule/pages/overview.php",
-            'SA_MYMODULE_VIEW', MENU_INQUIRY
-        );
-        $this->add_extensions();
-    }
-}
-```
-
-### `add_lapp_function` menu type constants
-
-| Constant | FA Menu Section |
-|---|---|
-| `MENU_MAIN` | Main entry (top of sub-menu) |
-| `MENU_ENTRY` | Data entry form |
-| `MENU_INQUIRY` | Inquiry / report (read-only) |
-| `MENU_REPORT` | Report |
-| `MENU_SETTINGS` | Configuration |
-
-### HookQueryProviderTrait — IMPORTANT WARNING
-
-`\Ksfraser\Traits\HookQueryProviderTrait` requires `vendor/autoload.php` to be
-loaded at hooks-load time. **Do NOT** add `use \Ksfraser\Traits\HookQueryProviderTrait`
-to a `hooks.php` class unless `vendor/autoload.php` is unconditionally included at the
-top of hooks.php **and** the vendor directory is present in the deployed module.
-
-If `vendor/` is absent (clean clone, no `composer install`) the `require_once` will
-fatal-error and crash FA's bootstrap for **all** pages — not just the module's own pages.
-
-Safe alternative: load `vendor/autoload.php` lazily inside the individual hook methods
-that actually need Composer classes, guarded by `file_exists()`:
-
-```php
-function my_hook_method(&$data, $opts = array())
-{
-    $autoload = __DIR__ . '/vendor/autoload.php';
-    if (!file_exists($autoload)) {
-        return null; // Composer deps not installed — skip gracefully
-    }
-    require_once $autoload;
-    // ... use namespaced classes here ...
-}
-```
-
-## CRM Tag Type Constants
-
-The CRM module defines tag types extending FA's `0_tags` + `0_tag_associations` tables. These are managed via `ksf_FA_CRM/pages/crm_tags.php` (not FA's `admin/tags.php`).
-
-| Constant | Value | Entity | DB Table |
-|----------|-------|--------|----------|
-| `TAG_CUSTOMER` | 3 | Customer | `debtors_master` |
-| `TAG_CONTACT` | 4 | Contact | `crm_contacts` |
-| `TAG_OPPORTUNITY` | 5 | Opportunity | `crm_opportunities` |
-| `TAG_LEAD` | 6 | Lead | `crm_leads` |
-| `TAG_COMMUNICATION` | 7 | Communication | `crm_communications` |
-
-Usage in pages (uses FA's existing tag helpers):
-```php
-include_once($path_to_root . "/admin/db/tags_db.inc");
-include_once($path_to_root . "/modules/ksf_FA_CRM/includes/crm_tags.inc");
-
-// Load existing tags
-$tags_result = get_tags_associated_with_record(TAG_CUSTOMER, $entity_id);
-$tagids = array();
-while ($tag = db_fetch($tags_result))
-    $tagids[] = $tag['id'];
-$_POST['entity_tags'] = $tagids;
-
-// Render tag selector
-tag_list_row(_("Tags:"), 'entity_tags', null, TAG_CUSTOMER, true);
-
-// Save
-update_tag_associations(TAG_CUSTOMER, $entity_id, $_POST['entity_tags']);
-```
-
-## CRM Module Split
-
-The monolith `ksf_CRM` has been split into two repositories:
-
-| Repository | Type | Namespace | Contents |
-|-----------|------|-----------|---------|
-| `ksf_CRM` | Business logic | `Ksfraser\CRM\*` | Entities, services, events — no FA deps |
-| `ksf_FA_CRM` | FA adapter | `Ksfraser\FA\CRM\*` | hooks.php, pages/, includes/, sql/ |
-
-## Dependencies
-
-- **FrontAccounting 2.4+**
-- **MariaDB 10.5+**
-- **PHP 7.4** (hard constraint — no PHP 8+ syntax)
-
-## Development Workflow
-
-All development is done in the **devel tree** (`~/Documents/ksf_Infrastructure`).
-
-### Workflow Steps
-1. **Develop** in this repo (feature/fix branches preferred — e.g. `feature/description` or `fix/description`)
-2. **Test**: run repo-appropriate tests
-3. **Lint**: `php -l` on modified PHP files (no syntax errors)
-4. **ALWAYS COMMIT** and **PUSH** branch to GitHub (do not wait for user permission)
-5. **Merge** to `master` when ready
-6. **Push** `master` to GitHub
-
-*No UAT bind point in `~/ksf_Infrastructure/fa_modules/ksf_Infrastructure` — this repo is consumed via Composer path repos or other means.*
-
-## FA Core Patches
-
-This repo carries two copies of patched FA core files:
-
-| Copy | Path | Purpose |
-|------|------|---------|
-| Active deployment | `fa_modules/includes/<file>` | Running UAT instance |
-| Docker reference | `docker/fa-alpine/fa_files/includes/<file>` | Source for container builds |
-
-When deploying ACPT / PROD, **both** copies must be patched identically.
-
-### Patch Inventory
-
-| File | Function | Issue | Fix |
-|------|----------|-------|-----|
-| `includes/packages.inc` | `check_src_ext_version()` | Local modules without `_init/config` get version `'-'`; `strspn('-', digits) = 0` produces empty numeric part, causing string comparison `'' < '2' = true` → false (incompatible) | Return `true` (compatible) when the extracted numeric part is empty — absence of version info is not grounds for rejection |
-
-### Applying When Deploying to New Environments
-
-1. Copy the patched file from `fa_modules/includes/` to the target FA installation's `includes/` directory
-2. For Docker-based deployments, also patch the reference copy in `docker/fa-alpine/fa_files/includes/` before rebuilding the image
-3. Run `php -l includes/<file>` to verify syntax
-4. Test by activating any local KSF module (e.g. ksf_FA_Attachments) in the Install/Activate extensions page
-
+# AGENTS.md — KSF FrontAccounting Architecture Notes
+
+Operational memory for the KSF FA infrastructure codebase.
+
+Files live under `/home/kevin/Documents/.
+
+Git repositories (dev trees) live under /home/kevin/Documents/<modulename>.
+
+Files deployed for Integration Testing live under ksf_Infrastructure/fa_modules/`.
+This doc captures cross-module architecture **decisions** and findings. 
+Read this before designing or refactoring anything that spans modules.
+
+> **Companion doc:** `AGENTS_ARCH.md` (co-located, hardlinked into each repo)
+> holds the shared module **conventions** and cross-repo engineering standards
+> (module layout, coding/testing standards, dev/deploy workflow, inter-module
+> hook protocols, security-area registry, FA DB gotchas). This file holds only
+> decisions.
+
+## ksf_payment_destinations — development tree status
+
+**`~/Documents/FA_PaymentDestinations/` is an ABORTED branch.** Do not develop
+there. That directory is a bind mount (via `~/Documents/ksf_Infrastructure/`)
+that was used for documentation only — it has no `src/`, no `Tests/`, no
+PSR-4 refactoring, and no `@BABOK` traceability annotations. All development
+happened in `~/Documents/ksf_payment_destinations/` which is the primary
+working dev tree.
+
+If you find yourself editing files in `FA_PaymentDestinations/` — STOP and
+switch to `ksf_payment_destinations/` immediately.
+
+## Cross-module facts (at a glance)
+
+- **PHP 7.3 is the cross-module compatibility floor** (current prod runs 7.3 on
+  Fedora 30 until a web container is stood up; the FA container runtime is 7.4).
+  See `AGENTS_ARCH.md` §1.
+- **ksf_FA_Common is now a pure Composer/Packagist package** (v1.0.9), not an FA
+  module. It was gutted to a no-op module shell. Owning modules (RBAC, CRM,
+  Calendar, HRM, Assets) register/unregister their `ksf_contact_types` on
+  activate/deactivate via embedded `sql/retag_contact_types.sql`.
+- **Square**: composer.json `config.platform.php = 7.4.33` pinned (commit
+  `b0ef4da`) for the PHP 7.4 container; lock regeneration is blocked locally on
+  the private `ksfraser/import-staging` package.
+- **FA_ProductAttributes issue #52 (child not detected as read-only)** root cause
+  found: two parallel, un-unified parent-relationship mechanisms. Full write-up
+  is in that repo's `AGENTS.local.md` (migrated out of this file).
+
+## The "generic data-dictionary + query-builder" direction (active design)
+
+The user wants a **generic, transport-agnostic** data-dictionary + SQL query
+builder package (suggested name `ksf_common_db`), NOT another DB class, and NOT
+in `ksf_FA_Common` (whose naming is FA-module-specific). Core requirement:
+
+> An interface defines the SQL query commands. A translation layer maps them to
+> MySQL commands when outside FA, and to FA's procedural `db_*` functions when
+> inside FA, so the correct implementation can be DI'd.
+
+Requirements/goals captured from discussion:
+- Want the **data dictionary + query builder** capabilities (from the legacy
+  `ksf_modules_common` `MODEL`/`fa_MODEL` framework).
+- **No third parallel DB-class abstraction** on top of what exists.
+- Lifecycle (pre/post CRUD) hooks should be able to tie into this system.
+- Package should be usable standalone (tests, CLI, other frameworks), not just
+  inside FA.
+
+### The pattern ALREADY exists / is partially realized (critical to not rebuild)
+1. **RBAC's `DbAdapterInterface` + `FaDbAdapter` (now generalized)** — the exact
+   two-part interface→FA-translation pattern the user described: `fetchAssoc`, `fetchAll`,
+   `executeUpdate`, `lastInsertId`. `FaDbAdapter` substitutes `?` placeholders via
+   `mysqli_real_escape_string` (FA has NO prepared statements) and regex table prefixing.
+   This served as the proof of concept and has been **genericized into the
+   `ksfraser/ksf-common-db` package** (`ksfraser\CommonDb\Contract\DbConnectionInterface` /
+   `ksfraser\CommonDb\Adapter\FaDbAdapter`); the RBAC-local copies were deleted. See that
+   package's `APPENDIX.md` for the migration.
+2. **Legacy `ksf_modules_common` (procedural, older)** — the actual data-dictionary +
+   query-builder the user remembers:
+   - `class.MODEL.php` — `fields_array` + `table_details['tablename']`/`['primarykey']`
+     dictionary; clause builders `buildSelect/From/Where/Join/GroupBy/Having/OrderBy/Limit`
+     assembled by `buildSelectQuery()`; CRUD `select_row`, `select_table`,
+     `insert_table`, `update_table`, `delete_table`, `ReplaceQuery`, `create_table`,
+     `alter_table`; `define_table()` derives tablename from class name + company prefix.
+   - `class.fa_MODEL.php` — FA subclass; sets `company_prefix = TB_PREF`.
+   - `class.eventloop.php` — Observer pattern event dispatcher: `ObserverRegister`,
+     `ObserverNotify` (with `'**'` wildcard = all), subscribers implement `notified()`.
+   - **CAVEAT**: the `eventloop` Observer hooks are wired only for `NOTIFY_INIT_TABLES`
+     → `create_table` and logging. They are NOT wired into `insert_table`/`update_table`/
+     `delete_table` as pre/post CRUD points. The `tell_eventloop(..., "NOTIFY_LOG_*", ...)`
+     calls are largely logging noise.
+3. **Modern ksf_FA_Common traits (OOP, current recommendation for hooks)**
+   - `src/Traits/WorkflowHooksTrait.php` — SuiteCRM-style lifecycle hooks. Register a
+     record type → hook prefix via `registerWorkflowType($recordType, $hookPrefix)`.
+     `fireWorkflowHook()` builds `{prefix}_{hookKey}` and calls `hook_invoke_all(...)`.
+     Hook keys: `before_save`, `after_save`, `before_delete`, `after_delete`, `new`,
+     `edited`, `linked`, `unlinked`. Convenience dispatchers + `fireWorkflowHooks()`
+     runs the full ordered sequence.
+   - `src/Traits/CrudOperationsTrait.php` — `createRecord()` / `deleteRecord()` wrappers
+     that fire pre-save → create → new/edited → post-save (and pre-delete → delete →
+     post-delete), delegating the actual DB work to overridable `*Internal()` methods.
+   - Both live in `ksfraser\FrontAccounting\Common\Traits\` (namespace is FA-flavored).
+   - Adoption is currently minimal: ksf_FA_Common's own unit tests +
+     `ksf_FA_HRM/hooks.php`. Not yet rolled out module-wide.
+
+### Naming observation
+The `registerWorkflowType($recordType, $hookPrefix)` + `{prefix}_{operation}` scheme
+already achieves what the user proposed as "DB class reads `$table_name` to build
+pre/post hook name." `$table_name` should map to a hook **prefix**, not be the literal
+hook name. Per-table hooks use `hook_invoke_all` (module-oriented dispatcher from
+`includes/hooks.inc`) — consistent with FA, zero new infra. If literal table-derived
+names are wanted, add a small table→prefix mapper, don't build a new dispatcher.
+
+### PDO question (decided: YES, PDO is the standalone impl; FA uses its own adapter)
+FA's DB layer is mysqli-based, NOT PDO (`includes/db/connect_db_mysqli.inc` uses
+`mysqli_connect/query/insert_id/errno/fetch_row`; procedural `db_query`/`db_escape`/
+`db_fetch_assoc`/`db_insert_id` wrappers; FA has NO prepared statements).
+
+Design: **make PDO the consumer contract of the interface, not the transport.** Two
+implementations of one `DbConnectionInterface` (PDO-style ops: query, executeWithParams,
+fetchAll, fetchAssoc, insertId, quote, beginTransaction/commit/rollBack):
+- `PdoDbAdapter` (standalone: tests/CLI/other frameworks) — nearly a 1:1 PDO wrapper,
+  real prepared statements, multi-driver.
+- `FaDbAdapter` (inside FA) — maps each method to FA `db_*`/mysqli calls, resolves
+  `?`/`:name` placeholders to escaped literals (FA has no prepared statements), exactly
+  like the FA adapter in `ksf-common-db` (`mysqli_real_escape_string` binding + regex
+  prefixing).
+
+**HARD RULE (user directive): FA modules MUST use native `db_*` calls at runtime.**
+PDO is ONLY for the standalone/portable side (tests, CLI, non-FA embedding). The FA
+adapter is the single, mandatory implementation inside FA and must delegate every
+operation to FA's procedural `db_query`/`db_escape`/`db_fetch_assoc`/`db_insert_id`/
+`db_num_rows`/`db_error` etc. — never a PDO handle, never raw mysqli. PDO is the
+portable *contract shape*, not a runtime transport for FA. (Note: PDO is an optional
+for the FA side: the only reason to depend on it at all is standalone usage; the FA
+adapter itself needs no PDO.)
+
+PDO and FA never meet; they are alternative DI implementations of a shared contract.
+This satisfies the user's requirement: "interface that translates SQL to MySQL outside
+FA but `db_*` inside FA so the right classes can be DI'd." This is realized by the
+`ksf-common-db` package's `DbConnectionInterface` + `FaDbAdapter`/`PdoDbAdapter`.
+
+### ksf_common_db package — implemented
+The `ksfraser/ksf-common-db` package (namespace `ksfraser\CommonDb`) exists at
+`~/Documents/ksf_common_db`, is published on Packagist (`v1.0.0`), and RBAC has
+been migrated onto it. **Repo-specific implementation/packaging/migration/gotcha
+notes live in that repo's `APPENDIX.md`** — see there for structure, consumers'
+dependency convention, the RBAC migration, and the implementation gotchas. This
+section only records the shared design decisions.
+
+Structure (high level):
+- `src/Contract/DbConnectionInterface.php` — PDO-shaped contract: `fetchAssoc`,
+  `fetchAll`, `fetchScalar`, `executeUpdate`, `lastInsertId`, `quote`, `beginTransaction`,
+  `commit`, `rollBack`. Accepts `?` (positional) or `:name` (named) placeholders.
+- `src/Adapter/FaDbAdapter.php` — FA runtime adapter; native `db_*` only.
+- `src/Adapter/PdoDbAdapter.php` — native PDO + prepared statements (NOT for FA runtime).
+- `src/Dictionary/TableDefinition.php` — data dictionary + CREATE/INSERT/UPDATE/DELETE SQL.
+- `src/Query/QueryBuilder.php` — fluent parameterized SELECT builder.
+
+NEXT STEPS (cross-module): port other modules' DAOs onto `DbConnectionInterface` +
+`TableDefinition`/`QueryBuilder`, then wire the pre/post workflow hooks
+(`WorkflowHooksTrait`/`CrudOperationsTrait` from ksf_FA_Common) onto the DAO layer.
+
+## FA core hook system (reference)
+
+`includes/hooks.inc`:
+- `hook_invoke($ext, $method, &$data, $opts)` / `hook_invoke_all($method, &$data, $opts)`
+  / `hook_invoke_first` / `hook_invoke_last` — dispatch to `$Hooks` extension objects.
+- Transaction-level DB hooks exist: `hook_db_prewrite`, `hook_db_postwrite`,
+  `hook_db_prevoid` → `hook_invoke_all('db_prewrite'|'db_postwrite'|'db_prevoid', $cart,
+  $type)`. These are CART/transaction scoped (sales orders, invoices, etc.), NOT
+  per-row CRUD. Per-row CRUD hooks are not provided by core; they come from the
+  traits/adapters above.
+
+## FA_ProductAttributes — module/tree-specific findings moved to its own repo
+
+Anything FA_ProductAttributes-specific that used to live here (issue #52 root
+cause, Generate Combinations semantics, the ksf-fa blank-page/bootstrap logs for
+that module) has been migrated OUT of this shared file into the repo's
+`AGENTS.local.md` (`~/Documents/FA_ProductAttributes/AGENTS.local.md`). Working
+on that module? Read that file. This shared doc keeps only cross-module
+decisions and mechanics.
+
+## FA extension install & activation mechanics (verified 2026-09, cross-module)
+
+How FA 2.4.x actually installs/activates third-party extensions — applies to
+every ksf_* module, and is why "clicks on the Extensions page" silently do
+nothing on a fresh mount. Verified against `fa/2.4.3` source + live UAT box.
+
+**Registries** — two PHP files of `$installed_extensions` arrays:
+- GLOBAL: `company/installed_extensions.php` (what "Local<pkg>" and the
+  repo-index install write to).
+- PER-COMPANY: `company/<id>/installed_extensions.php` — this is what
+  activation (Refresh/Update) actually reads and rewrites.
+Both must be writable by the container's PHP/MySQL UID (see the per-instance
+bind fix in the repo-local notes).
+
+**Registering a local module**: the `Local<pkg>` button
+(`local_extension()` in `admin/inst_module.php`) hardcodes
+`'version' => '-', 'available' => ''` and copies nothing from the module's
+`_init/config`. It includes the module's `hooks.php` and calls
+`install_extension(false)`.
+
+**Activivating** (the "Activated for '<company>'" view, `extset=<id>`):
+- Checkboxes are named `Active<i>` where `$i` is the index in the MERGED +
+  natural-sorted GLOBAL registry list, NOT the company registry. Map each row's
+  checkbox to its package name from the page HTML before POSTing.
+- POST `extset=<id>&Refresh=Update&Active<i>=1` (needs the current `_token`).
+- Gate: `check_src_ext_version()` in `includes/packages.inc` rejects any
+  version with a leading component below the app's (`2.4.3`). **A version of
+  `'-'` ALWAYS fails** → "incompatible with current application version and
+  cannot be activated". Private/local modules therefore MUST carry a numeric
+  version in the registries (manually set what `_init/config` declares, e.g.
+  `'2.4.4'`), the same value the repo index would have supplied.
+- `activate_hooks($pkg, $comp, true)` then calls the module's
+  `hooks_<pkg>::activate_extension($comp, false)`.
+
+**SQL prefix convention in module `sql/` files**: the install engine
+`db_import()` (`admin/db/maintenance_db.inc`) replaces ONLY the literal
+`0_` → `TB_PREF`. It does NOT touch `{TB_PREF}` or `@TB_PREF@` (those only
+work in ksf_FA_Common's own hand-rolled `install_schema()` helper). **All
+extension `sql/*.sql` for the FA install path must use literal `0_` table
+names** — `{TB_PREF}` yields "Table 'ksf_fa.{TB_PREF}x' doesn't exist".
+(FA_ProductAttributes had 4 files with `{TB_PREF}`; fixed to `0_` in commit
+`b9f484e`.)
+
+**Login gotcha** (`includes/session.inc:545`): without `company_login_name`
+in the POST, login always fails with 401 "Incorrect Password" even when the
+user/password is right. Send `company_login_name=<id>` (+ `_token` from the
+login page).
+
+**Cross-module activation hazard — duplicate ksf-fa-common class load**:
+`ksf_FA_Common` ships `src/autoload.php` as the canonical loader for the
+`ksfraser\FrontAccounting\Common\*` namespaces and explicitly must NOT have a
+PSR-4 pointing at a vendored copy. If another module's Composer autoloader
+(vendored `ksfraser/ksf-fa-common`, e.g. FA_ProductAttributes') loads those
+classes FIRST, then activating ksf_FA_Common (constructor `require_once
+src/autoload.php`) redeclares the already-loaded classes → fatal that kills
+the extension page mid-render (page shows footer only, no message, no
+registry write). Symptom: activation "does nothing". On the UAT box the
+workaround was manual activation (schema via raw SQL, `active => true` set
+directly in both registries). Proper fix is order-independent guarded
+loading in `src/autoload.php`.

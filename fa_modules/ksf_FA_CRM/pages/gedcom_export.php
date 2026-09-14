@@ -13,9 +13,9 @@ $page_security = 'SA_CRM_GEDCOM';
 $path_to_root = "../../..";
 
 include_once($path_to_root . "/includes/session.inc");
-add_access_extensions();
 include_once($path_to_root . "/includes/ui.inc");
 include_once($path_to_root . "/includes/data_checks.inc");
+include_once($path_to_root . "/modules/ksf_FA_CRM/vendor/autoload.php");
 include_once($path_to_root . "/modules/ksf_FA_CRM/includes/crm_relationships_db.inc");
 include_once($path_to_root . "/modules/ksf_FA_CRM/includes/gedcom_import.php");
 include_once($path_to_root . "/modules/ksf_FA_CRM/includes/gedcom_export.php");
