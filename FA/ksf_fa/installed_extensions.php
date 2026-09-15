@@ -6,14 +6,14 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 8; // unique id for next installed extension
+$next_extension_id = 7; // unique id for next installed extension
 
 $installed_extensions = array (
   '' => 
   array (
     'package' => 'ksf_FA_ImportStagingProcessing',
     'name' => 'ksf_FA_ImportStagingProcessing',
-    'version' => '-',
+    'version' => '2.4.4',
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_ImportStagingProcessing',
@@ -29,21 +29,21 @@ $installed_extensions = array (
     'path' => 'modules/FA_ProductAttributes',
     'active' => true,
   ),
-  2 => 
+  '2' => 
   array (
-    'package' => 'export_woocommerce',
-    'name' => 'export_woocommerce',
-    'version' => '-',
+    'package' => 'ksf_FA_Woocommerce',
+    'name' => 'ksf_FA_Woocommerce',
+    'version' => '2.4.3-1',
     'available' => '',
     'type' => 'extension',
-    'path' => 'modules/export_woocommerce',
+    'path' => 'modules/ksf_FA_Woocommerce',
     'active' => false,
   ),
   3 => 
   array (
     'package' => 'ksf_Calendar',
     'name' => 'ksf_Calendar',
-    'version' => '-',
+    'version' => '2.4.4',
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_Calendar',
@@ -51,39 +51,29 @@ $installed_extensions = array (
   ),
   4 => 
   array (
-    'package' => 'ksf_FA_Common',
-    'name' => 'ksf_FA_Common',
-    'version' => '2.4.4',
-    'available' => '',
-    'type' => 'extension',
-    'path' => 'modules/ksf_FA_Common',
-    'active' => true,
-  ),
-  5 => 
-  array (
     'package' => 'ksf_FA_CRM',
     'name' => 'ksf_FA_CRM',
-    'version' => '-',
+    'version' => '2.4.3-0',
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_CRM',
     'active' => false,
   ),
-  6 => 
+  5 => 
   array (
     'package' => 'ksf_FA_DataIntegrity',
     'name' => 'ksf_FA_DataIntegrity',
-    'version' => '-',
+    'version' => '2.4.3-1',
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_DataIntegrity',
     'active' => false,
   ),
-  7 => 
+  6 => 
   array (
     'package' => 'ksf_FA_HRM',
     'name' => 'ksf_FA_HRM',
-    'version' => '-',
+    'version' => '2.4.3-1',
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_HRM',
