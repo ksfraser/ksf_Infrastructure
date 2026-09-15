@@ -35,9 +35,10 @@ services:
     volumes:
       - ../fa/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
-      - ../fa/ksf_fa/config/config_db.php:/var/www/html/config_db.php:rw
+      - ../fa/ksf_fa/config_db.php:/var/www/html/config_db.php:rw
       - ../fa/ksf_fa/installed_extensions.php:/var/www/html/installed_extensions.php:rw
       - ../fa/ksf_fa/company/0:/var/www/html/company/0:rw
+      - ../fa/ksf_fa/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network
     depends_on:
@@ -58,9 +59,10 @@ services:
     volumes:
       - ../fa/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
-      - ../fa/ksfii_app/config/config_db.php:/var/www/html/config_db.php:rw
+      - ../fa/ksfii_app/config_db.php:/var/www/html/config_db.php:rw
       - ../fa/ksfii_app/installed_extensions.php:/var/www/html/installed_extensions.php:rw
       - ../fa/ksfii_app/company/0:/var/www/html/company/0:rw
+      - ../fa/ksfii_app/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network
     depends_on:
