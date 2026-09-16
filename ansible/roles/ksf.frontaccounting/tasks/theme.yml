@@ -1,0 +1,20 @@
+---
+# theme.yml - apply theme overlay to per-pod dir
+
+- name: Apply theme overlay (copy selected variant to canonical default.css)
+  become: true
+  copy:
+    src: "{{ fa_pod_dir }}/themes/default/default.css.{{ fa_theme }}"
+    dest: "{{ fa_pod_dir }}/themes/default/default.css"
+    remote_src: true
+    mode: '0644'
+  when: fa_theme != 'default'
+
+- name: Apply default theme (use canonical if no variant selected)
+  become: true
+  copy:
+    src: "{{ fa_source_tree }}/themes/default/default.css"
+    dest: "{{ fa_pod_dir }}/themes/default/default.css"
+    remote_src: true
+    mode: '0644'
+  when: fa_theme == 'default'

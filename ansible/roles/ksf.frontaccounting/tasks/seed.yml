@@ -1,0 +1,50 @@
+---
+# seed.yml - clean DB seed: import FA schema + create admin + staff users
+
+- name: Check FA schema already imported
+  command: >
+    podman exec "{{ fa_mariadb_host }}" mysql
+    -uroot -p"{{ mariadb_root_pass }}" -N -e
+    "SELECT COUNT(*) FROM information_schema.tables
+     WHERE table_schema = '{{ fa_db }}' AND table_name = '0_users';"
+  register: fa_schema_check
+  changed_when: false
+
+- name: Import FA base schema (en_US-new.sql)
+  command: >
+    podman exec -i "{{ fa_mariadb_host }}" mysql
+    -uroot -p"{{ mariadb_root_pass }}" "{{ fa_db }}"
+  args:
+    stdin: "{{ lookup('file', fa_schema_sql) }}"
+  register: schema_import
+  changed_when: false
+  when: fa_schema_check.stdout.strip() == '0'
+
+- name: Set admin user password
+  command: >
+    podman exec "{{ fa_mariadb_host }}" mysql
+    -uroot -p"{{ mariadb_root_pass }}" "{{ fa_db }}" -e
+    "UPDATE 0_users SET password = MD5('{{ fa_admin_pass }}')
+     WHERE user_id = '{{ fa_admin_user }}';"
+  when: fa_admin_pass | length > 0
+  changed_when: false
+
+- name: Add staff user (copy admin defaults + set unique login)
+  command: >
+    podman exec "{{ fa_mariadb_host }}" mysql
+    -uroot -p"{{ mariadb_root_pass }}" "{{ fa_db }}" -e
+    "INSERT IGNORE INTO 0_users (id, user_id, password, real_name, role_id, phone, email, language,
+      date_format, date_sep, tho_sep, dec_sep, theme, page_size, prices_dec, qty_dec,
+      rates_dec, percent_dec, show_gl, show_codes, show_hints, last_visit_date, query_size,
+      graphic_links, pos, print_profile, rep_popup, sticky_doc_date, startup_tab,
+      transaction_days, save_report_selections, use_date_picker, def_print_destination,
+      def_print_orientation, inactive)
+    SELECT NULL, '{{ fa_staff_user }}', MD5('{{ fa_staff_pass }}'), 'Kevin Fraser', role_id,
+      phone, '{{ fa_staff_email }}', language, date_format, date_sep, tho_sep, dec_sep,
+      theme, page_size, prices_dec, qty_dec, rates_dec, percent_dec, show_gl, show_codes,
+      show_hints, last_visit_date, query_size, graphic_links, pos, print_profile, rep_popup,
+      sticky_doc_date, startup_tab, transaction_days, save_report_selections, use_date_picker,
+      def_print_destination, def_print_orientation, inactive
+    FROM 0_users WHERE user_id = '{{ fa_admin_user }}';"
+  when: fa_staff_pass | length > 0
+  changed_when: false

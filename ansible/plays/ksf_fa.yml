@@ -1,0 +1,12 @@
+---
+# ksf-fa.yml - FA-only pod: MySQL + FA (no WordPress)
+# USAGE: ansible-playbook -i inventories/local ksf-fa.yaml \
+#          -e pod_name=ksf_fa
+- import_playbook: mysql.yml
+
+- name: "FrontAccounting for {{ pod_name | default('ksf_fa') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.frontaccounting
+    - role: ksfii_app

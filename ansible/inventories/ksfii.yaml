@@ -1,0 +1,32 @@
+# KSF Infrastructure - portable pod inventory
+# Usage: ansible-playbook -i inventories/ksfii.yaml ksfii-app.yaml
+#
+# Credentials come from group_vars/all/vault.yml (ansible-vault encrypted).
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+  vars:
+    pod_name: ksfii_app
+    # Ports (FA 8090, WP 8091, phpMyAdmin 8092, MariaDB host 3307)
+    fa_port: 8090
+    wp_port: 8091
+    pma_port: 8092
+    mariadb_host_port: 3307
+    # Optional workers stay off for ksfii scope
+    enable_ocr_worker: false
+    enable_tts_worker: false
+    enable_stt_worker: false
+    # Extra databases created on the pod's MariaDB
+    mariadb_additional_databases:
+      - ksf_wp
+    # FA modules to register + activate for this pod
+    fa_modules:
+      - ksf_FA_RBAC
+      - ksf_FA_HRM
+      - ksf_FA_Calendar
+    ksfii_modules_active:
+      - ksf_FA_RBAC
+      - ksf_FA_HRM
+      - ksf_FA_Calendar

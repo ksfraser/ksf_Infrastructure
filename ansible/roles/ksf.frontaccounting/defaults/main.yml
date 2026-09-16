@@ -1,0 +1,38 @@
+---
+# ksf.frontaccounting - AGENTS-IMAGE model (FA never baked; per-pod overlay)
+pod_name: ksfii_app
+fa_container_name: "{{ pod_name }}-fa"
+fa_hostname: "{{ fa_container_name }}"
+fa_image: localhost/ksf-fa:php7.4
+fa_network: "{{ pod_name }}"
+fa_port: 8090
+fa_container_port: 80
+
+# FA source tree (kept apart from per-pod dirs; RO in container)
+fa_version: 2.4.3
+ksf_infra_root: "/home/kevin/Documents/ksf_Infrastructure"
+fa_source_tree: "{{ ksf_infra_root }}/FA/{{ fa_version }}"
+fa_modules_dir: "{{ ksf_infra_root }}/fa_modules"
+fa_pod_dir: "{{ ksf_infra_root }}/FA/{{ pod_name }}"
+fa_entrypoint_dir: "{{ ksf_infra_root }}/containerfiles/FA"
+fa_schema_sql: "{{ fa_source_tree }}/sql/en_US-new.sql"
+fa_items_patch: ""
+
+# DB (must match ksf.mariadb defaults / vault)
+fa_mariadb_host: "{{ pod_name }}-mariadb"
+fa_db: "{{ mariadb_db | default('ksf_fa') }}"
+fa_db_user: "{{ mariadb_user | default('ksf_user') }}"
+fa_db_pass: "{{ vault_mariadb_pass }}"
+
+# Seed users (from vault: ksf_admin_user/pass, ksf_staff_user/pass)
+fa_admin_user: "{{ ksf_admin_user | default('admin') }}"
+fa_admin_pass: "{{ ksf_admin_pass }}"
+fa_staff_user: "{{ ksf_staff_user | default('kevin') }}"
+fa_staff_pass: "{{ ksf_staff_pass }}"
+fa_staff_email: "{{ ksf_staff_email | default('kevin@ksfraser.ca') }}"
+
+# Theme overlay (default/red/yellow -> copied onto canonical default.css)
+fa_theme: default
+
+# Seed the DB with clean FA schema (en_US-new.sql) + default users on first run
+fa_seed_db: true

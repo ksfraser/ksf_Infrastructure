@@ -1,0 +1,13 @@
+---
+# ksf.phpmyadmin - phpMyAdmin for the pod's MariaDB
+pod_name: ksfii_app
+phpmyadmin_enabled: true
+phpmyadmin_image: docker.io/phpmyadmin:latest
+phpmyadmin_container_name: "{{ pod_name }}-phpmyadmin"
+phpmyadmin_hostname: "{{ phpmyadmin_container_name }}"
+phpmyadmin_port: 8092
+phpmyadmin_container_port: 80
+phpmyadmin_host: "{{ pod_name }}-mariadb"
+phpmyadmin_port_db: 3306
+phpmyadmin_user: ""
+phpmyadmin_password: ""

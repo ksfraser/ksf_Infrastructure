@@ -1,0 +1,11 @@
+---
+# ksfii-app.yaml - bootstrap the ksfii_app pod (MySQL + FA + WP)
+# USAGE: ansible-playbook -i inventories/local ksfii-app.yaml
+#   optional: -e pod_name=ksfii_app  (default)
+- name: "Provision pod network for {{ pod_name | default('ksfii_app') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.pod
+
+- import_playbook: plays/ksfii_app.yml

@@ -1,0 +1,17 @@
+---
+# ksf.mariadb - per-pod MariaDB container (clean-seed capable)
+pod_name: ksfii_app
+mariadb_container_name: "{{ pod_name }}-mariadb"
+mariadb_hostname: "{{ mariadb_container_name }}"
+mariadb_image: docker.io/mariadb:10.11
+mariadb_data_volume: "{{ pod_name }}_mariadb_data"
+mariadb_host_port: 3307
+mariadb_container_port: 3306
+mariadb_db: ksf_fa
+mariadb_user: ksf_user
+# Passwords MUST come from vault (vault_mariadb_root_pass / vault_mariadb_pass)
+mariadb_root_pass: "{{ vault_mariadb_root_pass }}"
+mariadb_pass: "{{ vault_mariadb_pass }}"
+mariadb_extra_options: "--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+# Extra databases created after container starts (e.g. ksf_wp for the WP pod)
+mariadb_additional_databases: []

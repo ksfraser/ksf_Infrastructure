@@ -1,0 +1,65 @@
+---
+# ksf.frontaccounting tasks (AGENTS-IMAGE: version tarball + per-pod overlay)
+# Pod/network provisioning comes from the calling play (ksf.pod), not here.
+
+- name: Ensure FA image exists
+  command: podman image exists "{{ fa_image }}"
+  register: img_exists
+  failed_when: false
+  changed_when: false
+
+- name: Build FA runtime image from Podfile
+  command: >
+    podman build -t "{{ fa_image }}"
+    -f "{{ fa_entrypoint_dir }}/Podfile" "{{ fa_entrypoint_dir }}"
+  when: img_exists.rc != 0
+
+- name: Check source tree has FA install marker
+  stat:
+    path: "{{ fa_source_tree }}/index.php"
+  register: fa_tree_index
+
+- name: Unpack FA version tarball if source tree empty
+  become: true
+  unarchive:
+    src: "{{ fa_source_tree }}.tgz"
+    dest: "{{ fa_source_tree | dirname }}"
+    remote_src: false
+  when: fa_tree_index.stat is defined and not fa_tree_index.stat.exists
+
+- name: Check config.php presence in FA tree
+  stat:
+    path: "{{ fa_source_tree }}/config.php"
+  register: fa_config_php
+
+- name: Ensure config.php exists in FA tree (copy from config.default.php)
+  become: true
+  copy:
+    src: "{{ fa_source_tree }}/config.default.php"
+    dest: "{{ fa_source_tree }}/config.php"
+    remote_src: true
+    mode: '0644'
+  when: not fa_config_php.stat.exists
+
+- name: Apply version-anchored items.php patch if provided
+  become: true
+  shell: |
+    set -e
+    cp "{{ fa_source_tree }}/inventory/manage/items.php" \
+       "{{ fa_source_tree }}/inventory/manage/items.php.orig"
+    patch -p1 --directory="{{ fa_source_tree }}" < "{{ fa_items_patch }}"
+    rm -f "{{ fa_source_tree }}/inventory/manage/items.php.orig"
+  when: fa_items_patch | length > 0
+
+- name: Scaffold per-pod directory
+  include_tasks: scaffold.yml
+
+- name: Seed database (clean)
+  include_tasks: seed.yml
+  when: fa_seed_db is defined and fa_seed_db | bool
+
+- name: Apply theme overlay
+  include_tasks: theme.yml
+
+- name: Run FA container
+  include_tasks: container.yml

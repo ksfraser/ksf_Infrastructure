@@ -1,0 +1,72 @@
+---
+# seed.yml - WP core install + base users + plugins via wp-cli (one-shot)
+# wp-cli mounts the same overlay paths as the runtime container.
+
+- name: Check WP is installed (wp core is-installed)
+  command: >
+    podman run --rm --network "{{ wp_network }}"
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    "{{ wp_cli_image }}" wp core is-installed --path=/var/www/html
+  register: wp_core_installed
+  failed_when: false
+  changed_when: false
+
+- name: Install WordPress core
+  command: >
+    podman run --rm --network "{{ wp_network }}"
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    "{{ wp_cli_image }}" wp core install --path=/var/www/html
+    --url="{{ wp_site_url }}"
+    --title="{{ wp_site_title }}"
+    --admin_user="{{ wp_admin_user }}"
+    --admin_password="{{ wp_admin_pass }}"
+    --admin_email="{{ wp_admin_email }}"
+    --skip-email
+  when: wp_core_installed.rc != 0
+
+- name: Add staff user
+  command: >
+    podman run --rm --network "{{ wp_network }}"
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
+    "{{ wp_cli_image }}" wp user create --path=/var/www/html
+    "{{ wp_staff_user }}" "{{ wp_staff_email }}"
+    --role=administrator --user_pass="{{ wp_staff_pass }}"
+  register: wp_staff_user_result
+  failed_when: false
+  changed_when: false
+
+- name: Install and activate plugins
+  command: >
+    podman run --rm --network "{{ wp_network }}"
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
+    "{{ wp_cli_image }}" wp plugin install --path=/var/www/html
+    "{{ item.name }}" --activate
+  loop: "{{ wp_plugins }}"
+  when: wp_plugins | length > 0
+  changed_when: false

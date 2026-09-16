@@ -1,0 +1,10 @@
+---
+# ksf.pod - per-pod podman network/pod provisioner
+# Default model: named bridge network matching pod_name, standalone containers
+# on it (avoids shared-netns port collisions; same as proven start-fa.sh model).
+# Set use_pod: true to instead create a real podman pod (containers join via --pod).
+pod_name: ksfii_app
+pod_state: present
+use_pod: false
+pod_network_state: present
+pod_ports: []

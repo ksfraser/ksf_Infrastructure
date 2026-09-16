@@ -1,0 +1,42 @@
+---
+# ksfii_app - register/activate ksf modules in the pod's FA registries + SQL
+
+- name: Determine active module list
+  set_fact:
+    ksfii_registry_active: "{{ ksfii_modules_active | default(ksfii_modules) }}"
+
+- name: Resolve install.sql paths for active modules
+  set_fact:
+    ksfii_registry_active_sql: "{{ ksfii_registry_active_sql | default([]) + [ (fa_modules_dir + '/' + item + '/sql/install.sql') | realpath ] }}"
+  loop: "{{ ksfii_registry_active }}"
+  when: (fa_modules_dir + '/' + item + '/sql/install.sql') is file
+
+- name: Template per-company installed_extensions.php (active set)
+  become: true
+  template:
+    src: installed_extensions.php.j2
+    dest: "{{ per_company_ext_file }}"
+    mode: '0666'
+    owner: root
+  vars:
+    is_global: false
+
+- name: Template global installed_extensions.php (active set)
+  become: true
+  template:
+    src: installed_extensions.php.j2
+    dest: "{{ fa_pod_dir }}/installed_extensions.php"
+    mode: '0666'
+    owner: root
+  vars:
+    is_global: true
+
+- name: Apply module SQL (install.sql per active module)
+  command: >
+    podman exec -i "{{ pod_name }}-mariadb" mysql
+    -uroot -p"{{ mariadb_root_pass }}" "{{ fa_db }}"
+  args:
+    stdin: "{{ lookup('file', item) }}"
+  loop: "{{ ksfii_registry_active_sql }}"
+  ignore_errors: true
+  when: ksfii_registry_active_sql | length > 0

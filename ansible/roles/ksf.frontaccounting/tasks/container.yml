@@ -1,0 +1,51 @@
+---
+# container.yml - run the FA container (AGENTS-IMAGE mount set)
+
+- name: Check FA container exists
+  command: podman container exists "{{ fa_container_name }}"
+  register: fa_cont_exists
+  failed_when: false
+  changed_when: false
+
+- name: Remove stale FA container
+  command: podman rm -f "{{ fa_container_name }}"
+  when: fa_cont_exists.rc == 0
+  ignore_errors: true
+  changed_when: false
+
+- name: Run FA container (AGENTS-IMAGE mount set)
+  command: >
+    podman run -d
+    --name "{{ fa_container_name }}"
+    --hostname "{{ fa_hostname }}"
+    --network "{{ fa_network }}"
+    -p "{{ fa_port }}:{{ fa_container_port }}"
+    -v "{{ fa_source_tree }}:/var/www/html:ro,Z"
+    -v "{{ fa_modules_dir }}:/var/www/html/modules:rw,Z"
+    -v "{{ fa_pod_dir }}/config_db.php:/var/www/html/config_db.php:rw,Z"
+    -v "{{ fa_pod_dir }}/installed_extensions.php:/var/www/html/installed_extensions.php:rw,Z"
+    -v "{{ fa_pod_dir }}/company:/var/www/html/company:rw,Z"
+    -v "{{ fa_pod_dir }}/themes/default/default.css:/var/www/html/themes/default/default.css:rw,Z"
+    "{{ fa_image }}" apache2-foreground
+
+- name: Wait for FA container to be running
+  command: >
+    podman ps --filter "name={{ fa_container_name }}" --filter status=running
+    --format "{% raw %}{{.Names}}{% endraw %}"
+  register: fa_run_check
+  retries: 10
+  delay: 3
+  until: fa_run_check.stdout == fa_container_name
+  changed_when: false
+
+- name: Wait for FA HTTP endpoint
+  uri:
+    url: "http://127.0.0.1:{{ fa_port }}/"
+    method: GET
+    status_code: 200,302
+  register: fa_http_check
+  retries: 10
+  delay: 10
+  until: fa_http_check.status in [200, 302]
+  ignore_errors: true
+  when: fa_seed_db | bool

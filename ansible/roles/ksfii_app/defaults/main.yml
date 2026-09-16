@@ -1,0 +1,26 @@
+---
+# ksfii_app - deploy ksf modules into FA (fa_modules) + activate via registries
+pod_name: ksfii_app
+fa_container_name: "{{ pod_name }}-fa"
+ksf_infra_root: "/home/kevin/Documents/ksf_Infrastructure"
+fa_modules_dir: "{{ ksf_infra_root }}/fa_modules"
+fa_pod_dir: "{{ ksf_infra_root }}/FA/{{ pod_name }}"
+per_company_ext_file: "{{ fa_pod_dir }}/company/0/installed_extensions.php"
+
+# Modules to REGISTER+ACTIVATE (subset of fa_modules we want live here)
+ksfii_modules:
+  - ksf_FA_RBAC
+  - ksf_FA_HRM
+  - ksf_FA_Calendar
+
+# Modules installed but left unactivated (placeholder)
+ksfii_modules_inactive: []
+
+# Version every entry in the registries (check_src_ext_version gate needs it);
+# the module's own _init/config declares the real version.
+ksfii_ext_version: "2.4.4"
+
+# MariaDB connection (override per pod; direct vault refs so this role works
+# standalone without ksf.mariadb role vars leaking across plays)
+fa_db: "{{ mariadb_db | default('ksf_fa') }}"
+mariadb_root_pass: "{{ vault_mariadb_root_pass }}"

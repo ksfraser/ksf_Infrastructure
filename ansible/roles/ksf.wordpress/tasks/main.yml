@@ -1,0 +1,70 @@
+---
+# main.yml - WordPress container with FA-style per-pod overlay mounts
+
+- name: Check WP data volume exists
+  command: podman volume exists "{{ wp_data_volume }}"
+  register: vol_exists
+  failed_when: false
+  changed_when: false
+
+- name: Create WP data volume
+  command: podman volume create "{{ wp_data_volume }}"
+  when: vol_exists.rc != 0
+
+- name: Ensure WP image is present
+  command: podman image exists "{{ wp_image }}"
+  register: img_exists
+  failed_when: false
+  changed_when: false
+
+- name: Pull WP image
+  command: podman pull "{{ wp_image }}"
+  when: img_exists.rc != 0
+
+- name: Scaffold per-pod overlay
+  include_tasks: scaffold.yml
+
+- name: Check WP container exists
+  command: podman container exists "{{ wp_container_name }}"
+  register: cont_exists
+  failed_when: false
+  changed_when: false
+
+- name: Remove stale WP container
+  command: podman rm -f "{{ wp_container_name }}"
+  when: cont_exists.rc == 0
+  ignore_errors: true
+  changed_when: false
+
+- name: Run WP container (FA-style overlay mounts)
+  command: >
+    podman run -d --name "{{ wp_container_name }}"
+    --hostname "{{ wp_hostname }}"
+    --network "{{ wp_network }}"
+    -p "{{ wp_port }}:{{ wp_container_port }}"
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    -e WORDPRESS_TABLE_PREFIX="{{ wp_table_prefix }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:rw,Z"
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    "{{ wp_image }}"
+
+- name: Wait for WP HTTP endpoint
+  uri:
+    url: "http://127.0.0.1:{{ wp_port }}/"
+    method: GET
+    status_code: 200,302,403
+  register: wp_http_check
+  retries: 24
+  delay: 5
+  until: wp_http_check.status in [200, 302, 403]
+  ignore_errors: true
+
+- name: Seed WordPress (core install + users + plugins)
+  include_tasks: seed.yml
+  when: wp_seed_db | default(false) | bool

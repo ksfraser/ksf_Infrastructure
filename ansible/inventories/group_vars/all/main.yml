@@ -1,0 +1,16 @@
+---
+# group_vars/all/main.yml - non-secret shared defaults for ksf pod roles.
+# Secrets stay in group_vars/all/vault.yml (ansible-vault encrypted).
+# These apply to every play, so roles resolve correctly even across
+# import_playbook boundaries where role defaults do not leak.
+
+# MariaDB container/connection defaults (ksf.mariadb)
+mariadb_container_name: "{{ pod_name }}-mariadb"
+mariadb_db: ksf_fa
+mariadb_user: ksf_user
+
+# FA per-pod defaults (ksf.frontaccounting)
+fa_container_name: "{{ pod_name }}-fa"
+
+# WordPress per-pod defaults (ksf.wordpress)
+wp_container_name: "{{ pod_name }}-wordpress"

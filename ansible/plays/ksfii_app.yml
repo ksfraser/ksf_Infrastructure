@@ -1,0 +1,18 @@
+---
+# ksfii-app.yml - full ksfii_app pod: MySQL + FA + WP
+# USAGE: ansible-playbook -i inventories/local ksfii-app.yaml \
+#          -e pod_name=ksfii_app
+- import_playbook: mysql.yml
+
+- name: "FA for {{ pod_name | default('ksfii_app') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.frontaccounting
+    - role: ksfii_app
+
+- name: "WordPress for {{ pod_name | default('ksfii_app') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.wordpress

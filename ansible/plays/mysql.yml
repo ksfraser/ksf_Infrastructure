@@ -1,0 +1,10 @@
+---
+# mysql.yml - MySQL stack (MariaDB + phpMyAdmin) for the pod
+# Composable: the bigger plays (ksfii_app, ksf_fa) import this via
+# import_playbook. Expects the pod network (ksf.pod) to already exist.
+- name: "MySQL stack for {{ pod_name | default('ksfii_app') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.mariadb
+    - role: ksf.phpmyadmin

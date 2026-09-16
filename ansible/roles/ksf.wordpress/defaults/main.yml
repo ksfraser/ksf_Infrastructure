@@ -1,0 +1,60 @@
+---
+# ksf.wordpress - per-pod WordPress container (FA-style per-pod overlay mounts)
+pod_name: ksfii_app
+wp_container_name: "{{ pod_name }}-wordpress"
+wp_hostname: "{{ wp_container_name }}"
+wp_network: "{{ pod_name }}"
+wp_image: docker.io/wordpress:6.7-php8.2-apache
+wp_cli_image: docker.io/wordpress:cli-php8.2
+wp_port: 8091
+wp_container_port: 80
+wp_data_volume: "{{ pod_name }}_wp_data"
+wp_mariadb_host: "{{ pod_name }}-mariadb"
+wp_db: ksf_wp
+wp_db_user: "{{ mariadb_user | default('ksf_user') }}"
+wp_db_pass: "{{ vault_mariadb_pass }}"
+wp_table_prefix: wp_
+
+# Per-pod overlay (mirror of the FA/<pod> pattern; the data volume holds the
+# WP core + base wp-content, these mount RW over the top)
+ksf_infra_root: "/home/kevin/Documents/ksf_Infrastructure"
+wp_pod_dir: "{{ ksf_infra_root }}/WT/{{ pod_name }}"
+wp_config_file: "{{ wp_pod_dir }}/wp-config.php"
+wp_plugins_dir: "{{ wp_pod_dir }}/plugins"
+wp_uploads_dir: "{{ wp_pod_dir }}/uploads"
+wp_muplugins_dir: "{{ wp_pod_dir }}/mu-plugins"
+
+# Site identity / URLs (overrides are handy in debug; defaults auto-derive)
+wp_site_url: "http://localhost:{{ wp_port }}"
+wp_site_title: "{{ pod_name | replace('_', ' ') | title }}"
+wp_home: ""
+
+# Debug / troubleshooting switches (written into wp-config.php)
+wp_debug: false
+wp_debug_log: false
+wp_debug_display: false
+wp_error_reporting: ""
+wp_savequeries: false
+
+# Salts - override via vault (vault_wp_salts) in real envs; default is thin
+wp_salt: "{% if vault_wp_salts is defined %}{{ vault_wp_salts }}{% else %}ksf-{{ pod_name }}-salt{% endif %}"
+
+# Seed users
+wp_admin_user: "{{ ksf_admin_user | default('admin') }}"
+wp_admin_pass: "{{ ksf_admin_pass }}"
+wp_admin_email: "admin@ksfraser.local"
+wp_staff_user: "{{ ksf_staff_user | default('kevin') }}"
+wp_staff_pass: "{{ ksf_staff_pass }}"
+wp_staff_email: "{{ ksf_staff_email | default('kevin@ksfraser.ca') }}"
+
+# Plugins to install via wp-cli (tagged: ecommerce, crm, forms, etc.)
+wp_plugins: []
+  # - name: woocommerce
+  #   tags: [ecommerce]
+  # - name: jetpack-crm
+  #   tags: [crm]
+  # - name: contact-form-7
+  #   tags: [forms]
+
+# Seed WP core + users on the one-shot db
+wp_seed_db: true

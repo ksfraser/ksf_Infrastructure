@@ -1,0 +1,31 @@
+---
+# ksf.pod tasks - ensure the per-pod network (and optionally a real pod)
+
+- name: Check podman network exists
+  command: podman network exists "{{ pod_name }}"
+  register: net_exists
+  failed_when: false
+  changed_when: false
+
+- name: Create per-pod podman network
+  command: podman network create "{{ pod_name }}"
+  when: pod_network_state == 'present' and net_exists.rc != 0
+
+- name: Remove per-pod podman network
+  command: podman network rm "{{ pod_name }}"
+  when: pod_network_state == 'absent' and net_exists.rc == 0
+
+- name: Check pod exists
+  command: podman pod exists "{{ pod_name }}"
+  register: pod_exists
+  failed_when: false
+  changed_when: false
+  when: use_pod | bool
+
+- name: Create pod
+  command: podman pod create --name "{{ pod_name }}" --network "{{ pod_name }}" --replace
+  when: use_pod | bool and pod_state == 'present' and pod_exists.rc != 0
+
+- name: Remove pod
+  command: podman pod rm -f "{{ pod_name }}"
+  when: use_pod | bool and pod_state == 'absent' and pod_exists.rc == 0

@@ -1,0 +1,10 @@
+---
+# ksf-fa.yaml - bootstrap the ksf_fa pod (MySQL + FA only, no WordPress)
+# USAGE: ansible-playbook -i inventories/local ksf-fa.yaml -e pod_name=ksf_fa
+- name: "Provision pod network for {{ pod_name | default('ksf_fa') }}"
+  hosts: localhost
+  become: true
+  roles:
+    - role: ksf.pod
+
+- import_playbook: plays/ksf_fa.yml

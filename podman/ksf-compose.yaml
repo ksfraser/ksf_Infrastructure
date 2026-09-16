@@ -22,10 +22,10 @@ services:
       retries: 5
 
   frontaccounting:
-    image: localhost/ksf-fa:latest
+    image: localhost/ksf-fa:php7.4
     container_name: ksf-fa
     hostname: ksf-fa
-    command: --http
+    command: apache2-foreground
     environment:
       DB_DSN: mysql:host=ksf-mariadb;dbname=ksf_fa;charset=utf8
       DB_USER: ${MARIADB_USER:-ksf_user}
@@ -33,11 +33,11 @@ services:
     ports:
       - "${FA_PORT:-8080}:80"
     volumes:
-      - ../fa/2.4.3:/var/www/html:ro
+      - ../FA/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
       - ../fa/ksf_fa/config_db.php:/var/www/html/config_db.php:rw
       - ../fa/ksf_fa/installed_extensions.php:/var/www/html/installed_extensions.php:rw
-      - ../fa/ksf_fa/company/0:/var/www/html/company/0:rw
+      - ../fa/ksf_fa/company:/var/www/html/company:rw
       - ../fa/ksf_fa/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network
@@ -49,7 +49,7 @@ services:
     image: localhost/ksf-iiapp:latest
     container_name: ksfii-app
     hostname: ksfii-app
-    command: --http
+    command: apache2ctl -D FOREGROUND
     environment:
       DB_DSN: mysql:host=ksf-mariadb;dbname=ksf_fa;charset=utf8
       DB_USER: ${MARIADB_USER:-ksf_user}
@@ -57,11 +57,11 @@ services:
     ports:
       - "${KSFII_FA_PORT:-8090}:80"
     volumes:
-      - ../fa/2.4.3:/var/www/html:ro
+      - ../FA/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
       - ../fa/ksfii_app/config_db.php:/var/www/html/config_db.php:rw
       - ../fa/ksfii_app/installed_extensions.php:/var/www/html/installed_extensions.php:rw
-      - ../fa/ksfii_app/company/0:/var/www/html/company/0:rw
+      - ../fa/ksfii_app/company:/var/www/html/company:rw
       - ../fa/ksfii_app/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network

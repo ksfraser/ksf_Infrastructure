@@ -1,0 +1,20 @@
+<?php
+{% if is_global %}
+$next_extension_id = {{ ksfii_registry_active | length + 1 }};
+{% endif %}
+
+$installed_extensions = array (
+{% for m in ksfii_registry_active %}
+  {{ loop.index }} => 
+  array (
+    'package' => '{{ m }}',
+    'name' => '{{ m }}',
+    'version' => '{{ ksfii_ext_version }}',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/{{ m }}',
+    'active' => true,
+  ),
+{% endfor %}
+);
+?>

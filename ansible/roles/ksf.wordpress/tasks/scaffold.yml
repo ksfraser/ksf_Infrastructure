@@ -1,0 +1,46 @@
+---
+# scaffold.yml - per-pod overlay dirs + wp-config.php
+
+# The wp-data named volume holds the WP core + default wp-content at
+# /var/www/html. Per-pod bind mounts are overlaid RW on the individual
+# subpaths (wp-content/plugins, wp-content/uploads, wp-content/mu-plugins,
+# wp-config.php) — the exact AGENTS-IMAGE pattern used for FA.
+
+- name: Create per-pod WP overlay directory
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0775'
+  loop:
+    - "{{ wp_pod_dir }}"
+    - "{{ wp_pod_dir }}/plugins"
+    - "{{ wp_pod_dir }}/uploads"
+    - "{{ wp_pod_dir }}/mu-plugins"
+
+- name: Template per-pod wp-config.php
+  become: true
+  template:
+    src: wp-config.php.j2
+    dest: "{{ wp_config_file }}"
+    mode: '0664'
+    owner: root
+
+# www-data (uid 33/82) inside the containers must write these overlays; host
+# owner is root under rootless podman, so open them up like the FA entrypoint.
+- name: Make overlay dirs + wp-config writable by container uid
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 'a+rwx'
+  loop:
+    - "{{ wp_plugins_dir }}"
+    - "{{ wp_uploads_dir }}"
+    - "{{ wp_muplugins_dir }}"
+
+- name: Make wp-config.php world-readable
+  become: true
+  file:
+    path: "{{ wp_config_file }}"
+    mode: '0664'

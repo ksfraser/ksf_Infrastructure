@@ -26,6 +26,12 @@ RUN a2enmod rewrite
 # KSF PHP settings (memory, uploads, session hardening)
 COPY php.ini /usr/local/etc/php/conf.d/zz-ksf.ini
 
+# KSF runtime permission fixer (idempotent; runs on every container start).
+# Fixes bind-mounted writable paths for www-data under rootless podman.
+COPY entrypoint.sh /usr/local/bin/ksf-entrypoint.sh
+RUN chmod +x /usr/local/bin/ksf-entrypoint.sh
+
 EXPOSE 80
 
+ENTRYPOINT ["/usr/local/bin/ksf-entrypoint.sh"]
 CMD ["apache2-foreground"]

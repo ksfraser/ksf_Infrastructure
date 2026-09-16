@@ -1,0 +1,93 @@
+---
+# scaffold - create per-pod directory structure
+
+- name: Create per-pod base directory
+  become: true
+  file:
+    path: "{{ fa_pod_dir }}"
+    state: directory
+    mode: '0775'
+
+- name: Create per-pod company/0 subdirectories
+  become: true
+  file:
+    path: "{{ fa_pod_dir }}/{{ item }}"
+    state: directory
+    mode: '0775'
+  loop:
+    - company
+    - company/0
+    - company/0/backup
+    - company/0/images
+    - company/0/js_cache
+    - company/0/pdf_files
+    - company/0/reporting
+    - themes
+    - themes/default
+
+- name: Create company index.php
+  become: true
+  copy:
+    content: "<?php\nheader(\"Location: ../index.php\");\n"
+    dest: "{{ fa_pod_dir }}/company/index.php"
+    mode: '0644'
+
+- name: Create company/0 index.php
+  become: true
+  copy:
+    content: "<?php\nheader(\"Location: ../index.php\");\n"
+    dest: "{{ fa_pod_dir }}/company/0/index.php"
+    mode: '0644'
+
+- name: Template config_db.php for this pod
+  become: true
+  template:
+    src: config_db.php.j2
+    dest: "{{ fa_pod_dir }}/config_db.php"
+    mode: '0666'
+    owner: root
+
+- name: Template global installed_extensions.php (clean)
+  become: true
+  template:
+    src: installed_extensions.php.j2
+    dest: "{{ fa_pod_dir }}/installed_extensions.php"
+    mode: '0666'
+    owner: root
+
+- name: Create per-company installed_extensions.php (clean)
+  become: true
+  template:
+    src: installed_extensions.php.j2
+    dest: "{{ fa_pod_dir }}/company/0/installed_extensions.php"
+    mode: '0666'
+    owner: root
+
+- name: Check default theme variant exists
+  stat:
+    path: "{{ fa_pod_dir }}/themes/default/default.css.default"
+  register: theme_default
+
+- name: Ensure default theme CSS variant exists (copy canonical if missing)
+  become: true
+  copy:
+    src: "{{ fa_source_tree }}/themes/default/default.css"
+    dest: "{{ fa_pod_dir }}/themes/default/default.css.default"
+    remote_src: true
+    mode: '0644'
+  when: not theme_default.stat.exists
+
+- name: Check red theme variant exists
+  stat:
+    path: "{{ fa_pod_dir }}/themes/default/default.css.red"
+  register: theme_red
+
+- name: Ensure red theme variant exists
+  become: true
+  copy:
+    src: "{{ fa_pod_dir }}/themes/default/default.css.default"
+    dest: "{{ fa_pod_dir }}/themes/default/default.css.red"
+    remote_src: true
+    force: false
+    mode: '0644'
+  when: not theme_red.stat.exists

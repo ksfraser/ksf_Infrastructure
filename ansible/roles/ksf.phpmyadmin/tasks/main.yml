@@ -1,0 +1,40 @@
+---
+# ksf.phpmyadmin tasks (CLI-based; no podman API socket required)
+# Deps: ksf.pod (see meta/main.yml)
+
+- name: Ensure phpMyAdmin image is present
+  command: podman image exists "{{ phpmyadmin_image }}"
+  register: pma_img_exists
+  failed_when: false
+  changed_when: false
+  when: phpmyadmin_enabled | bool
+
+- name: Pull phpMyAdmin image
+  command: podman pull "{{ phpmyadmin_image }}"
+  when: phpmyadmin_enabled | bool and pma_img_exists.rc != 0
+
+- name: Check phpMyAdmin container exists
+  command: podman container exists "{{ phpmyadmin_container_name }}"
+  register: pma_cont_exists
+  failed_when: false
+  changed_when: false
+  when: phpmyadmin_enabled | bool
+
+- name: Remove stale phpMyAdmin container
+  command: podman rm -f "{{ phpmyadmin_container_name }}"
+  when: phpmyadmin_enabled | bool and pma_cont_exists.rc == 0
+  ignore_errors: true
+  changed_when: false
+
+- name: Run phpMyAdmin container
+  command: >
+    podman run -d --name "{{ phpmyadmin_container_name }}"
+    --hostname "{{ phpmyadmin_hostname }}"
+    --network "{{ pod_name }}"
+    -p "{{ phpmyadmin_port }}:{{ phpmyadmin_container_port }}"
+    -e PMA_HOST="{{ phpmyadmin_host }}"
+    -e PMA_PORT="{{ phpmyadmin_port_db }}"
+    {% if phpmyadmin_user | length > 0 %}-e PMA_USER="{{ phpmyadmin_user }}"{% endif %}
+    {% if phpmyadmin_password | length > 0 %}-e PMA_PASSWORD="{{ phpmyadmin_password }}"{% endif %}
+    "{{ phpmyadmin_image }}"
+  when: phpmyadmin_enabled | bool
