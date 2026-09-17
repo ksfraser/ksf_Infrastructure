@@ -11,7 +11,8 @@ ksf_Infrastructure/
 │   └── inventories/
 │       └── local                    # Local development inventory
 ├── podman/                          # Podman compose + config
-│   ├── ksf-compose.yaml
+│   ├── ksf-compose.yaml             # CANONICAL compose (FA uses ../FA/* binds, NOT named volume)
+│   ├── start-fa.sh                  # Rootless ksf-fa podman run (verified 2026-09)
 │   ├── post-install.sh
 │   └── .env.example
 ├── init-sql/                        # DB initialization
@@ -32,7 +33,7 @@ ansible/inventories/<environment>
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `fa_port` | FrontAccounting HTTP port | 8090 |
+| `fa_port` | FrontAccounting HTTP port | 8080 |
 | `wp_port` | WordPress HTTP port | 8091 |
 | `volume_prefix` | Prefix for podman volumes (must be unique per deployment) | ksf_infrastructure |
 | `mariadb_root_pass` | MariaDB root password | ksfroot2024! |
@@ -87,13 +88,19 @@ cd ansible
 ansible-playbook -i inventories/local ksf-playbook.yaml --ask-become-pass
 ```
 
-## Manual Deployment (Podman Compose Only)
+## Manual Deployment (Podman)
 
-If not using Ansible, copy `.env.example` to `.env` and set:
+FA (and Podman 4.x) is managed with **direct `podman run`**, not compose:
+`podman-compose` (1.0.6 on this host) fails to parse the `${VAR:-default}`
+top-level volume names in `ksf-compose.yaml` ("volume [...] not defined in top
+level") — so `ksf-compose.yaml` is the **source of truth for the container
+spec**, but the runnable path is `start-fa.sh`.
+
+Copy `.env.example` to `.env` and set:
 
 ```bash
 # podman/.env
-FA_PORT=8090
+FA_PORT=8080
 WP_PORT=8091
 VOLUME_PREFIX=my_unique_prefix   # REQUIRED - must be unique per deployment!
 MARIADB_ROOT_PASSWORD=ksfroot2024!
@@ -102,25 +109,39 @@ MARIADB_USER=ksf_user
 MARIADB_PASSWORD=ksfuser2024!
 ```
 
-Then start:
+Then start (rootless direct-run — the verified recipe; FA uses per-pod
+`../FA/<pod>/*` binds, NOT a named data volume):
+
 ```bash
 cd podman
-podman-compose up -d
-VOLUME_PREFIX=my_unique_prefix bash post-install.sh
+bash start-fa.sh
+```
+
+After starting, ALWAYS verify the single-file binds actually applied (rootless
+podman has been caught silently dropping them — see Troubleshooting):
+```bash
+sudo -n -u kevin podman exec ksf-fa grep -l config_db /proc/mounts
 ```
 
 ## Access (Default - Update Ports per Inventory)
 
 | Service | URL | Default Credentials |
 |---------|-----|-------------------|
-| FrontAccounting | http://localhost:8090 | admin / admin |
+| FrontAccounting | http://localhost:8080 | opencode / opencode |
 | WordPress | http://localhost:8091 | admin / admin2024! |
 | MariaDB | localhost:3306 | ksf_user / ksfuser2024! |
 | Stock Market Python Worker | http://localhost:8000/health | Same host network (optional) |
 
 ## Volume Naming Convention
 
-**CRITICAL:** Volumes are named `{volume_prefix}_mariadb_data`, `{volume_prefix}_fa_data`, `{volume_prefix}_wp_data`
+**CRITICAL:** Volumes are named `{volume_prefix}_mariadb_data`, `{volume_prefix}_wp_data`.
+
+FA 2.4.3 no longer uses a named volume: the read-only FA source tree
+(`../FA/2.4.3`) and writable per-pod files (`../FA/<pod>/config_db.php`,
+`installed_extensions.php`, `company/`, `themes/default/default.css`) are
+bind-mounted directly — see `ksf-compose.yaml`. This is what makes extension
+activation writable on a fresh rootless create. Named volumes remain only for
+MariaDB and WordPress.
 
 Each deployment MUST have a unique `volume_prefix` to avoid:
 - Data collision between environments
@@ -138,14 +159,13 @@ Each deployment MUST have a unique `volume_prefix` to avoid:
 
 ```bash
 # Stop containers (keep data)
-podman-compose down
+podman stop ksf-fa ksf-mariadb
 
-# Destroy containers AND volumes (CAREFUL - deletes data!)
-podman-compose down -v
+# Remove the FA container (ready for a healthy recreate; data in MariaDB volume survives)
+podman rm ksf-fa
 
 # Remove volumes manually
 podman volume rm ${VOLUME_PREFIX}_mariadb_data
-podman volume rm ${VOLUME_PREFIX}_fa_data
 podman volume rm ${VOLUME_PREFIX}_wp_data
 ```
 
@@ -172,7 +192,7 @@ podman volume ls | grep ${VOLUME_PREFIX}
 
 **Port already in use:**
 ```
-Error: endpoint exposure failed: exposing port 8090-8091 failed
+Error: endpoint exposure failed: exposing port 8080-8091 failed
 ```
 Solution: Update `fa_port`/`wp_port` in inventory to unused ports.
 
@@ -183,6 +203,16 @@ Error: volume some_name already exists
 Solution: Either use a different `volume_prefix`, or manually remove:
 ```bash
 podman volume rm <old_volume_name>
+```
+
+**"Cannot open the extension setup file 'installed_extensions.php' for writing"** on the Extensions page:
+The ksf-fa container is serving the read-only git-tracked global registry
+(`FA/2.4.3/installed_extensions.php`) instead of the per-pod writable one
+(`FA/ksf_fa/installed_extensions.php`). Cause: rootless podman silently dropped
+the single-file binds (see `start-fa.sh` header). Fix: recreate the container
+with the correct `../FA/…` binds, then verify:
+```bash
+sudo -n -u kevin podman exec ksf-fa grep -l config_db /proc/mounts
 ```
 
 **FA modules not appearing:**

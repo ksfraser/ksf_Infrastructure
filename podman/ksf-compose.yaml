@@ -35,10 +35,10 @@ services:
     volumes:
       - ../FA/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
-      - ../fa/ksf_fa/config_db.php:/var/www/html/config_db.php:rw
-      - ../fa/ksf_fa/installed_extensions.php:/var/www/html/installed_extensions.php:rw
-      - ../fa/ksf_fa/company:/var/www/html/company:rw
-      - ../fa/ksf_fa/themes/default/default.css:/var/www/html/themes/default/default.css:rw
+      - ../FA/ksf_fa/config_db.php:/var/www/html/config_db.php:rw
+      - ../FA/ksf_fa/installed_extensions.php:/var/www/html/installed_extensions.php:rw
+      - ../FA/ksf_fa/company:/var/www/html/company:rw
+      - ../FA/ksf_fa/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network
     depends_on:
@@ -59,10 +59,10 @@ services:
     volumes:
       - ../FA/2.4.3:/var/www/html:ro
       - ../fa_modules:/var/www/html/modules:rw
-      - ../fa/ksfii_app/config_db.php:/var/www/html/config_db.php:rw
-      - ../fa/ksfii_app/installed_extensions.php:/var/www/html/installed_extensions.php:rw
-      - ../fa/ksfii_app/company:/var/www/html/company:rw
-      - ../fa/ksfii_app/themes/default/default.css:/var/www/html/themes/default/default.css:rw
+      - ../FA/ksfii_app/config_db.php:/var/www/html/config_db.php:rw
+      - ../FA/ksfii_app/installed_extensions.php:/var/www/html/installed_extensions.php:rw
+      - ../FA/ksfii_app/company:/var/www/html/company:rw
+      - ../FA/ksfii_app/themes/default/default.css:/var/www/html/themes/default/default.css:rw
     networks:
       - ksf_network
     depends_on:
@@ -186,9 +186,6 @@ networks:
 
 volumes:
   ${VOLUME_PREFIX:-ksf_infrastructure}_mariadb_data:
-  ${VOLUME_PREFIX:-ksf_infrastructure}_fa_data:
-  ${VOLUME_PREFIX:-ksf_infrastructure}_iiapp_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_wp_data:
-  ${VOLUME_PREFIX:-ksf_infrastructure}_stockmarket_python_data:
   ${VOLUME_PREFIX:-ksf_infrastructure}_backups:
   gpg-agent-log:

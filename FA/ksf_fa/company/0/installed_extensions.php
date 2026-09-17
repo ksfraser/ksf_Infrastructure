@@ -14,7 +14,7 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_ImportStagingProcessing',
-    'active' => false,
+    'active' => 1,
   ),
   1 => 
   array (
@@ -26,7 +26,7 @@ $installed_extensions = array (
     'path' => 'modules/FA_ProductAttributes',
     'active' => true,
   ),
-  '2' => 
+  2 => 
   array (
     'package' => 'ksf_FA_Woocommerce',
     'name' => 'ksf_FA_Woocommerce',
@@ -34,7 +34,7 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_Woocommerce',
-    'active' => false,
+    'active' => 1,
   ),
   3 => 
   array (
@@ -44,7 +44,7 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_Calendar',
-    'active' => false,
+    'active' => 1,
   ),
   4 => 
   array (
@@ -54,7 +54,7 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_CRM',
-    'active' => false,
+    'active' => 1,
   ),
   5 => 
   array (
@@ -64,7 +64,7 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_DataIntegrity',
-    'active' => false,
+    'active' => 1,
   ),
   6 => 
   array (
@@ -74,6 +74,6 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/ksf_FA_HRM',
-    'active' => false,
+    'active' => 1,
   ),
 );

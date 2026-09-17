@@ -243,7 +243,21 @@ workaround was manual activation (schema via raw SQL, `active => true` set
 directly in both registries). Proper fix is order-independent guarded
 loading in `src/autoload.php`.
 
-## FA theme customization (decided 2026-09, cross-module)
+**Rootless podman single-file binds silently absent — the "nothing happens"
+activation trap (diagnosed 2026-09)**: on the rootless ksf_fa instance (podman
+under user `kevin`), the ksf-fa container appeared to have all 6 binds per
+`podman inspect`, but the **single-file** binds (config_db.php,
+installed_extensions.php, default.css) were NOT effective — `/proc/mounts` showed
+only the 3 directory binds. So FA wrote the RO git-tracked
+`FA/2.4.3/installed_extensions.php` as the global registry and failed with
+"Cannot open the extension setup file '../installed_extensions.php' for writing."
+Root cause was stale recipes with lowercase `../fa/…` paths + a `fa_data` named
+volume that didn't exist. Fix = recreate the container; a fresh create applies
+the file binds (legacy `compose.yaml` deleted, `start-fa.sh` rewritten). Rule:
+after any container create/modify, verify with
+`podman exec <c> grep -l config_db /proc/mounts` — don't trust `inspect`.
+
+**FA theme customization (decided 2026-09, cross-module)**
 
 Per-pod theme overlays **mirror the native FA tree** (`/var/www/html`), so the
 mount paths are the real FA locations. Inside each pod dir

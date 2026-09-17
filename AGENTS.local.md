@@ -60,12 +60,63 @@ ksf_Infrastructure/
 - `ksf-fa` — Apache + PHP 7.4; FA root at `/var/www/html/`
 - `ksf-mariadb` — MariaDB
 - `ksf-wp` — WordPress
-- FA modules volume: Podman named volume `fa_modules` → `/var/www/html/modules`
+- FA modules bind: `../fa_modules` → `/var/www/html/modules` (rw)
   - Updated by running `git pull` in `fa_modules/<module>/` subdirectories
 - Apache error.log → `/dev/stderr`; view PHP errors with:
   ```
   podman logs ksf-fa 2>&1 1>/dev/null
   ```
+
+### Rootless podman: single-file binds can be silently absent (verified 2026-09)
+
+`ksf_fa` runs **rootless** podman under user `kevin` (`sudo -n -u kevin podman …`),
+separate from the root-managed ksfii_app/kiiii pods. Symptom that cost a whole
+diagnosis: `podman inspect ksf-fa` showed all 6 binds (`FA/2.4.3:ro`, `fa_modules`,
+`FA/ksf_fa/config_db.php`, `…/installed_extensions.php`, `…/company`,
+`…/themes/default/default.css`) but the **running container did not have the
+single-file binds applied** — `/proc/mounts` only showed the 3 directory binds.
+Consequences while in that state:
+
+- Global registry served the RO git-tracked `FA/2.4.3/installed_extensions.php`
+  (844B, API+Calendar only) instead of the per-pod writable file → FA admin wrote
+  `Cannot open the extension setup file '../installed_extensions.php' for writing.`
+  (`write_extensions()` in `FA/2.4.3/admin/db/maintenance_db.inc:119-157`, global
+  `company == -1`). Per-company activation itself (company/0 registry) was fine.
+- `config_db.php` served the RO `FA/2.4.3` copy, not `FA/ksf_fa/config_db.php`.
+
+Fix was recreation, not code: `podman rm -f ksf-fa` + `podman run` with the same
+bind set — a fresh create DOES apply the file binds (verified in `/proc/mounts`;
+see `ksf-compose.yaml` for the canonical 8080 run recipe: image
+`localhost/ksf-fa:php7.4`, `--network ksf_network`, env `DB_DSN=mysql:host=ksf
+-mariadb;dbname=ksf_fa;charset=utf8`). The culprit for the stale container was
+the older recipes using **lowercase `../fa/…` paths and/or a `fa_data` named
+volume** — none of those paths exist, so podman silently skipped the file binds.
+Those recipes are now retired:
+- `podman/compose.yaml` — deleted (`git`); it declared `ksf…_fa_data` and would
+  have been auto-picked by bare `podman-compose up` (default filename), silently
+  recreating the broken mount. `ksf-compose.yaml` is now the ONLY compose file
+  (partial container spec; see `podman-compose` 1.0.6 caveat below).
+- `podman/start-fa.sh` — rewritten to the verified rootless `podman run` recipe;
+  the old file bound `ksf_infrastructure_fa_data:/var/www/html` **plus**
+  `fa_modules:/var/www/html:Z`, i.e. two mounts racing on the same target.
+- Dead named volumes `{prefix}_fa_data` / `{prefix}_iiapp_data` /
+  `{prefix}_stockmarket_python_data` removed from `ksf-compose.yaml` (FA/ksfii use
+  `../FA/*` binds; stockmarket worker binds `${STOCKMARKET_PYTHON_DIR}` directly).
+
+`ksf-compose.yaml` and `start-fa.sh` now both use `../FA/…` (uppercase).
+**Caveat:** `podman-compose` 1.0.6 FAILS to parse `ksf-compose.yaml` (broken on
+`${VAR:-default}` top-level volume names: "volume [...] not defined in top
+level"), so the runnable recipe is `bash start-fa.sh`, NOT
+`podman-compose up`. Treat `ksf-compose.yaml` as the machine-readable spec only.
+**Rule: after any container create/modify, verify with
+`podman exec <c> grep -l 'config_db' /proc/mounts`, don't trust inspect.**
+
+`FA/2.4.3/config_db.php` (company 0) intentionally reads the **generic**
+`host => localhost, port => 3306` (bare-metal default); container-specific
+`host => ksf-mariadb` lives in `FA/ksf_fa/config_db.php` and wins once the file
+bind is actually mounted. `FA/2.4.3/installed_extensions.php` is git-tracked RO
+and must stay that way; the per-pod writable registry is
+`FA/ksf_fa/installed_extensions.php`.
 
 ## FA Database Credentials
 

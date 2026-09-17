@@ -3,7 +3,7 @@ $db_connections = array (
     0 => 
     array (
         "name" => "ksf_fa",
-        "host" => "ksf-mariadb",
+        "host" => "localhost",
         "port" => 3306,
         "dbuser" => "ksf_user",
         "dbpassword" => "ksfuser2024!",
