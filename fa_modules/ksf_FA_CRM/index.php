@@ -1,9 +1,11 @@
 <?php
 /**
- * ksf_FA_CRM entry point
+ * ksf_FA_CRM Entry Point
  *
- * Router page following the standard FA module pattern.
- * Session-expiry handling and AJAX support can be added later.
+ * App-shell router: resolves the ?view= tab from the CrmAppShell, sets the
+ * per-view security BEFORE session.inc, then boots the shell (fires the
+ * `crm_register_tabs` register-with-me hook so other modules can add tabs),
+ * renders the sub-menu and dispatches to the tab controller SRP or page script.
  *
  * PHP 7.3 compatible — no PHP 8+ syntax.
  *
@@ -13,65 +15,43 @@
 
 chdir(__DIR__);
 
-$vendorAutoload = __DIR__ . '/vendor/autoload.php';
-if (file_exists($vendorAutoload)) {
-    require_once $vendorAutoload;
+if (file_exists(__DIR__ . '/bootstrap.php')) {
+    require_once __DIR__ . '/bootstrap.php';
 }
 
-$page_security = 'SA_CRM_DASHBOARD';
-
 $path_to_root = "../..";
+
+$appShell = new \Ksfraser\FA\CRM\App\CrmAppShell();
+
+$view = isset($_GET['view']) ? (string) $_GET['view'] : $appShell->getDefaultView();
+if ($appShell->getTab($view) === null) {
+    $view = $appShell->getDefaultView();
+}
+
+$page_security = $appShell->getSecurity($view, 'SA_CRM_DASHBOARD');
 include_once($path_to_root . "/includes/session.inc");
 add_access_extensions();
 
-$view = isset($_GET['view']) ? (string) $_GET['view'] : 'dashboard';
+// FA convention: pages include ui.inc themselves (main.inc only loads
+// ui_controls). Required for the FA-native UI-lists helpers (e.g. the
+// customer_list_row filter combo on the Contacts tab).
+include_once($path_to_root . "/includes/ui.inc");
 
-$validViews = array(
-    'dashboard'        => 'pages/dashboard.php',
-    'contacts'         => 'pages/contact_relationships.php',
-    'customers'        => 'pages/customer_types.php',
-    'leads'            => 'pages/leads.php',
-    'opportunities'    => 'pages/opportunities.php',
-    'communications'   => 'pages/communications.php',
-    'meetings'         => 'pages/meetings.php',
-    'quotes'           => 'pages/quotes.php',
-    'customer_types'   => 'pages/customer_types.php',
-    'territories'      => 'pages/territories.php',
-    'tags'             => 'pages/crm_tags.php',
-    'email_accounts'   => 'pages/email_accounts.php',
-);
-
-$pageFile = isset($validViews[$view]) ? $validViews[$view] : 'pages/dashboard.php';
-
-$page = $view;
+// Fire the register-with-me hook: other modules may add their tabs now.
+$appShell->boot();
 
 $js = '';
 if (function_exists('user_use_date_picker') && user_use_date_picker()) {
     $js .= get_js_date_picker();
 }
+
 page(_("CRM"), false, false, '', $js);
 
-$subMenu = new \ksfraser\FrontAccounting\Common\Menu\FAModuleMenu(
-    'index.php',
-    'view',
-    $view
-);
+echo $appShell->renderMenu($view);
 
-$subMenu->addItem('dashboard',       _("&Dashboard"),       null)
-        ->addItem('contacts',         _("Contacts"),         null)
-        ->addItem('customers',        _("Customers"),        null)
-        ->addItem('leads',            _("Leads"),            null)
-        ->addItem('opportunities',    _("Opportunities"),    null)
-        ->addItem('communications',   _("Communications"),   null)
-        ->addItem('meetings',         _("Meetings"),         null)
-        ->addItem('quotes',           _("Quotes"),           null)
-        ->addItem('customer_types',   _("Customer Types"),   null)
-        ->addItem('territories',      _("Territories"),      null)
-        ->addItem('tags',             _("Tags"),             null)
-        ->addItem('email_accounts',   _("Email Accounts"),   null);
-
-echo $subMenu->render();
-
-include($pageFile);
+// SRP dispatch: every tab is an AbstractTabController SRP (inherits the
+// FA-round-trip fix: `'ajax' => false` guarantees the Save spinner → native
+// POST → full-page PRG; no ajaxsubmit warning-triangle round-trip).
+$appShell->dispatch($view);
 
 end_page();
