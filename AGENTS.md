@@ -57,6 +57,14 @@ switch to `ksf_payment_destinations/` immediately.
   `ksf_Infrastructure/fa-modules-doctor.sh`, which probes the real container
   rather than guessing package versions. Full procedure in
   `ksf_Infrastructure/AGENTS_APPENDIX.md`.
+- **Two FA containers run at once and share one vendor tree.** Rootful
+  `ksfii_app-fa` on **8090** (overlay `FA/ksfii_app`) and rootless `ksf-fa` on
+  **8080** (overlay `FA/ksf_fa`, driven as `su - kevin -c`). Both are PHP
+  7.4.33 and both bind-mount `ksf_Infrastructure/fa_modules` at
+  `/var/www/html/modules`, so a bad vendor breaks both, but extension activation
+  is **per-instance** (separate `company/<id>/installed_extensions.php`). A module
+  can be a live landmine on one pod and dead code on the other, so always check
+  both before deciding something is harmless.
 - **FA_ProductAttributes issue #52 (child not detected as read-only)** root cause
   found: two parallel, un-unified parent-relationship mechanisms. Full write-up
   is in that repo's `AGENTS.local.md` (migrated out of this file).

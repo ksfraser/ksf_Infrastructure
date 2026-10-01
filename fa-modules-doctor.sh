@@ -33,7 +33,11 @@
 
 set -uo pipefail
 
-FA_MODULES_DIR="${FA_MODULES_DIR:-$HOME/Documents/ksf_Infrastructure/fa_modules}"
+# Resolve the staging dir relative to this script, not $HOME. The rootful pod is
+# driven as root, whose $HOME is /root, so a $HOME-relative default silently
+# points at a path that does not exist when the tool is run the "correct" way.
+_SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+FA_MODULES_DIR="${FA_MODULES_DIR:-$_SELF_DIR/fa_modules}"
 AUDIT_ONLY=0
 ONLY_MODULES=()
 
@@ -504,25 +508,224 @@ repair_module() {
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
+# Instances
+#
+# There is more than one FA pod, and they are NOT interchangeable:
+#
+#   - the ROOTFUL pod runs as root and owns the rootful podman store
+#   - the ROOTLESS pod runs as an ordinary user with its own store
+#
+# `podman` resolves against whichever store the *calling user* owns, so the
+# rootful pod is invisible to the rootless user and vice versa. Any tool that
+# assumes one podman namespace silently sees only half the estate.
+#
+# The two also DIVERGE in ways that matter:
+#   - separate per-instance overlay dirs, so separate config_db.php, separate
+#     global registry and separate company/<id>/installed_extensions.php
+#   - therefore a different set of ACTIVE extensions on each
+#
+# What they SHARE is the thing that breaks: both bind-mount the same
+# fa_modules/ at /var/www/html/modules. A vendor resolved for the wrong PHP is
+# therefore a defect in both, and has to be probed in both.
+#
+# Fields: name | port | overlay dir | podman user ("" = whatever we are)
+# ---------------------------------------------------------------------------
+ALL_INSTANCES="ksfii_app-fa:8090:FA/ksfii_app:
+ksf-fa:8080:FA/ksf_fa:kevin"
+
+INSTANCES=""
+POD_PREFIX_CACHE=""
+
+# pod_for <instance> -> prints a working "podman exec" invocation, or fails.
+# Tries the current user first, then each configured podman user.
+# pod_for <instance> -> prints the prefix that can see it, or fails.
+# Cache entries use "." for "current user". Split on newlines only: word
+# splitting would tear "su - kevin -c" into four useless pieces.
+# Resolved prefix per instance.
+#
+# Two traps this design avoids:
+#  1. POD_OWNER must be populated in the MAIN shell. Every consumer runs inside
+#     a command substitution (subshell), so a memo written during a lookup is
+#     thrown away before the next call. Rescanning `podman ps` on every single
+#     exec floods rootful podman, which intermittently fails to answer and
+#     produced phantom "podman cannot see container 'ksfii_app-fa'" reports.
+#  2. Never pipe podman into `grep -q`. Under `set -o pipefail`, grep -q exits
+#     at the first match and closes the pipe, podman dies with SIGPIPE (141),
+#     and the pipeline reports failure -- again randomly. Capture first, match
+#     the captured value.
+declare -A POD_OWNER=()
+
+# resolve_instance <name>: find the prefix that can see it and record it.
+# Call once per instance from the main shell, right after build_pod_cache.
+resolve_instance() {
+  local want="$1" p names attempt
+  for attempt in 1 2 3; do
+    while IFS= read -r p; do
+      [ -n "$p" ] || continue
+      if [ "$p" = "." ]; then
+        names=$(podman ps -a --format '{{.Names}}' 2>/dev/null)
+      else
+        names=$(run_pod "$p" ps -a --format '{{.Names}}' 2>/dev/null)
+      fi
+      if printf '%s\n' "$names" | grep -qx "$want"; then
+        POD_OWNER[$want]="$p"
+        return 0
+      fi
+    done <<< "$POD_PREFIX_CACHE"
+  done
+  return 1
+}
+
+# pod_for <name> -> the resolved prefix. Pure lookup; never calls podman.
+pod_for() {
+  if [ -n "${POD_OWNER[$1]+set}" ]; then
+    echo "${POD_OWNER[$1]}"
+    return 0
+  fi
+  return 1
+}
+
+# pod_exec <instance> <podman exec args...>
+pod_exec() {
+  local inst="$1" p
+  shift
+  p=$(pod_for "$inst") \
+    || { echo "podman cannot see container '$inst'" >&2; return 1; }
+  run_pod "$p" exec "$inst" "$@"
+}
+
+# The cache holds candidate prefixes in the order they should be tried.
+build_pod_cache() {
+  # Candidates, one per line: "." means plain `podman` as the current user,
+  # then one `su - <user> -c` per other podman owner. A single run can then see
+  # both the rootful and the rootless estate.
+  #
+  # "su -" (login shell), NOT bare "su": bare su keeps root's environment, so
+  # XDG_RUNTIME_DIR stays /run/user/0 and rootless podman refuses to run with
+  # "XDG_RUNTIME_DIR directory /run/user/0 is not owned by the current user".
+  #
+  # Skip a prefix naming the user we already are: root running `su - root -c`
+  # re-enters a login shell and can lose the rootful podman's socket, which
+  # shows up as "visible but not responding to php".
+  local me users p
+  me=$(id -un)
+  users=$(printf '%s\n' "$ALL_INSTANCES" | cut -d: -f4 | grep -v '^$' | sort -u)
+  POD_PREFIX_CACHE="."
+  for p in $users; do
+    [ "$p" = "$me" ] && continue
+    POD_PREFIX_CACHE="$POD_PREFIX_CACHE
+su - $p -c"
+  done
+}
+
+# pod_exec <instance> <args...>
+# sq <string> -> the string wrapped in POSIX single quotes, with embedded
+# single quotes escaped. Used to rebuild one argv as a single `sh -c` string.
+sq() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
+
+run_pod() {
+  # $1 = prefix: "." means current user, or "su - user -c"
+  # $2+ = podman subcommand and its args
+  #
+  # The args are re-quoted into ONE string because `su -c` accepts a single
+  # command string. Getting this wrong is subtle: with naive quoting,
+  # `--format {{.Names}}` reaches podman as \{\{.Names\}\} and podman rejects it
+  # as an unknown format specifier, which looks like "container not found".
+  local prefix="$1"
+  shift
+  if [ "$prefix" = "." ]; then
+    podman "$@"
+    return $?
+  fi
+  local cmd="" a
+  for a in "$@"; do cmd+=" $(sq "$a")"; done
+  eval "$prefix$(sq "podman$cmd")"
+}
+
+# instance_port <instance>
+instance_port() {
+  printf '%s\n' "$ALL_INSTANCES" | awk -F: -v n="$1" '$1==n{print $2}'
+}
+
+# discover_instances -> sets the global INSTANCES (newline-separated) to the
+# containers podman can actually see. Deliberately NOT called via $(...): a
+# command substitution is a subshell, which would discard the POD_OWNER memo
+# that resolve_instance populates.
+INSTANCES=""
+discover_instances() {
+  local line name acc=""
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    name=${line%%:*}
+    resolve_instance "$name" && acc="${acc:+$acc
+}$name"
+  done <<< "$ALL_INSTANCES"
+  INSTANCES="$acc"
+}
+
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-
-FA_CONTAINER="${FA_CONTAINER:-$(podman ps --format '{{.Names}}' 2>/dev/null | grep -E 'fa$' | head -1)}"
 
 if [ "$AUDIT_ONLY" -eq 1 ]; then MODE="AUDIT ONLY (no changes)"; else MODE="REPAIR"; fi
 echo "fa-modules-doctor  dir=$FA_MODULES_DIR  mode=$MODE"
 
-CONTAINER_PHP=""
-if [ -n "$FA_CONTAINER" ]; then
-  CONTAINER_PHP=$(podman exec "$FA_CONTAINER" php -r 'echo PHP_VERSION;' 2>/dev/null)
-  [ -n "$CONTAINER_PHP" ] || { echo "${RED}container $FA_CONTAINER has no working php; cannot verify${RST}"; exit 1; }
-  CONTAINER_PHP_ID=$(podman exec "$FA_CONTAINER" php -r 'echo PHP_VERSION_ID;' 2>/dev/null)
-  echo "target runtime: $FA_CONTAINER  PHP $CONTAINER_PHP (id $CONTAINER_PHP_ID)"
-else
-  echo "${RED}no *fa container found; the runtime probe is the authoritative check, so refusing to guess${RST}"
-  echo "  start the container, or set FA_CONTAINER=<name>"
+build_pod_cache
+# Called directly, not via $(...): the POD_OWNER memo must land in this shell.
+discover_instances
+if [ -z "$INSTANCES" ]; then
+  echo "${RED}no FA container is visible to this user${RST}"
+  echo "  rootful pod is owned by root; rootless pod by its own user."
+  echo "  Add the missing side to ALL_INSTANCES, or re-run as the owning user."
   exit 1
 fi
+
+# The repair path targets ONE runtime, because a single `composer update`
+# cannot satisfy two different PHP floors. Default to the first healthy
+# instance; override with FA_DOCTOR_INSTANCE=<container>.
+TARGET_INSTANCE="${FA_DOCTOR_INSTANCE:-}"
+ALIVE=""
+echo "instances:"
+while read -r inst; do
+  [ -n "$inst" ] || continue
+  pv=$(pod_exec "$inst" php -r 'echo PHP_VERSION;' 2>/dev/null)
+  if [ -n "$pv" ]; then
+    echo "  ${GRN}ok${RST}      $inst  PHP $pv  http://localhost:$(instance_port "$inst")/"
+    ALIVE="${ALIVE:+$ALIVE
+}$inst"
+  else
+    echo "  ${RED}down${RST}    $inst  (visible but not responding to php)"
+    INSTANCES=$(printf '%s\n' "$INSTANCES" | grep -vx "$inst")
+  fi
+done <<< "$INSTANCES"
+
+if [ -z "$ALIVE" ]; then
+  echo "${RED}no instance has a working php; nothing can be verified${RST}"
+  exit 1
+fi
+if [ -n "$TARGET_INSTANCE" ]; then
+  case "
+$ALIVE" in
+    *"
+$TARGET_INSTANCE
+"*) ;;
+    *)
+      echo "${RED}FA_DOCTOR_INSTANCE=$TARGET_INSTANCE is not a healthy instance${RST}"
+      echo "  healthy: $(printf '%s' "$ALIVE" | paste -sd' ' -)"
+      exit 1 ;;
+  esac
+else
+  TARGET_INSTANCE=${ALIVE%%$'\n'*}
+fi
+
+# What the repair helpers reason about. Both pods run 7.4 today, but derive it
+# rather than hardcoding, so a future pod bump does not silently mis-pin.
+CONTAINER_PHP=$(pod_exec "$TARGET_INSTANCE" php -r 'echo PHP_VERSION;' 2>/dev/null)
+CONTAINER_PHP_ID=$(pod_exec "$TARGET_INSTANCE" php -r 'echo PHP_VERSION_ID;' 2>/dev/null)
+echo "  ${DIM}repair target: $TARGET_INSTANCE  PHP $CONTAINER_PHP (id $CONTAINER_PHP_ID)${RST}"
+echo "  ${DIM}note: both pods bind-mount $FA_MODULES_DIR at /var/www/html/modules,${RST}"
+echo "  ${DIM}      so a broken vendor is a defect in both, and is probed in both.${RST}"
 echo
 
 # Discover candidates: any module with a vendor dir, optionally filtered.
@@ -536,7 +739,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Pass 1 (authoritative): ask the target runtime to load each autoloader.
+# Pass 1 (authoritative): ask each target runtime to load each autoloader.
 #
 # This is the only check that cannot produce a false negative. It catches every
 # mechanism by which a host-resolved vendor breaks PHP 7.4:
@@ -545,54 +748,75 @@ fi
 #     which Composer's own generator writes when a prod dependency is resolved
 #     for a newer platform than the target)
 #   - a missing/renamed package the autoloader references
+#
+# Probing more than one instance matters because activation state is per
+# instance: a module can be an active landmine on one pod and dead code on the
+# other, and only the first one is taking the site down.
 # ---------------------------------------------------------------------------
-probe_container() {
-  local mod="$1"
-  podman exec "$FA_CONTAINER" php -d display_errors=1 -d error_reporting=E_ALL \
+probe() {
+  local inst="$1" mod="$2"
+  pod_exec "$inst" php -d display_errors=1 -d error_reporting=E_ALL \
     -r "require '/var/www/html/modules/$mod/vendor/autoload.php'; echo 'PROBE_OK';" 2>&1
 }
 
-# module_active <module> -> prints "active" / "inactive" / "unknown"
+# module_active <instance> <module> -> "active" | "inactive" | "not-registered"
 #
-# Urgency depends on this. An active module whose autoloader fatals will take
-# the site down the moment any of its hook methods run; an inactive one is a
-# trap waiting for whoever activates it next.
+# Activation is per company AND per instance: each pod has its own
+# company/<id>/installed_extensions.php, so this must never be cached across
+# instances.
 module_active() {
-  podman exec "$FA_CONTAINER" php -r '
+  pod_exec "$1" php -r '
     $f = "/var/www/html/company/0/installed_extensions.php";
-    if (!is_readable($f)) { echo "unknown"; return; }
+    if (!is_readable($f)) { echo "no-registry"; return; }
     include $f;
-    $p = $argv[1];
     foreach ($installed_extensions as $e) {
-      if (($e["package"] ?? "") === $p) {
+      if (($e["package"] ?? "") === $argv[1]) {
         $a = $e["active"] ?? false;
         echo ($a === false || $a === "" || $a === 0 || $a === "0") ? "inactive" : "active";
         return;
       }
     }
-    echo "not-registered";' "$1" 2>/dev/null || echo "unknown"
+    echo "not-registered";' "$2" 2>/dev/null || echo "unknown"
 }
 
 NEEDS_REPAIR=()
-ACTIVE_BREAK=()
+URGENT=()
 for mod in "${CANDIDATES[@]}"; do
-  out=$(probe_container "$mod")
-  if [[ "$out" == *PROBE_OK* ]]; then
-    continue
-  fi
-  # Trim to the single most informative line.
-  reason=$(printf '%s\n' "$out" | grep -iE "parse error|platform_check|does not exist|not found|unterminated" | head -1)
-  [ -n "$reason" ] || reason=$(printf '%s\n' "$out" | grep -v '^$' | tail -1)
-  state=$(module_active "$mod")
-  case "$state" in
-    active)
-      echo "${RED}BREAKING NOW${RST} $mod  ${DIM}(active extension)${RST}"
-      ACTIVE_BREAK+=("$mod") ;;
-    *)
-      echo "${RED}WILL BREAK${RST}    $mod  ${DIM}($state - fatal the day it is activated)${RST}" ;;
-  esac
-  echo "    ${DIM}${reason:0:150}${RST}"
-  NEEDS_REPAIR+=("$mod")
+  broken_anywhere=0
+  for inst in $INSTANCES; do
+    out=$(probe "$inst" "$mod")
+    [[ "$out" == *PROBE_OK* ]] && continue
+    broken_anywhere=1
+    state=$(module_active "$inst" "$mod")
+    case "$state" in
+      active)
+        tag="${RED}BREAKING NOW${RST}"; URGENT+=("$mod:$inst") ;;
+      *)
+        tag="${RED}WILL BREAK${RST}   " ;;
+    esac
+    # No `| head -1` / `| tail -1` here: under `set -o pipefail` the closing
+    # end of the pipeline can SIGPIPE the grep, which discards the match we
+    # came for. Read the first match with a shell loop instead.
+    reason=""
+    line=""
+    while IFS= read -r line; do
+      [ -n "$line" ] || continue
+      case "$line" in
+        *[Pp]arse\ error*|*platform_check*|*does\ not\ exist*|*not\ found*|*unterminated*)
+          reason="$line"; break ;;
+      esac
+    done <<< "$out"
+    if [ -z "$reason" ]; then
+      line=""
+      while IFS= read -r line; do
+        [ -n "$line" ] && reason="$line"
+      done <<< "$out"
+    fi
+    port=$(instance_port "$inst")
+    echo "$tag $mod  ${DIM}[$inst :$port  $state]${RST}"
+    echo "    ${DIM}${reason:0:130}${RST}"
+  done
+  [ "$broken_anywhere" -eq 1 ] && NEEDS_REPAIR+=("$mod")
 done
 
 # ---------------------------------------------------------------------------
@@ -603,10 +827,6 @@ for mod in "${CANDIDATES[@]}"; do
   case " ${NEEDS_REPAIR[*]-} " in *" $mod "*) continue ;; esac
   inst=$(installed_php81 "$mod")
   [ -n "$inst" ] || continue
-  # One compact line: these are dev-tooling leftovers (phar-io, sebastian 5.x)
-  # that sit in vendor but are not in any files-autoload list. Harmless today,
-  # but they are the residue of a host-PHP install and mark the module as one
-  # whose vendor was never rebuilt for the container.
   printf '%s' "$inst" | sed -E 's/^[^ ]+ //' | sort -V | tr '\n' ' ' \
     | sed "s/^/${DIM}latent      $mod  php8 pkgs present but never autoloaded: /; s/\$/${RST}/"
   echo
@@ -615,13 +835,13 @@ done
 
 echo
 if [ ${#NEEDS_REPAIR[@]} -eq 0 ]; then
-  echo "${GRN}All $(( ${#CANDIDATES[@]} )) autoloaders load cleanly on PHP $CONTAINER_PHP.${RST}"
+  echo "${GRN}All $(( ${#CANDIDATES[@]} )) autoloaders load on every instance.${RST}"
   [ "$LATENT" -gt 0 ] && echo "${DIM}($LATENT module(s) carry PHP 8 packages that nothing autoloads today)${RST}"
   exit 0
 fi
 
-if [ ${#ACTIVE_BREAK[@]} -gt 0 ]; then
-  echo "${RED}${#ACTIVE_BREAK[@]} ACTIVE extension(s) cannot load on PHP $CONTAINER_PHP:${RST} ${ACTIVE_BREAK[*]}"
+if [ ${#URGENT[@]} -gt 0 ]; then
+  echo "${RED}ACTIVE extension(s) that cannot load:${RST} ${URGENT[*]}"
 fi
 if [ "$AUDIT_ONLY" -eq 1 ]; then
   echo "${YLW}Re-run without --audit to repair.${RST}"
@@ -629,7 +849,8 @@ if [ "$AUDIT_ONLY" -eq 1 ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Repair
+# Repair. The vendor is shared, so one repair fixes every instance; it is then
+# re-probed on all of them.
 # ---------------------------------------------------------------------------
 echo
 FAILED=()
@@ -638,22 +859,21 @@ for mod in "${NEEDS_REPAIR[@]}"; do
 done
 rm -f /tmp/fa-doctor.$$
 
-# ---------------------------------------------------------------------------
-# Pass 3: re-probe, because "composer exited 0" is not the same as "PHP can
-# actually parse and load it". Only this makes the green result trustworthy.
-# ---------------------------------------------------------------------------
 echo
-echo "re-probing in $FA_CONTAINER (PHP $CONTAINER_PHP):"
+echo "re-probing every instance:"
 for mod in "${NEEDS_REPAIR[@]}"; do
   case " ${FAILED[*]-} " in *" $mod "*) continue ;; esac
-  out=$(probe_container "$mod")
-  if [[ "$out" == *PROBE_OK* ]]; then
-    echo "  ${GRN}ok${RST}   $mod"
-  else
-    echo "  ${RED}FAIL${RST} $mod"
-    printf '%s\n' "$out" | grep -v '^$' | tail -2 | sed 's/^/         /'
-    FAILED+=("$mod")
-  fi
+  line="  "
+  for inst in $INSTANCES; do
+    out=$(probe "$inst" "$mod")
+    if [[ "$out" == *PROBE_OK* ]]; then
+      line="$line${GRN}ok${RST}:$inst  "
+    else
+      line="$line${RED}FAIL${RST}:$inst  "
+      FAILED+=("$mod")
+    fi
+  done
+  echo "$line"
 done
 
 echo
@@ -663,5 +883,8 @@ if [ ${#FAILED[@]} -gt 0 ]; then
   echo "'vendor built for the wrong PHP' section of AGENTS_APPENDIX.md."
   exit 1
 fi
-echo "${GRN}All repaired.${RST}"
-echo "  curl -s -o /dev/null -w '%{http_code}\\n' http://localhost:8090/index.php   # expect 200"
+echo "${GRN}All repaired on all instances.${RST}"
+while read -r inst; do
+  [ -n "$inst" ] || continue
+  echo "  curl -s -o /dev/null -w '%{http_code}\\n' http://localhost:$(instance_port "$inst")/index.php"
+done <<< "$INSTANCES"

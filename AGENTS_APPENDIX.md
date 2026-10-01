@@ -33,8 +33,14 @@ PHP.
 
 ## Deployment Process
 
-Container name and port differ per instance; the Integration pod is
-`ksfii_app-fa` on **8090**.
+Two containers run in parallel, both bind-mount the same
+`fa_modules/` at `/var/www/html/modules`:
+
+- **rootful (Integration)**: `ksfii_app-fa`, port **8090**, PHP `7.4.33`, runs as root, overlay `FA/ksfii_app`
+- **rootless (ksf_fa)**: `ksf-fa`, port **8080**, PHP `7.4.33`, runs as `kevin` via login shell, overlay `FA/ksf_fa`
+
+Activation state is per-instance (different registries). The same vendor tree is
+shared; building it for PHP 7.4 fixes both.
 
 ```bash
 # 1) Source-only deploy (fa_modules/ is bind-mounted to /var/www/html/modules)
@@ -76,19 +82,29 @@ cd ~/Documents/ksf_Infrastructure
 ./fa-modules-doctor.sh --audit              # report only, changes nothing
 ./fa-modules-doctor.sh                      # repair
 ./fa-modules-doctor.sh --module ksf_FA_Square
+FA_DOCTOR_INSTANCE=ksf-fa ./fa-modules-doctor.sh    # target the other pod
 ```
+
+It probes **both** containers in one run, since they share the vendor tree but
+have independent activation state. It reaches the rootless pod from root with
+`su - kevin -c` (login shell; a bare `su` leaves `XDG_RUNTIME_DIR=/run/user/0`
+and rootless podman refuses to run). Set `FA_DOCTOR_INSTANCE` to choose which
+runtime the repair targets, since one `composer update` cannot satisfy two PHP
+floors.
 
 The authoritative check is **not** a heuristic about package versions. It asks
 the target runtime to load each autoloader:
 
 ```bash
 podman exec ksfii_app-fa php -r "require '/var/www/html/modules/<m>/vendor/autoload.php';"
+su - kevin -c "podman exec ksf-fa php -r \"require '/var/www/html/modules/<m>/vendor/autoload.php';\""
 ```
 
 That catches every mechanism above at once, with no false negatives from
 version-guessing. Failures are ranked by urgency — `BREAKING NOW` for an active
 extension, `WILL BREAK` for an inactive one (fatal the day it is activated) —
-by reading `company/0/installed_extensions.php` in the container.
+by reading `company/0/installed_extensions.php` **inside each container**, since
+activation is per-instance.
 
 After any rsync or vendor change, run it. A green run is the deploy gate.
 
@@ -129,10 +145,11 @@ After any rsync or vendor change, run it. A green run is the deploy gate.
 cd ~/Documents/ksf_Infrastructure && ./fa-modules-doctor.sh   # must be green
 
 curl -s http://localhost:8090/index.php -o /dev/null -w "%{http_code}\n"   # 200
+curl -s http://localhost:8080/index.php -o /dev/null -w "%{http_code}\n"   # 200
 
 # PHP 7.4 lint sweep of runtime code (tests/ may still use PHP 8-only syntax)
 podman exec ksfii_app-fa sh -c '
-for m in ksf_FA_Square ksf_FA_HRM; do
+for m in ksf_FA_Square ksf_FA_HRM ksf_Calendar; do
   find /var/www/html/modules/$m -name "*.php" -not -path "*/vendor/*" -not -path "*/tests/*" \
     -exec php -l {} \;
 done | grep -v "No syntax errors"'
@@ -142,15 +159,21 @@ An empty lint result matters as much as the HTTP 200: a `Parse error` in a
 module source file only surfaces when that class is first loaded, so "the login
 page works" is not evidence that the module is loadable.
 
+Note: only `/index.php` is a reliable anonymous probe. Module pages return 200
+while logged out but 404 for paths that do not exist, so a 404 there says
+nothing about module health — use the doctor's in-container autoload probe.
+
 ## Known module state
 
-- **`ksf_Calendar` / `ksf_Calendar_UI`** — both fail the doctor with
-  `platform_check.php` demanding >= 8.1.2. Both are inactive, so the site is
-  unaffected, but activating either will fatal it. Blockers: `require-dev` pins
-  PHPUnit ^10, and `ksfraser/ksf-calendar` declares `php >= 8.0` in its
-  published metadata. `ksf_Calendar` also has a `fix/php74-ical-compat` branch
-  in flight (named args in `iCalService`, `CalendarEntryDTO::toArray` fields) —
-  land that before attempting a 7.4 rebuild.
+- **`ksf_Calendar` / `ksf_Calendar_UI`** — both fixed. `require-dev` moved to
+  PHPUnit `^9.6`, `config.platform.php = 7.4.33` pinned in both, and `phpunit.xml`
+  converted from the PHPUnit 10 schema (`<source>`, `cacheDirectory`) to the 9.6
+  schema (`<coverage>`, `cacheResultFile`). Both vendors rebuild clean for 7.4 and
+  the doctor is green on both pods. `ksf_Calendar` is **active on the rootless
+  pod**, so this was a live landmine there, not just a latent one. Six
+  `ksf_Calendar` tests were stale against committed source and were corrected:
+  `TYPE_FA_USER` is `'fa_user'` (not `'user'`), `individualStatus` defaults to
+  `'planned'` (not `null`), and `getFreeBusy()` returns ISO-8601 (`T` separator).
 - **`ksf_FA_Calendar`** (the FA module, distinct from the `ksfraser/ksf-calendar`
   library) is platform-pinned and loads cleanly.
 
@@ -168,15 +191,15 @@ module in the per-company `company/<id>/installed_extensions.php`.
 2. Deploy the module to `fa_modules/<module>/` (bind-mounted to
    `/var/www/html/modules/`).
 3. Update the matching stored `'version' => '...'` entry for that module in the
-   live company file
-   (`~/.local/share/containers/storage/volumes/podman_fa_company/_data/0/installed_extensions.php`)
-   so FA's version check agrees and the "Unknown" state clears.
+   live company file **of each pod** — the registries are per-instance, so one pod
+   can be "Unknown" while the other is fine:
+   - rootful: `FA/ksfii_app/company/0/installed_extensions.php`
+   - rootless: `FA/ksf_fa/company/0/installed_extensions.php`
 
 Both the source version and the stored company version must be kept in sync.
 `_init/config` may be gzip-compressed OR plain text — probe for the gzip magic
 bytes (`1f 8b`) before decompressing, and preserve the original format when
 editing.
-```
 
 ---
 
