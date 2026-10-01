@@ -31,11 +31,21 @@ function local_extension($id)
 {
 	global $next_extension_id, $Ajax, $path_to_root;
 
+	// The repo-index install path takes the version from the packaged
+	// _init/config (packages.inc install_extension: 'version' => $pkg['Version']).
+	// A local module is already unpacked on disk, so read the same control file
+	// directly instead of storing '-', which check_src_ext_version() always
+	// rejects -- that is what made Local<pkg> installs impossible to activate.
+	$version = '-';
+	$ctrl = get_control_file($path_to_root.'/modules/'.clean_file_name($id).'/_init/config');
+	if ($ctrl && !empty($ctrl['Version']))
+		$version = $ctrl['Version'];
+
 	$exts = get_company_extensions();
 	$exts[$next_extension_id++] = array(
 			'package' => $id,
 			'name' => $id,
-			'version' => '-',
+			'version' => $version,
 			'available' => '',
 			'type' => 'extension',
 			'path' => 'modules/'.$id,
@@ -214,8 +224,9 @@ if (get_post('Refresh')) {
 		{
 			if (check_value('Active'.$i) && !check_src_ext_version($ext['version']))
 			{
-				display_warning(sprintf(_("Package '%s' is incompatible with current application version and cannot be activated.\n")
-					. _("Check Install/Activate page for newer package version."), $ext['name']));
+				global $src_version;
+				display_warning(sprintf(_("Package '%s' with version '%s' is incompatible with current application version '%s' and cannot be activated.\n")
+					. _("Check Install/Activate page for newer package version."), $ext['name'], $ext['version'], $src_version));
 				continue;
 			}
 			$activated = activate_hooks($ext['package'], $comp, !$ext['active']);	// change active state
