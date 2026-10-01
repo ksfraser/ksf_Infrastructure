@@ -75,6 +75,54 @@ into the resolution.
 Devel dev tools stay in the devel trees and never run in the container. Tests
 run on the host: `vendor/bin/phpunit --no-coverage` from each devel tree.
 
+### Modules with `path` repositories cannot be rebuilt inside `fa_modules/`
+
+Some modules declare Composer `path` repositories that point at **sibling devel
+trees** (`../ksf_RBAC`, `../ksf_CRM`, `../Traits`, `../ksfraser/html`). Those
+paths do not exist relative to `fa_modules/<module>/`, so step 2 fails outright:
+
+```
+The `url` supplied for the path (../ksf_CRM) repository does not exist
+```
+
+This cannot be fixed by deleting the `path` repos, because at least
+`ksfraser/rbac` is **not on Packagist** (404) — it exists only as the local
+`~/Documents/ksf_RBAC` tree. The workaround is to resolve in a scratch directory
+that is a *direct child of `~/Documents`* (so `../<repo>` resolves), then install
+the resulting vendor into `fa_modules/`:
+
+```bash
+# build beside the sibling devel trees
+BUILD=~/Documents/<module>__build
+rm -rf "$BUILD"; mkdir -p "$BUILD"
+cp ~/Documents/<module>/composer.json ~/Documents/<module>/composer.lock "$BUILD"/
+( cd "$BUILD" && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --no-interaction )
+
+# install into staging, dereferencing the path-repo symlinks
+cd ~/Documents/ksf_Infrastructure/fa_modules/<module>
+rm -rf vendor
+rsync -aL "$BUILD/vendor/" vendor/
+rm -rf "$BUILD"
+```
+
+Two things to know about that step:
+
+- **`rsync -aL` (dereference) is required.** Composer symlinks `path` repos into
+  `vendor/`. Copied as symlinks they point at `../../../ksf_RBAC` relative to
+  `fa_modules/<module>/vendor/`, which resolves nowhere and is unreachable from
+  inside the container anyway. Dereferencing makes the staged vendor
+  self-contained.
+- **Do not use `composer dump-autoload --optimize`** when regenerating the
+  autoloader afterwards. An optimize pass emits a PSR-4 classmap warning and
+  *drops* classes whose directory casing does not match the namespace (known:
+  `Ksfraser\HTML\JS\HtmlJsEventTrait` lives in `.../HTML/js/`), which silently
+  removes them from the autoloader. A plain (non-optimized) `dump-autoload`
+  matches every other module.
+
+Affected today: `ksf_FA_CRM`. Any new module that adds a `path` repository
+inherits this; prefer a Packagist or VCS repository for deployable dependencies
+and reserve `path` repos for devel-only conveniences.
+
 ## `fa-modules-doctor.sh` — audit and repair
 
 ```bash
