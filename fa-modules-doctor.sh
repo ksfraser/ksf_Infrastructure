@@ -90,69 +90,46 @@ PY
 }
 
 # A package is a landmine only if the INSTALLED version cannot be parsed by the
-# container's PHP. Deep-copy is the reason this takes versions rather than
-# names: 1.x is fine on 7.4, 2.x is not.
-version_is_php81_only() {
-  case "$1" in
-    phpunit/phpunit)          [ "${2%%.*}" -ge 10 ] 2>/dev/null ;;
-    myclabs/deep-copy)         [ "${2%%.*}" -ge 2 ] 2>/dev/null ;;
-    phar-io/manifest)         [ "${2%%.*}" -ge 2 ] 2>/dev/null ;;
-    phar-io/version)          [ "${2%%.*}" -ge 3 ] 2>/dev/null ;;
-    sebastian/*)              [ "${2%%.*}" -ge 5 ] 2>/dev/null ;;
-    *)                        return 1 ;;
-  esac
+# container's PHP. The verdict comes from the package's OWN declared
+# `require.php` constraint, evaluated by php-constraint.py -- never from a
+# hardcoded name+major table, which both over-reported (phar-io 2.x/3.x and
+# sebastian 5.x all declare ">=7.3" or "^7.2 || ^8.0") and under-reported
+# (doctrine/instantiator 2.0.0 "^8.1" was absent from the table entirely, and
+# myclabs/deep-copy 1.14.0 "^8.0" slipped past a "major >= 2" test).
+php_constraint_tool() {
+  # Resolved next to this script so it works from any cwd.
+  local here
+  here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  echo "$here/php-constraint.py"
+}
+
+# installed_php81: same verdict across the whole vendor tree, eager or not.
+# An installed-but-not-eager incompatible package is harmless today and only
+# matters if some future code path starts autoloading it, so it is reported,
+# not fixed. Emits the tool's full "<name> <version> requires php <constraint>"
+# line so callers can show the constraint, which is the actionable part.
+installed_php81() {
+  local mod="$1" j="$FA_MODULES_DIR/$mod/vendor/composer/installed.json"
+  [ -f "$j" ] || return 0
+  FA_PHP_TARGET="${CONTAINER_PHP:-7.4.33}" \
+    python3 "$(php_constraint_tool)" "$j" "${CONTAINER_PHP:-7.4.33}" 2>/dev/null
 }
 
 # eager_php81: PHP 8.1-only packages referenced in composer/autoload_files.php
 # that are ALSO present in vendor (an entry left behind by a --no-dev rebuild is
 # ignored, because nothing can load it).
 eager_php81() {
-  local mod="$1" f="$FA_MODULES_DIR/$1/vendor/composer/autoload_files.php"
-  [ -f "$f" ] || return 0
-  # Each line looks like:  'hash' => $vendorDir . '/phpunit/phpunit/src/...',
-  # Reduce to "<vendor>/<name>" with python: fragile to express in sed because
-  # the literal contains both quotes and a dollar sign.
-  python3 - "$f" "$FA_MODULES_DIR/$mod/vendor/composer/installed.json" <<'PY' 2>/dev/null
-import json, re, sys
-autoload, installed = sys.argv[1], sys.argv[2]
-try:
-    text = open(autoload, encoding="utf-8", errors="replace").read()
-    data = json.load(open(installed))
-except Exception:
-    sys.exit(0)
-vers = {p.get("name", ""): (p.get("version", "") or "").lstrip("v")
-        for p in data.get("packages", [])}
-pkgs = set()
-for m in re.finditer(r"\$vendorDir\s*\.\s*'([^']+)'", text):
-    pkgs.add("/".join(m.group(1).lstrip("/").split("/")[:2]))
-
-def bad(p):
-    v = vers.get(p)
-    if v is None:            # declared in files-autoload but not installed
-        return False
-    major = v.split(".")[0]
-    try:
-        major = int(major)
-    except ValueError:
-        return False
-    if p == "phpunit/phpunit":                 return major >= 10
-    if p == "myclabs/deep-copy":                return major >= 2
-    if p in ("phar-io/manifest",):              return major >= 2
-    if p in ("phar-io/version",):               return major >= 3
-    if p.startswith("sebastian/"):             return major >= 5
-    return False
-
-print("\n".join(sorted(f"{p} {vers[p]}" for p in pkgs if bad(p))))
-PY
-}
-
-# installed_php81: same verdict across the whole vendor tree, eager or not.
-# An installed-but-not-eager 8.1 package is harmless today and only matters if
-# some future code path starts autoloading it, so it is reported, not fixed.
-installed_php81() {
-  installed_versions "$1" | while read -r name ver; do
-    version_is_php81_only "$name" "$ver" && echo "$name $ver"
-  done
+  local mod="$1"
+  local f="$FA_MODULES_DIR/$1/vendor/composer/autoload_files.php"
+  local j="$FA_MODULES_DIR/$1/vendor/composer/installed.json"
+  [ -f "$f" ] && [ -f "$j" ] || return 0
+  # Each autoload_files.php line looks like:
+  #   'hash' => $vendorDir . '/phpunit/phpunit/src/...',
+  # Reducing that to "<vendor>/<name>" is fragile in sed (the literal contains
+  # both quotes and a dollar sign), so php-constraint.py does it in python.
+  FA_PHP_TARGET="${CONTAINER_PHP:-7.4.33}" \
+    python3 "$(php_constraint_tool)" --eager "$f" "$j" "${CONTAINER_PHP:-7.4.33}" \
+    2>/dev/null | awk '{print $1, $2}'
 }
 
 # lock_pkg_version <lockfile> <package> -> version string, or empty if absent
@@ -242,36 +219,23 @@ PINPY
 
 # needs_platform_reresolve <module>
 #
-# True when the installed vendor holds a package whose declared php floor is
-# strictly above the container runtime. `install --no-dev` cannot fix that: the
-# lock already names the bad version, so Composer faithfully reinstalls it.
-# Only an unambiguous floor ("^8.1", ">=8.0") counts, so this never fires on a
-# package that merely *permits* 8.x.
+# True when the installed vendor holds a package whose DECLARED php constraint
+# excludes the container runtime. `install --no-dev` cannot fix that: the lock
+# already names the bad version, so Composer faithfully reinstalls it.
+#
+# This used to regex the constraint looking for an "unambiguous floor"
+# ("^8.1", ">=8.0") and therefore MISSED "^8.1" entirely, because the pattern
+# only accepted a leading ">=", ">" or a bare digit. php-constraint.py
+# evaluates the constraint properly instead, so a caret floor is now caught
+# while a package that merely *permits* 8.x ("^7.2 || ^8.0") is still ignored.
 needs_platform_reresolve() {
   local mod="$1" j="$FA_MODULES_DIR/$mod/vendor/composer/installed.json"
   [ -f "$j" ] || return 0
-  python3 - "$j" "$CONTAINER_PHP_ID" <<'RERESOLVE'
-import json, re, sys
-try:
-    data = json.load(open(sys.argv[1]))
-except Exception:
-    sys.exit(1)                      # unreadable -> let composer rebuild
-target = int(sys.argv[2])
-for p in data.get("packages", []):
-    c = (p.get("require") or {}).get("php")
-    if not c:
-        continue
-    if re.search(r"\|\||\^7|~7|>= *7\.", c):
-        continue                     # admits 7.x -> fine
-    m = re.match(r"^(?:>=|>)?\s*(\d+)\.(\d+)", c)
-    if not m:
-        continue
-    floor = int(m.group(1)) * 10000 + int(m.group(2)) * 100
-    if floor > target:
-        print("      %s %s requires php %s" % (p["name"], p.get("version", ""), c))
-        sys.exit(0)
-sys.exit(1)
-RERESOLVE
+  local out
+  out=$(python3 "$(php_constraint_tool)" "$j" "${CONTAINER_PHP:-7.4.33}" 2>/dev/null)
+  [ -n "$out" ] || return 1              # nothing incompatible, or unreadable
+  printf '%s\n' "$out" | sed 's/^/      /'
+  return 0
 }
 
 repair_module() {
@@ -347,164 +311,6 @@ repair_module() {
   return 1
 }
 
-# ---------------------------------------------------------------------------
-# ensure_platform_pin <composer.json> <php-version>
-#
-# The root cause of every "works on my machine" FA 500: a module whose
-# composer.json says `php: >=7.4` but declares no `config.platform.php` gets its
-# dependencies resolved against whatever PHP runs `composer update` -- here, the
-# host's 8.1. Composer then writes a platform_check.php demanding 8.1 and
-# installs packages whose source PHP 7.4 cannot parse. Pinning the platform makes
-# "the container's PHP" part of the resolution, so a 7.4 vendor is the only
-# thing Composer can build.
-ensure_platform_pin() {
-  local cj="$1" want="$2" have
-  have=$(python3 -c "
-import json,sys
-try: print(json.load(open(sys.argv[1])).get('config',{}).get('platform',{}).get('php',''))
-except Exception: print('')" "$cj")
-  if [ "$have" = "$want" ]; then return 0; fi
-  if [ -n "$have" ]; then
-    echo "  ${YLW}note${RST} platform pin is $have, container is $want -- leaving the pin alone"
-    return 0
-  fi
-  echo "  ${YLW}no config.platform.php${RST} (resolves against the host PHP, not the container)"
-  if [ "$AUDIT_ONLY" -eq 1 ]; then return 0; fi
-  python3 - "$cj" "$want" <<'PINPY'
-import json, re, sys
-p = sys.argv[1]
-raw = open(p).read()
-d = json.loads(raw)
-d.setdefault("config", {}).setdefault("platform", {})["php"] = sys.argv[2]
-m = re.search(r"\n( +)\S", raw)
-step = len(m.group(1)) if m else 4
-out = json.dumps(d, indent=step, ensure_ascii=False)
-if raw.endswith("\n"):
-    out += "\n"
-open(p, "w").write(out)
-print("  -> pinned config.platform.php = " + sys.argv[2] + " in " + p)
-PINPY
-}
-
-# needs_platform_reresolve <module>
-#
-# True when the installed vendor holds a package whose declared php floor is
-# strictly above the container runtime. `install --no-dev` cannot fix that: the
-# lock already names the bad version, so Composer faithfully reinstalls it.
-# Only an unambiguous floor ("^8.1", ">=8.0") counts, so this never fires on a
-# package that merely *permits* 8.x.
-needs_platform_reresolve() {
-  local mod="$1" j="$FA_MODULES_DIR/$mod/vendor/composer/installed.json"
-  [ -f "$j" ] || return 0
-  python3 - "$j" "$CONTAINER_PHP_ID" <<'RERESOLVE'
-import json, re, sys
-try:
-    data = json.load(open(sys.argv[1]))
-except Exception:
-    sys.exit(1)                      # unreadable -> let composer rebuild
-target = int(sys.argv[2])
-for p in data.get("packages", []):
-    c = (p.get("require") or {}).get("php")
-    if not c:
-        continue
-    if re.search(r"\|\||\^7|~7|>= *7\.", c):
-        continue                     # admits 7.x -> fine
-    m = re.match(r"^(?:>=|>)?\s*(\d+)\.(\d+)", c)
-    if not m:
-        continue
-    floor = int(m.group(1)) * 10000 + int(m.group(2)) * 100
-    if floor > target:
-        print("      %s %s requires php %s" % (p["name"], p.get("version", ""), c))
-        sys.exit(0)
-sys.exit(1)
-RERESOLVE
-}
-
-repair_module() {
-  local mod="$1" dir="$FA_MODULES_DIR/$1"
-  [ -d "$dir" ] || { echo "  $mod: not present, skipped"; return 0; }
-
-  if [ ! -f "$dir/composer.json" ]; then
-    echo "  $mod: no composer.json, nothing to do"
-    return 0
-  fi
-
-  # A lock that is out of sync with composer.json cannot be installed from.
-  # Do NOT "fix" it with a blind `composer update`: that re-resolves prod
-  # versions and can pull 8.1-only releases into a 7.4 target.
-  if [ ! -f "$dir/composer.lock" ]; then
-    echo "  $mod:${YLW} no composer.lock${RST} - the lock is what makes the build reproducible."
-    echo "      Build it in the dev tree and redeploy:"
-    echo "        (cd ~/Documents/$mod && composer update --no-dev)"
-    return 1
-  fi
-
-  # The lock is the input to --no-dev. If the dev tree has been fixed since the
-  # last deploy, the staged lock is the stale one and `install` will either fail
-  # or (worse) silently succeed against a dev-master that composer.json no longer
-  # allows. Prefer the dev tree's lock when it satisfies the constraint.
-  local devlock="$HOME/Documents/$mod/composer.lock"
-  if [ -f "$devlock" ]; then
-    local devver deployver
-    devver=$(lock_pkg_version "$devlock" ksfraser/ksf-fa-common)
-    deployver=$(lock_pkg_version "$dir/composer.lock" ksfraser/ksf-fa-common)
-    if [ -n "$devver" ] && [ "$devver" != "$deployver" ] \
-       && lock_satisfies "$dir/composer.json" ksfraser/ksf-fa-common "$devver"; then
-      echo "  $mod:${YLW} staged lock is stale${RST} (ksf-fa-common $deployver vs dev tree $devver); refreshing"
-      cp "$devlock" "$dir/composer.lock"
-    fi
-  fi
-
-  if needs_platform_reresolve "$mod"; then
-    echo "  $mod: installed vendor has packages that exclude PHP $CONTAINER_PHP"
-    ensure_platform_pin "$dir/composer.json" "$CONTAINER_PHP"
-    local devjson="$HOME/Documents/$mod/composer.json"
-    [ -f "$devjson" ] && ensure_platform_pin "$devjson" "$CONTAINER_PHP"
-    echo "  $mod: re-resolving against the pinned platform ..."
-    if ! ( cd "$dir" && COMPOSER_ALLOW_SUPERUSER=1 \
-             composer update --no-dev --no-interaction ) >/tmp/fa-doctor.$$ 2>&1; then
-      echo "  $mod:${RED} re-resolve failed:${RST}"
-      sed -n '1,14p' /tmp/fa-doctor.$$ | sed 's/^/      /'
-      # `--no-dev` skips INSTALLING require-dev, not RESOLVING it, so an
-      # unresolvable dev constraint still fails the whole update. This is the
-      # single most common reason a 7.4-pinned re-resolve dies.
-      if grep -q 'phpunit/phpunit\[10' /tmp/fa-doctor.$$; then
-        echo "      ${YLW}known blocker:${RST} require-dev pins phpunit ^10, which needs PHP >= 8.1."
-        echo "      PHPUnit 9.6 is the last line that supports PHP 7.3+. In the dev tree:"
-        echo "        composer require --dev \"phpunit/phpunit:^9.6\" --no-update"
-      fi
-      if grep -q 'ksfraser/ksf-calendar.*requires php' /tmp/fa-doctor.$$; then
-        echo "      ${YLW}known blocker:${RST} the ksf-calendar library package declares php >= 8.0,"
-        echo "      so ksf_Calendar_UI cannot be built for a 7.4 target at all until that"
-        echo "      constraint is relaxed on the library side."
-      fi
-      return 1
-    fi
-    echo "  $mod:${GRN} re-resolved${RST}"
-    return 0
-  fi
-
-  echo "  $mod: rebuilding vendor with --no-dev ..."
-  if ( cd "$dir" && COMPOSER_ALLOW_SUPERUSER=1 \
-        composer install --no-dev --no-interaction ) >/tmp/fa-doctor.$$ 2>&1; then
-    local left removed
-    left=$(eager_php81 "$mod")
-    removed=$(grep -c 'Removing' /tmp/fa-doctor.$$ 2>/dev/null || echo 0)
-    if [ -n "$left" ]; then
-      echo "  $mod:${RED} still eager-loading:${RST} $(echo "$left" | tr '\n' ' ')"
-      return 1
-    fi
-    echo "  $mod:${GRN} repaired${RST} ($removed packages removed)"
-    return 0
-  fi
-
-  echo "  $mod:${RED} composer install failed:${RST}"
-  sed -n '1,12p' /tmp/fa-doctor.$$ | sed 's/^/      /'
-  echo "      The lock is likely out of date with composer.json (e.g. a package"
-  echo "      locked as dev-master but constrained to ^1.0). Fix the lock in the"
-  echo "      devel tree and redeploy; do NOT force composer update here."
-  return 1
-}
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -728,6 +534,16 @@ echo "  ${DIM}note: both pods bind-mount $FA_MODULES_DIR at /var/www/html/module
 echo "  ${DIM}      so a broken vendor is a defect in both, and is probed in both.${RST}"
 echo
 
+# The php-constraint evaluator is a gate: if it silently mis-evaluates, this
+# doctor either cries wolf or misses a real landmine. Prove it works before
+# trusting its verdict.
+if ! php_constraint_selftest=$(python3 "$(php_constraint_tool)" --self-test 2>&1); then
+  echo "${RED}FATAL: the php-constraint evaluator is broken:${RST}"
+  echo "$php_constraint_selftest" | sed 's/^/  /'
+  echo "  Refusing to report PHP-compatibility findings from a broken checker."
+  exit 3
+fi
+
 # Discover candidates: any module with a vendor dir, optionally filtered.
 if [ ${#ONLY_MODULES[@]} -gt 0 ]; then
   CANDIDATES=("${ONLY_MODULES[@]}")
@@ -820,23 +636,29 @@ for mod in "${CANDIDATES[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
-# Pass 2 (advisory): packages installed that a future code path could autoload.
+# Pass 2 (advisory): installed packages whose declared php constraint excludes
+# the container runtime, but which nothing autoloads today. They are harmless
+# until some future code path (or a test run) reaches them, so they are
+# reported rather than repaired.
 # ---------------------------------------------------------------------------
 LATENT=0
 for mod in "${CANDIDATES[@]}"; do
   case " ${NEEDS_REPAIR[*]-} " in *" $mod "*) continue ;; esac
   inst=$(installed_php81 "$mod")
   [ -n "$inst" ] || continue
-  printf '%s' "$inst" | sed -E 's/^[^ ]+ //' | sort -V | tr '\n' ' ' \
-    | sed "s/^/${DIM}latent      $mod  php8 pkgs present but never autoloaded: /; s/\$/${RST}/"
-  echo
+  # Show "<name> <version> (<constraint>)" so the finding is actionable: the
+  # constraint is the thing to fix in the dev tree, not the version number.
+  detail=$(printf '%s\n' "$inst" \
+    | sed -E 's/^([^ ]+) ([^ ]+) requires php (.+)$/\1 \2 (\3)/' \
+    | sort -V | tr '\n' ' ')
+  echo "${DIM}latent      $mod  cannot run on PHP ${CONTAINER_PHP:-7.4.33}, not autoloaded: ${detail}${RST}"
   LATENT=$((LATENT+1))
 done
 
 echo
 if [ ${#NEEDS_REPAIR[@]} -eq 0 ]; then
   echo "${GRN}All $(( ${#CANDIDATES[@]} )) autoloaders load on every instance.${RST}"
-  [ "$LATENT" -gt 0 ] && echo "${DIM}($LATENT module(s) carry PHP 8 packages that nothing autoloads today)${RST}"
+  [ "$LATENT" -gt 0 ] && echo "${DIM}($LATENT module(s) hold packages that exclude PHP ${CONTAINER_PHP:-7.4.33}; nothing autoloads them today)${RST}"
   exit 0
 fi
 
