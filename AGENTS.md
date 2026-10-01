@@ -236,6 +236,38 @@ bind fix in the repo-local notes).
 - `activate_hooks($pkg, $comp, true)` then calls the module's
   `hooks_<pkg>::activate_extension($comp, false)`.
 
+**`Refresh=Update` is a full-state replace, not a delta.** The handler toggles
+every listed row: `$ext['active'] ^ check_value('Active'.$i)`. A module that is
+active but whose checkbox is **not** submitted gets **deactivated**. So a POST
+must include `Active<i>=1` for *every* module that should end up active, not just
+the ones being changed. Submitting only the one box you want to turn on silently
+turns everything else off.
+
+**`Delete<i>` / `Active<i>` are GLOBAL array keys, not company positions.** They
+index the array literal in `company/installed_extensions.php`, so the ids get
+sparse (`0,1,5,15,16,...`) and shift every time something is deleted. Never
+compute a control name from the company registry or from a previous response —
+re-parse the page and match the package name in the same row. (`Delete` with no
+number is a literal key `0`-less name, i.e. a genuinely different id.)
+
+**Fixing a stored `'-'` version goes through the UI, not the file.** A module
+already registered keeps its stale version, so re-activating it fails the gate
+forever. `local_extension()` (commit `6a00b5d`) now reads `_init/config` via
+FA's own `get_control_file()`, so the repair is: `Delete<i>` → `Local<pkg>` →
+activate. That is safe on a bind-mounted `fa_modules/` — `uninstall_package()`
+only touches `PKG_CACHE_PATH`, and local modules are not in the package cache,
+so the module directory and its `vendor/` survive.
+
+**Which registry file is authoritative.** `get_company_extensions(-1)` reads
+`/var/www/html/installed_extensions.php`; `update_extensions()` writes that
+global file and then copies it down to each `company/<id>/`, preserving only
+`active` **by array key**. So a stale global poisons every company registry on
+any install or activate. Verify the global file is actually the bind-mounted one
+by comparing sizes (`stat -c%s` on both sides) — on `ksfii_app-fa` the bind is
+NOT effective and FA writes a container-local copy, so the repo's
+`FA/ksfii_app/installed_extensions.php` is stale and a container recreate would
+lose the real global list. `ksf_fa` does bind correctly.
+
 **SQL prefix convention in module `sql/` files**: the install engine
 `db_import()` (`admin/db/maintenance_db.inc`) replaces ONLY the literal
 `0_` → `TB_PREF`. It does NOT touch `{TB_PREF}` or `@TB_PREF@` (those only
