@@ -44,15 +44,22 @@
   changed_when: false
   failed_when: false
 
+# A bind is unhealthy when the two inodes differ, when either side reports
+# MISSING, or when the probe produced an unparseable pair.
+#
+# MISSING on BOTH sides must still be flagged: that is precisely the silent
+# "inspect shows 6 mounts but /proc/mounts has 3" failure, where the container
+# simply has no such file and the host never had one either. Comparing the two
+# MISSING tokens for equality would report that bind as healthy.
 - name: Collect bind inode mismatches
   ansible.builtin.set_fact:
-    fa_bind_mismatched: >-
-      {{ (fa_bind_mismatched | default([])) + (
-          ([ item.stdout.split()[2] ] if (item.stdout.split() | length) == 3
-             and item.stdout.split()[0] != item.stdout.split()[1] else [])
-          + ([ item.stdout.split()[2] ] if (item.stdout.split() | length) < 3 else [])
-      ) }}
-  loop: "{{ fa_bind_cmp.results }}"
+    fa_bind_mismatched: "{{ fa_bind_mismatched | d([]) + [item.item.host] }}"
+  loop: "{{ fa_bind_cmp.results | d([]) }}"
   loop_control:
-    label: "{{ item.item.host }}"
-  when: fa_bind_mismatched is not defined or true
+    label: "{{ item.item.host | d('') }}"
+  when:
+    - item.stdout is defined
+    - >-
+      (item.stdout.split() | length) != 2
+      or item.stdout.split()[0] != item.stdout.split()[1]
+      or 'MISSING' in item.stdout.split()

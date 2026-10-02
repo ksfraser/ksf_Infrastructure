@@ -57,9 +57,38 @@ switch to `ksf_payment_destinations/` immediately.
   `ksf_Infrastructure/fa-modules-doctor.sh`, which probes the real container
   rather than guessing package versions. Full procedure in
   `ksf_Infrastructure/AGENTS_APPENDIX.md`.
+- **Per-environment port map (decided 2026-10-01) — the target layout.** Each
+  environment takes a base and each service a fixed slot offset, so a whole
+  stack can be relocated by changing one number:
+
+  | slot | service | prod | UAT | Integration | dev |
+  |---|---|---|---|---|---|
+  | base | *(reserved — `sso`/`kube`-class services)* | 8080 | 8090 | 9000 | 9010 |
+  | +1 | *(reserved)* | 8081 | 8091 | 9001 | 9011 |
+  | +2 | **FrontAccounting** | 8082 | 8092 | 9002 | 9012 |
+  | +3 | **Nextcloud** | 8083 | 8093 | 9003 | 9013 |
+  | +4 | **WordPress** | 8084 | 8094 | 9004 | 9014 |
+  | +5 | **phpMyAdmin** | 8085 | 8095 | 9005 | 9015 |
+
+  Slots `base` and `+1` are deliberately left unallocated because those are the
+  numbers other roles in `/root/.ansible/roles` want: `ksf.sso` binds `8080`
+  (`sso_http_port`), and `ksf.kube`/`ksf.suitecrm`/`mrlesmithjr.netdata` bind
+  `9000`. Leaving `base`/`+1` free means a stack can host those roles without
+  moving the application services. Two soft overlaps remain for *other* roles'
+  own defaults and only matter if those roles are added to a stack later:
+  `ksf.qbittorrent` (`qbittorrent_port: 8085`) and `ksf.ocrmypdf`
+  (`ocrmypdf_webservice_port: 8095`). MariaDB is not slotted yet — it currently
+  publishes `3307` (container) against the host's own `3306`.
+
+  **RUNNING OVERLAP — the live containers do NOT match this map yet.** The
+  ports below are pre-migration and are superseded by the table when the stacks
+  are rebuilt by the Ansible role. Do not "fix" a live pod by hand to match the
+  table; rebuild it.
+
 - **Two FA containers run at once and share one vendor tree.** Rootful
   `ksfii_app-fa` on **8090** (overlay `FA/ksfii_app`) and rootless `ksf-fa` on
-  **8080** (overlay `FA/ksf_fa`, driven as `su - kevin -c`). Both are PHP
+  **8080** (overlay `FA/ksf_fa`, driven as `su - kevin -c`). **These two ports
+  are pre-migration leftovers, not the plan** — see the port map above. Both are PHP
   7.4.33 and both bind-mount `ksf_Infrastructure/fa_modules` at
   `/var/www/html/modules`, so a bad vendor breaks both, but extension activation
   is **per-instance** (separate `company/<id>/installed_extensions.php`). A module
@@ -380,7 +409,8 @@ mount). Target look: **Integration = RED**, **UAT = YELLOW**, default = original
 BLUE. The recipe applies `default.css.<fa_theme>` → `default.css` (never edits
 the variants). `fa_theme` defaults to `default` and **nothing sets it per
 environment** — both pods currently serve blue, so the Integration=RED /
-UAT=YELLOW target is still unimplemented. `tasks/scaffold.yml` only creates
-`default.css.default` and `default.css.red`; it does **not** create
-`default.css.yellow`, so selecting `fa_theme: yellow` fails on a fresh pod.
-Container mounts are defined once, in the ansible role's `container-run.yml`.
+UAT=YELLOW target is still unimplemented; setting `fa_theme` per environment in
+the inventory is the remaining step. `tasks/scaffold.yml` now creates all three
+variants (`c7649b1`; it previously created only `.default` and `.red`, so
+`fa_theme: yellow` failed on a fresh pod). Container mounts are defined once, in
+the ansible role's `container-run.yml`.
