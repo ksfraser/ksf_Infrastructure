@@ -309,6 +309,43 @@ the file binds (legacy `compose.yaml` deleted, `start-fa.sh` rewritten). Rule:
 after any container create/modify, verify with
 `podman exec <c> grep -l config_db /proc/mounts` — don't trust `inspect`.
 
+**ROOTFUL single-file binds go dead on any inode-replacing write (root cause
+found 2026-10-01).** The *same* dead-inode failure hit `ksfii_app-fa` (8090),
+and this time the real cause is confirmed: a single-file bind resolves to one
+**inode**, not to the path. `sed -i`, `rsync` (without `--inplace`), `git
+checkout`, or any write-then-rename tool **replaces the inode**, so the
+container keeps reading the *unlinked original* forever while the host path
+holds brand-new content. Symptom set on 8090: registry stale (15 host entries
+vs the container's live 16, missing `ksf_Calendar`), `default.css` stale, and
+`config_db.php` stale — all three with `podman inspect` naming the correct
+source path, so the bind *looks* correct. Diagnosis is `stat -c%i` on both
+sides, never `inspect`. Rules:
+- Never edit a single-file bind target with `sed -i`. Use `cat src > dst` /
+  `tee` (truncate-in-place, keeps the inode) or `rsync --inplace`.
+- After ANY container create **or** after editing `config_db.php`,
+  `installed_extensions.php`, or `default.css`, re-run the inode check on all
+  six mounts. An inode-only change is invisible to a diff and to HTTP probes.
+- Recover by recreating the container *only after* fixing the host files, since
+  recreating makes the binds effective for the first time and will hand the
+  host's content to the app immediately.
+- `ksfii_app-fa` is NOT built by `podman/ksf-compose.yaml` (that file describes
+  a different name/image). It was created ad-hoc as a plain
+  `podman run --network ksfii_app -p 8090:80 -w /var/www/html`, and the
+  `ksfii_app-pod`-era compose/ansible recipes must not be trusted as the source
+  of truth. The `ksfii-pod` itself is stopped and unrelated.
+
+**The two stacks have DIFFERENT DB credentials — never copy one
+`config_db.php` over the other (found 2026-10-01).** Rootless `ksf-fa` (8080)
+talks to container `ksf-mariadb` with `ksf_user` / `ksfuser2024!`; rootful
+`ksfii_app-fa` (8090) talks to `ksfii_app-mariadb` with `ksf_user` /
+`ksfuser2026!` (root pw `m1l1ce_db_root_2026!`, DB `ksf_fa`, 177 tables). The
+rootful host copy had been seeded from the rootless file, so it named the
+non-resolving host `ksf-mariadb` with the rootless password; that is why the
+bind was dangerous to fix — recreating alone would have handed FA a config it
+could not connect with. Change the DB host *and* password together, then
+verify from inside the container by `include`-ing the real
+`/var/www/html/config_db.php` and counting `information_schema` tables.
+
 **FA theme customization (decided 2026-09, cross-module)**
 
 Per-pod theme overlays **mirror the native FA tree** (`/var/www/html`), so the
