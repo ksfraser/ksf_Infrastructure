@@ -1,0 +1,39 @@
+---
+# verify_binds.yml - assert every FA bind resolves to the live host inode,
+# and self-repair by re-creating the container when it does not.
+#
+# Why this exists: several tasks in this role and in the ksfii_app role write
+# the three single-file bind targets (config_db.php, installed_extensions.php,
+# default.css) AFTER the container has already been started. Ansible's
+# template/copy modules write-then-rename, which replaces the inode and kills
+# the bind. Rather than depend on fragile task ordering, the play runs this
+# after every role has had its turn: it detects the dead bind and re-creates
+# the container (same spec, via container-run.yml) so the bind becomes
+# effective. This is the machine-checked enforcement of the rule in AGENTS.md.
+
+- include_tasks: bind-inodes.yml
+
+- name: Report dead bind(s) detected
+  ansible.builtin.debug:
+    msg: >-
+      Dead bind(s): host inode != container inode for
+      {{ fa_bind_mismatched | join(', ') }}.
+      Re-creating {{ fa_container_name }} so the binds become effective.
+  when: fa_bind_mismatched | length > 0
+
+- include_tasks: container-run.yml
+  when: fa_bind_mismatched | length > 0
+
+- include_tasks: bind-inodes.yml
+
+- name: Assert every FA bind resolves to the live host inode
+  ansible.builtin.assert:
+    that:
+      - fa_bind_mismatched | length == 0
+    fail_msg: >-
+      Still dead after container re-create: {{ fa_bind_mismatched | join(', ') }}.
+      The host file is missing, or something is rewriting it after the
+      container starts. Check ownership/writability of {{ fa_pod_dir }} and
+      that no task writes a bind target after container-run.yml.
+    success_msg: "All {{ fa_bind_map | length }} FA bind mounts resolve correctly."
+  when: fa_bind_mismatched is defined

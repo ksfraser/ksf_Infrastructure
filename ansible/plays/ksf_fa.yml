@@ -10,3 +10,6 @@
   roles:
     - role: ksf.frontaccounting
     - role: ksfii_app
+  post_tasks:
+    - name: Verify (and repair) FA bind mounts
+      ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml

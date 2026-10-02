@@ -1,0 +1,37 @@
+---
+# container-run.yml - (re)create the FA container with the canonical mount set.
+#
+# Split out of container.yml so that verify_binds.yml can re-create the
+# container using the EXACT same spec when it detects a dead single-file bind.
+# Do not duplicate the podman run here; this file is the single source of truth.
+
+- name: Remove existing FA container
+  command: podman rm -f "{{ fa_container_name }}"
+  failed_when: false
+  changed_when: false
+
+- name: Run FA container (canonical mount set)
+  command: >
+    podman run -d
+    --name "{{ fa_container_name }}"
+    --hostname "{{ fa_hostname }}"
+    --network "{{ fa_network }}"
+    -p "{{ fa_port }}:{{ fa_container_port }}"
+    -v "{{ fa_source_tree }}:/var/www/html:ro,Z"
+    -v "{{ fa_modules_dir }}:/var/www/html/modules:rw,Z"
+    -v "{{ fa_pod_dir }}/config_db.php:/var/www/html/config_db.php:rw,Z"
+    -v "{{ fa_pod_dir }}/installed_extensions.php:/var/www/html/installed_extensions.php:rw,Z"
+    -v "{{ fa_pod_dir }}/company:/var/www/html/company:rw,Z"
+    -v "{{ fa_pod_dir }}/themes/default/default.css:/var/www/html/themes/default/default.css:rw,Z"
+    "{{ fa_image }}" apache2-foreground
+  register: fa_container_run
+
+- name: Wait for FA container to be running
+  command: >
+    podman ps --filter "name={{ fa_container_name }}" --filter status=running
+    --format "{% raw %}{{.Names}}{% endraw %}"
+  register: fa_run_check
+  retries: 10
+  delay: 3
+  until: fa_run_check.stdout == fa_container_name
+  changed_when: false

@@ -328,11 +328,24 @@ sides, never `inspect`. Rules:
 - Recover by recreating the container *only after* fixing the host files, since
   recreating makes the binds effective for the first time and will hand the
   host's content to the app immediately.
-- `ksfii_app-fa` is NOT built by `podman/ksf-compose.yaml` (that file describes
-  a different name/image). It was created ad-hoc as a plain
-  `podman run --network ksfii_app -p 8090:80 -w /var/www/html`, and the
-  `ksfii_app-pod`-era compose/ansible recipes must not be trusted as the source
-  of truth. The `ksfii-pod` itself is stopped and unrelated.
+- `podman/ksf-compose.yaml` was **DELETED 2026-10-01**. It was a second,
+   competing container spec that nothing referenced; `podman-compose` 1.0.6
+   could not parse it, and its `ksfii-app` service disagreed with the real
+   container on image (`ksf-iiapp:latest` vs `ksf-fa:php7.4`), name
+   (`ksfii-app` vs `ksfii_app-fa`) and network (`ksf_network` vs `ksfii_app`).
+   Do not reintroduce it. The single source of truth for the FA container spec
+   is `ansible/roles/ksf.frontaccounting/tasks/container-run.yml`.
+- The provisioner also needs `ansible/ansible.cfg`. Without it Ansible resolves
+   roles from `/root/.ansible/roles` (a DIFFERENT repo, `ksfraser/ksf_ansible`)
+   and cannot find `ksf.mariadb`/`ksfii_app` at all, because the plays live in
+   `ansible/plays/` while the roles live in `ansible/roles/`. That is why these
+   containers were built by hand rather than by the playbook.
+- `ansible/roles/ksf.frontaccounting/tasks/verify_binds.yml` runs as `post_tasks`
+   on every FA play: it compares each bind's host inode against the container's,
+   and re-creates the container when they differ. This is what stops the
+   `ksfii_app` role from silently re-breaking the global registry bind by
+   templating it after the container is already running. Do not rely on task
+   ordering to keep binds alive — verify instead.
 
 **The two stacks have DIFFERENT DB credentials — never copy one
 `config_db.php` over the other (found 2026-10-01).** Rootless `ksf-fa` (8080)
@@ -365,7 +378,9 @@ Decisions: private modules mount **only** the `default.css` file; do not overlay
 `renderer.php`/`index.php`/`images/` (those stay read-only from the `2.4.3`
 mount). Target look: **Integration = RED**, **UAT = YELLOW**, default = original
 BLUE. The recipe applies `default.css.<fa_theme>` → `default.css` (never edits
-the variants). Container mounts were historically split across
-`podman/ksf-compose.yaml` vs the ansible role's `frontaccounting-container.yml`;
-the two recipes currently differ — reconcile before trusting either as source
-of truth.
+the variants). `fa_theme` defaults to `default` and **nothing sets it per
+environment** — both pods currently serve blue, so the Integration=RED /
+UAT=YELLOW target is still unimplemented. `tasks/scaffold.yml` only creates
+`default.css.default` and `default.css.red`; it does **not** create
+`default.css.yellow`, so selecting `fa_theme: yellow` fails on a fresh pod.
+Container mounts are defined once, in the ansible role's `container-run.yml`.

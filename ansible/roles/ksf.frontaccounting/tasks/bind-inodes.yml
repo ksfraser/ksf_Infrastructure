@@ -1,0 +1,58 @@
+---
+# bind-inodes.yml - compare host vs container inode for every FA bind mount.
+#
+# A podman bind resolves to an INODE, not to a path. Any write-then-rename
+# operation (ansible template/copy, sed -i, rsync without --inplace,
+# git checkout) replaces the inode at the host path, which silently orphans
+# the inode the container is bound to. `podman inspect` still shows the correct
+# source path, so the bind looks healthy while the app keeps reading stale
+# content. Directory binds are inode-stable and are checked too, as a cheap
+# regression net.
+#
+# Sets: fa_bind_mismatched  (list of host paths whose inode differs)
+
+- name: Build FA bind map (host path -> container path)
+  ansible.builtin.set_fact:
+    fa_bind_map:
+      - host: "{{ fa_source_tree }}"
+        container: "/var/www/html"
+      - host: "{{ fa_modules_dir }}"
+        container: "/var/www/html/modules"
+      - host: "{{ fa_pod_dir }}/config_db.php"
+        container: "/var/www/html/config_db.php"
+      - host: "{{ fa_pod_dir }}/installed_extensions.php"
+        container: "/var/www/html/installed_extensions.php"
+      - host: "{{ fa_pod_dir }}/company"
+        container: "/var/www/html/company"
+      - host: "{{ fa_pod_dir }}/themes/default/default.css"
+        container: "/var/www/html/themes/default/default.css"
+
+- name: Compare host and container inode for each FA bind
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -c
+      - >-
+        printf '%s %s %s\n'
+        "$(stat -c%i {{ item.host | quote }} 2>/dev/null || echo MISSING)"
+        "$(podman exec {{ fa_container_name }} stat -c%i {{ item.container | quote }} 2>/dev/null || echo MISSING)"
+        {{ item.host | quote }}
+  loop: "{{ fa_bind_map }}"
+  loop_control:
+    label: "{{ item.host }}"
+  register: fa_bind_cmp
+  changed_when: false
+  failed_when: false
+
+- name: Collect bind inode mismatches
+  ansible.builtin.set_fact:
+    fa_bind_mismatched: >-
+      {{ (fa_bind_mismatched | default([])) + (
+          ([ item.stdout.split()[2] ] if (item.stdout.split() | length) == 3
+             and item.stdout.split()[0] != item.stdout.split()[1] else [])
+          + ([ item.stdout.split()[2] ] if (item.stdout.split() | length) < 3 else [])
+      ) }}
+  loop: "{{ fa_bind_cmp.results }}"
+  loop_control:
+    label: "{{ item.item.host }}"
+  when: fa_bind_mismatched is not defined or true

@@ -1,7 +1,11 @@
 ---
-# ksfii-app.yml - full ksfii_app pod: MySQL + FA + WP
-# USAGE: ansible-playbook -i inventories/local ksfii-app.yaml \
-#          -e pod_name=ksfii_app
+# ksfii_app.yml - full ksfii_app pod: MySQL + FA + WP
+#
+# Ordering note: the FA container is created by ksf.frontaccounting, but the
+# ksfii_app role then rewrites the global extension registry, which is a
+# single-file bind target. Rewriting it replaces the inode and silently kills
+# the bind. Rather than rely on task order, post_tasks re-check every bind and
+# re-create the container if any bind went stale (see verify_binds.yml).
 - import_playbook: mysql.yml
 
 - name: "FA for {{ pod_name | default('ksfii_app') }}"
@@ -10,6 +14,9 @@
   roles:
     - role: ksf.frontaccounting
     - role: ksfii_app
+  post_tasks:
+    - name: Verify (and repair) FA bind mounts
+      ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
 
 - name: "WordPress for {{ pod_name | default('ksfii_app') }}"
   hosts: localhost

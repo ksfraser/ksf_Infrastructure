@@ -1,7 +1,17 @@
 #!/bin/bash
-# Rootless podman under user kevin (NOT root, NOT compose). Same spec as
-# ksf-compose.yaml's frontaccounting service (verified 2026-09 rootless).
-# WARNING: single-file binds only apply on a FRESH create - verify with:
+# Rootless podman under user kevin. MANUAL FALLBACK ONLY.
+#
+# The authoritative way to create this container is:
+#   ansible/roles/ksf.frontaccounting/tasks/container-run.yml
+# via `cd ansible && ansible-playbook ksf-fa.yaml`. This script is kept
+# because it is the verified 2026-09 rootless recipe and the rootless pod is
+# currently driven by hand (the roles assume `become: true`, i.e. rootful).
+# It mirrors the ansible mount set; if you change one, change both.
+#
+# WARNING: single-file binds only apply on a FRESH create, and any later
+# write-then-rename to a bind target (ansible template/copy, sed -i, rsync
+# without --inplace, git checkout) silently orphans the inode the container
+# holds. Verify with ./fa-modules-doctor.sh --audit, or:
 #   sudo -n -u kevin podman exec ksf-fa grep config_db /proc/mounts
 podman run -d \
   --name ksf-fa \

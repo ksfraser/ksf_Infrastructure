@@ -47,21 +47,28 @@
     mode: '0666'
     owner: root
 
-- name: Template global installed_extensions.php (clean)
+# The extension registries are owned by FA itself (admin/inst_module.php), which
+# rewrites them on every install/activate. Scaffold them ONLY when missing so a
+# re-run never wipes live activation state. The ksfii_app role owns populating
+# them for a fresh environment. `force: false` also keeps the inode stable when
+# the file already exists, which matters because both files are bind-mounted.
+- name: Template global installed_extensions.php (only if absent)
   become: true
   template:
     src: installed_extensions.php.j2
     dest: "{{ fa_pod_dir }}/installed_extensions.php"
     mode: '0666'
     owner: root
+    force: false
 
-- name: Create per-company installed_extensions.php (clean)
+- name: Create per-company installed_extensions.php (only if absent)
   become: true
   template:
     src: installed_extensions.php.j2
     dest: "{{ fa_pod_dir }}/company/0/installed_extensions.php"
     mode: '0666'
     owner: root
+    force: false
 
 - name: Check default theme variant exists
   stat:

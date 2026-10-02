@@ -88,37 +88,45 @@ cd ansible
 ansible-playbook -i inventories/local ksf-playbook.yaml --ask-become-pass
 ```
 
-## Manual Deployment (Podman)
+## Deployment (Podman)
 
-FA (and Podman 4.x) is managed with **direct `podman run`**, not compose:
-`podman-compose` (1.0.6 on this host) fails to parse the `${VAR:-default}`
-top-level volume names in `ksf-compose.yaml` ("volume [...] not defined in top
-level") — so `ksf-compose.yaml` is the **source of truth for the container
-spec**, but the runnable path is `start-fa.sh`.
-
-Copy `.env.example` to `.env` and set:
+FA and Podman 4.x are provisioned by **Ansible**, which issues direct
+`podman run` commands. `ansible/ansible.cfg` is required: without it Ansible
+resolves roles from a *different* repo (`/root/.ansible/roles`) and the
+provisioner cannot run at all.
 
 ```bash
-# podman/.env
-FA_PORT=8080
-WP_PORT=8091
-VOLUME_PREFIX=my_unique_prefix   # REQUIRED - must be unique per deployment!
-MARIADB_ROOT_PASSWORD=ksfroot2024!
-MARIADB_DATABASE=ksf_fa
-MARIADB_USER=ksf_user
-MARIADB_PASSWORD=ksfuser2024!
+cd ansible
+ansible-playbook -i inventories/ksfii.yaml ksfii-app.yaml   # MariaDB + FA + WP
+ansible-playbook -i inventories/ksfii.yaml ksf-fa.yaml      # MariaDB + FA only
 ```
 
-Then start (rootless direct-run — the verified recipe; FA uses per-pod
-`../FA/<pod>/*` binds, NOT a named data volume):
+`ansible/roles/ksf.frontaccounting/tasks/container-run.yml` is the **single
+source of truth** for the FA container spec (image, network, ports, mounts).
+Every play ends with `verify_binds.yml`, which compares the host inode of each
+bind target against the inode the container is actually bound to and
+re-creates the container if any single-file bind went stale (see AGENTS.md).
+
+> A `podman/ksf-compose.yaml` used to sit alongside this as a competing "source
+> of truth". It was **deleted** on 2026-10-01: nothing referenced it,
+> `podman-compose` 1.0.6 could not parse its `${VAR:-default}` volume names, and
+> its `ksfii-app` service disagreed with the real container on image, name and
+> network. Two specs for one container is how the dead-bind class of bug got
+> in. Do not reintroduce it.
+
+Manual fallback only (rootless pod, the verified 2026-09 recipe):
 
 ```bash
 cd podman
 bash start-fa.sh
 ```
 
-After starting, ALWAYS verify the single-file binds actually applied (rootless
-podman has been caught silently dropping them — see Troubleshooting):
+After starting, ALWAYS verify the single-file binds actually applied. Either run
+the doctor (reports `DEAD BIND(S)` per instance):
+```bash
+./fa-modules-doctor.sh --audit
+```
+or check manually:
 ```bash
 sudo -n -u kevin podman exec ksf-fa grep -l config_db /proc/mounts
 ```

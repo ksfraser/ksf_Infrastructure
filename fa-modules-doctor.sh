@@ -453,6 +453,47 @@ instance_port() {
   printf '%s\n' "$ALL_INSTANCES" | awk -F: -v n="$1" '$1==n{print $2}'
 }
 
+# instance_overlay -> the host overlay dir (FA/<pod>) backing an instance.
+instance_overlay() {
+  printf '%s\n' "$ALL_INSTANCES" | awk -F: -v n="$1" '$1==n{print $3}'
+}
+
+# check_binds <instance> -> report any FA bind whose host inode differs from
+# the inode the container is actually bound to.
+#
+# A podman bind resolves to an INODE, not to a path. Ansible's template/copy
+# (and sed -i, rsync without --inplace, git checkout) write-then-rename, which
+# replaces the inode at the host path and silently orphans the one the container
+# holds. `podman inspect` still shows the correct source path, so the bind looks
+# healthy while FA serves stale content -- which is how a stale extension
+# registry (missing a just-activated module) survives a "successful" deploy.
+# Directory binds are inode-stable and are checked too as a cheap net.
+#
+# Prints one line per bad bind to stdout; returns 0 always (reporting only).
+check_binds() {
+  local inst="$1" overlay h c
+  overlay="$(instance_overlay "$inst")"
+  [ -n "$overlay" ] || return 0
+  local pairs=(
+    "FA/2.4.3:/var/www/html"
+    "fa_modules:/var/www/html/modules"
+    "$overlay/config_db.php:/var/www/html/config_db.php"
+    "$overlay/installed_extensions.php:/var/www/html/installed_extensions.php"
+    "$overlay/company:/var/www/html/company"
+    "$overlay/themes/default/default.css:/var/www/html/themes/default/default.css"
+  )
+  local pair src dst
+  for pair in "${pairs[@]}"; do
+    src="${pair%%:*}"
+    dst="${pair##*:}"
+    [ -e "$src" ] || continue
+    h=$(stat -c%i "$src" 2>/dev/null) || continue
+    c=$(pod_exec "$inst" stat -c%i "$dst" 2>/dev/null) || c="MISSING"
+    [ "$h" != "$c" ] && printf '    %s  host=%s container=%s\n' "$dst" "$h" "${c:-MISSING}"
+  done
+  return 0
+}
+
 # discover_instances -> sets the global INSTANCES (newline-separated) to the
 # containers podman can actually see. Deliberately NOT called via $(...): a
 # command substitution is a subshell, which would discard the POD_OWNER memo
@@ -498,6 +539,14 @@ while read -r inst; do
   pv=$(pod_exec "$inst" php -r 'echo PHP_VERSION;' 2>/dev/null)
   if [ -n "$pv" ]; then
     echo "  ${GRN}ok${RST}      $inst  PHP $pv  http://localhost:$(instance_port "$inst")/"
+    bad=$(check_binds "$inst")
+    if [ -n "$bad" ]; then
+      # Not fatal on its own (an audit should still report on modules), but it is
+      # a real defect and must be visible on every run.
+      echo "  ${YLW}warn${RST}    $inst  DEAD BIND(S) - host inode != container inode:"
+      printf '%s\n' "$bad"
+      echo "            fix the host file, then re-create the container (see AGENTS.md)"
+    fi
     ALIVE="${ALIVE:+$ALIVE
 }$inst"
   else
