@@ -224,6 +224,58 @@ nothing about module health — use the doctor's in-container autoload probe.
   `'planned'` (not `null`), and `getFreeBusy()` returns ISO-8601 (`T` separator).
 - **`ksf_FA_Calendar`** (the FA module, distinct from the `ksfraser/ksf-calendar`
   library) is platform-pinned and loads cleanly.
+- **`ksf_FA_CRM`** — pinned (`config.platform.php = 7.4.33`), `require-dev` moved
+  to PHPUnit `^9.6`, `phpunit.xml` converted from the 10 schema to 9.6, and
+  `_init/config` `PHP-Version` corrected 7.3 → 7.4. The stale lock had also been
+  silently omitting the declared `ksfraser/ksf-fa-common` and
+  `ksfraser/fa-classes` requirements; the pinned resolve installs both. 115 tests
+  / 275 assertions pass. This module needs the `path`-repository rebuild
+  procedure above, because `ksfraser/rbac` is not on Packagist.
+- **`ksf_FA_DataIntegrity`, `ksf_FA_Upc2Item`, `ksf_payment_destinations`** —
+  all three were missing `config.platform.php`, so `composer update` resolved
+  against the host's PHP 8.1 and installed PHP-8-only packages into a 7.4
+  target. All three are now pinned and rebuilt: `ksf_FA_DataIntegrity`
+  `90d92ad`, `ksf_FA_Upc2Item` `844d530`, `ksf_payment_destinations` `f1c2999`.
+  `ksf_FA_DataIntegrity` additionally had a `phpunit.xml` written for PHPUnit 10
+  (`<source>`, `cacheDirectory`) while requiring `phpunit ^9`, so the config
+  failed XSD validation and **the suite silently ran nothing at all** — worth
+  checking for on any other module, since the only symptom is a
+  "configuration file did not pass validation" warning. That module has no tests
+  (`tests/Unit` is empty), so it is still empty, but it now at least validates.
+  `ksf_FA_Upc2Item`: 25 tests / 44 assertions pass.
+  `ksf_payment_destinations`: 43 tests / 57 assertions with 6 skipped.
+- **Current status: zero latent PHP-compatibility findings across all 26
+  modules.** Every deployed vendor's installed packages admit PHP 7.4.33.
+
+### The "latent php8 package" check was wrong, and is now constraint-based
+
+The doctor used to decide "can this package run on the container's PHP?" from a
+hardcoded name+major table (`phpunit/phpunit >= 10`, `sebastian/* >= 5`,
+`phar-io/manifest >= 2`, …). That disagreed with the `require.php` constraint
+Composer had already recorded in `vendor/composer/installed.json`, in **both**
+directions:
+
+| package | version | declared `php` | old verdict |
+|---|---|---|---|
+| `phar-io/manifest` | 2.0.4 | `^7.2 \|\| ^8.0` | flagged (wrong) |
+| `phar-io/version` | 3.2.1 | `^7.2 \|\| ^8.0` | flagged (wrong) |
+| `sebastian/environment` | 5.1.5 | `>=7.3` | flagged (wrong) |
+| `sebastian/global-state` | 5.0.8 | `>=7.3` | flagged (wrong) |
+| `doctrine/instantiator` | 2.0.0 | `^8.1` | **missed** (not in the table) |
+| `myclabs/deep-copy` | 1.14.0 | `^8.0` | **missed** (major 1, table wanted >= 2) |
+
+It reported 30 offending packages across 9 modules; the real number was 4 across
+3, and the two most dangerous were among the misses. A third checker,
+`needs_platform_reresolve`, regexed for an "unambiguous floor" and so never
+matched `^8.1` at all, meaning those modules would never have been repaired
+either.
+
+All three now call `php-constraint.py`, which evaluates the declared constraint
+(caret, tilde, wildcard, `||`, and the spaced-operator form `">= 7"`) against the
+container version. It carries a 29-case self-test, and the doctor runs it on
+every invocation and **exits 3** rather than reporting compatibility findings
+from an evaluator that has demonstrably broken. Run it yourself with
+`python3 php-constraint.py --self-test`.
 
 ## FA Module Version — `_init/config` vs company `installed_extensions.php`
 
