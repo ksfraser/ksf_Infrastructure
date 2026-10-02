@@ -98,3 +98,23 @@
     force: false
     mode: '0644'
   when: not theme_red.stat.exists
+
+# default.css.yellow is required for `fa_theme: yellow` (the documented UAT
+# look). It was previously never scaffolded, so selecting it failed on a fresh
+# pod. Same pattern as .red: seeded once from the canonical variant, never
+# overwritten, and the theme task only ever copies a variant ONTO the mounted
+# default.css - the variants themselves stay unmounted.
+- name: Check yellow theme variant exists
+  stat:
+    path: "{{ fa_pod_dir }}/themes/default/default.css.yellow"
+  register: theme_yellow
+
+- name: Ensure yellow theme variant exists
+  become: true
+  copy:
+    src: "{{ fa_pod_dir }}/themes/default/default.css.default"
+    dest: "{{ fa_pod_dir }}/themes/default/default.css.yellow"
+    remote_src: true
+    force: false
+    mode: '0644'
+  when: not theme_yellow.stat.exists
