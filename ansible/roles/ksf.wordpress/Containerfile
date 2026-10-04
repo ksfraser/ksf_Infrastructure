@@ -1,0 +1,19 @@
+# WordPress + TLS for WooCommerce REST.
+#
+# The stock wordpress:*-apache image ships mod_ssl (mods-available/ssl.conf)
+# and default-ssl.conf but never enables them, so WooCommerce REST cannot be
+# reached over https. WooCommerce only performs consumer-key basic
+# authentication when is_ssl() is true (server side), and the official PHP
+# client only uses basic auth when the URL starts with https:// (client side).
+#
+# Let's Encrypt is not an option for the pods: they are only published on
+# localhost/private podman bridges with no public DNS name. So we terminate TLS
+# with a private CA instead; certs are bind-mounted from the pod overlay.
+FROM docker.io/wordpress:6.7-php8.2-apache
+
+COPY vhost-ssl.conf /etc/apache2/sites-available/ksf-ssl.conf
+
+RUN a2enmod ssl headers \
+ && a2ensite ksf-ssl
+
+EXPOSE 80 443

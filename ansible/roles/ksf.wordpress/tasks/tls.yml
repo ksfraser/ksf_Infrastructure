@@ -1,0 +1,112 @@
+---
+# tls.yml - idempotent private CA + server certificate for the pod's HTTPS vhost.
+#
+# Pods have no public DNS, so a publicly-trusted (Let's Encrypt) certificate is
+# not an option: there is nothing to validate a public name against. The pod
+# therefore runs its own CA and the FA container is told to trust it (see the
+# ksf.frontaccounting role, which installs this CA into the FA trust store).
+#
+# WooCommerce REST REQUIRES HTTPS: server side the consumer-key check is gated
+# on is_ssl(), and the official v3 client only signs with HTTP basic auth for
+# https:// URLs (it falls back to OAuth 1.0a otherwise). So a pod without TLS
+# cannot authenticate the FA sync at all.
+#
+# Idempotence: every openssl task is guarded by `creates:` against its output, so
+# a re-run leaves an existing CA in place (rotating it would invalidate the cert
+# already trusted by the FA container). Keys are generated 0600 and must never be
+# committed - see .gitignore (WT/*/tls/).
+
+- name: Create per-pod TLS directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ wp_tls_dir }}"
+    state: directory
+    mode: '0750'
+
+- name: Generate pod CA private key
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl genrsa -out {{ wp_tls_dir }}/ca.key 4096
+  args:
+    creates: "{{ wp_tls_dir }}/ca.key"
+
+- name: Generate pod CA certificate
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -new -nodes
+      -key {{ wp_tls_dir }}/ca.key
+      -sha256 -days {{ wp_tls_ca_days }}
+      -subj "/CN={{ wp_tls_ca_cn }}"
+      -out {{ wp_tls_dir }}/ca.crt
+  args:
+    creates: "{{ wp_tls_dir }}/ca.crt"
+
+- name: Generate server private key
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl genrsa -out {{ wp_tls_dir }}/server.key 4096
+  args:
+    creates: "{{ wp_tls_dir }}/server.key"
+
+- name: Generate server certificate signing request
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -new -key {{ wp_tls_dir }}/server.key
+      -subj "/CN={{ wp_container_name }}"
+      -out {{ wp_tls_dir }}/server.csr
+  args:
+    creates: "{{ wp_tls_dir }}/server.csr"
+
+# SANs matter: curl/OpenSSL ignore CN when a SAN list is present, and the name FA
+# dials ({{ wp_container_name }} on the pod network) differs from the one a human
+# or wp-cli uses on the host (localhost:{{ wp_https_port }}).
+- name: Write server certificate extensions (SANs)
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ wp_tls_dir }}/server.ext"
+    mode: '0644'
+    content: |
+      subjectAltName={{ wp_tls_san_csv }}
+      basicConstraints=CA:FALSE
+      keyUsage=digitalSignature,keyEncipherment
+      extendedKeyUsage=serverAuth
+
+- name: Sign server certificate with the pod CA
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl x509 -req -in {{ wp_tls_dir }}/server.csr
+      -CA {{ wp_tls_dir }}/ca.crt -CAkey {{ wp_tls_dir }}/ca.key
+      -CAcreateserial -days {{ wp_tls_server_days }}
+      -sha256 -extfile {{ wp_tls_dir }}/server.ext
+      -out {{ wp_tls_dir }}/server.crt
+  args:
+    creates: "{{ wp_tls_dir }}/server.crt"
+
+- name: Restrict TLS private key permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: '0600'
+  loop:
+    - "{{ wp_tls_dir }}/ca.key"
+    - "{{ wp_tls_dir }}/server.key"
+
+- name: Publish the CA certificate read-only for dependent containers
+  become: true
+  ansible.builtin.file:
+    path: "{{ wp_tls_dir }}/ca.crt"
+    mode: '0644'
+
+- name: Assert the server certificate chains to the pod CA
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      openssl verify -CAfile {{ wp_tls_dir }}/ca.crt {{ wp_tls_dir }}/server.crt
+  register: wp_tls_verify
+  changed_when: false
+  failed_when: wp_tls_verify.rc != 0

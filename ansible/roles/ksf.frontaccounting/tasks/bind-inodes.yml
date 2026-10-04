@@ -26,6 +26,10 @@
         container: "/var/www/html/company"
       - host: "{{ fa_pod_dir }}/themes/default/default.css"
         container: "/var/www/html/themes/default/default.css"
+      # Pod CA (WordPress TLS). Directory bind, so inode-stable, but checking it
+      # catches a CA that was never mounted at all.
+      - host: "{{ pod_tls_dir }}"
+        container: "/etc/ksf/tls"
 
 - name: Compare host and container inode for each FA bind
   ansible.builtin.command:

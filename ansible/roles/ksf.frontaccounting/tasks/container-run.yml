@@ -23,6 +23,9 @@
     -v "{{ fa_pod_dir }}/installed_extensions.php:/var/www/html/installed_extensions.php:rw,Z"
     -v "{{ fa_pod_dir }}/company:/var/www/html/company:rw,Z"
     -v "{{ fa_pod_dir }}/themes/default/default.css:/var/www/html/themes/default/default.css:rw,Z"
+    {% if pod_ca_bundle is file %}
+    -v "{{ pod_tls_dir }}:/etc/ksf/tls:ro,Z"
+    {% endif %}
     "{{ fa_image }}" apache2-foreground
   register: fa_container_run
 
@@ -35,3 +38,30 @@
   delay: 3
   until: fa_run_check.stdout == fa_container_name
   changed_when: false
+
+# Install the pod CA into the container trust store.
+#
+# This cannot be done with ini_set('curl.cainfo') from PHP: the PHP build in the
+# FA image silently refuses to set it (ini_get stays empty), so curl keeps using
+# its compiled-in bundle and every HTTPS call to WordPress fails with
+# "unable to get local issuer certificate". Copying into
+# /usr/local/share/ca-certificates and re-running update-ca-certificates is what
+# actually fixes it, and it must be redone on every container create - which is
+# why it lives here, next to the canonical run spec, rather than in a module.
+- name: Install the pod CA into the FA container trust store
+  command: >
+    podman exec {{ fa_container_name }}
+    sh -c "cp /etc/ksf/tls/ca.crt /usr/local/share/ca-certificates/ksf-pod-ca.crt
+    && update-ca-certificates"
+  when: pod_ca_bundle is file
+  changed_when: true
+  register: fa_ca_install
+
+- name: Assert FA can verify a WordPress certificate signed by the pod CA
+  command: >
+    podman exec {{ fa_container_name }}
+    openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt
+    /etc/ksf/tls/server.crt
+  when: pod_ca_bundle is file
+  changed_when: false
+  failed_when: false

@@ -319,3 +319,77 @@ Rule for every FA/WP related repo: hardlink these at repo root
 `ln -f` after any git operation (hardlinks do not survive pull/checkout/clone).
 For clone portability, commit plain copies. Full ritual + carrier list:
 `APP_TAB_ARCHITECTURE.md` Appendix A/B and `/home/kevin/Documents/AGENTS_APPENDIX.md`.
+
+---
+
+## WordPress HTTPS + the FA-side trust (added 2026-10-03, integration pod)
+
+**WooCommerce REST is HTTPS-only, in two independent places.** Server side,
+`WC_REST_Authentication::authenticate()` only accepts consumer-key/secret basic
+auth when `is_ssl()` is true. Client side, the official v3 client only signs with
+basic auth for `https://` URLs and falls back to OAuth 1.0a signing otherwise,
+which Woo rejects. So a pod serving plain HTTP on the WP port can never
+authenticate the FA sync — the failure looks like a bad key/secret, not a
+transport problem. The WP container therefore publishes **8093 for HTTPS**
+(8091 stays plain HTTP for browsers, wp-cli and the health check).
+
+**Pods have no public DNS, so TLS uses a private CA**, issued by the
+`ksf.wordpress` role (`tasks/tls.yml`, idempotent via `creates:`). The CA is
+mounted RO into the FA container at `/etc/ksf/tls` and copied into
+`/usr/local/share/ca-certificates` + `update-ca-certificates` on every container
+create (`ksf.frontaccounting/tasks/container-run.yml`). Keys are 0600 and land
+under `WT/`, which `.gitignore` already excludes.
+
+**`ini_set('curl.cainfo')` is silently refused by the FA image's PHP** (7.4.33):
+`ini_get('curl.cainfo')` stays empty afterwards, so curl keeps its compiled-in
+bundle and every call fails with `unable to get local issuer certificate`.
+Setting `CURL_CA_BUNDLE` in the environment does not help either. The trust
+store is the only thing that works — do not "fix" this from PHP. The module's
+`woocommerce_ca_bundle` pref still sets the ini as a best effort for PHP builds
+that permit it.
+
+**Company prefs live in `0_sys_prefs`** (`name` PK varchar(35), `category`,
+`type`, `length`, `value`), not in a `preference` table — FA 2.4.3 reads them via
+`get_company_pref()` from the session-backed `$SysPrefs` object. Extension prefs
+go in `category='setup.company'`; the type vocabulary that FA itself writes is
+`tinyint` (bools), `int`, `varchar`, `char`, `tinytext`. `name` is capped at 35
+characters.
+
+**`KSF REST Host Tolerance` mu-plugin is still required** even with TLS:
+`siteurl`/`home` are the browser-facing `http://localhost:8091`, so WP would
+otherwise 301 FA's `https://ksfii_app-wordpress/wp-json/...` to the canonical
+URL and the request would never reach the REST controller. It only suppresses
+`redirect_canonical` for REST. An earlier revision also spoofed
+`$_SERVER['HTTPS']='on'` for RFC1918 callers — that is obsolete now that TLS is
+real and was removed.
+
+## Ansible: why the plays had never run (found 2026-10-03)
+
+`inventories/local` was INI but contained YAML (a list of module names and a
+list of `{port, proto}` dicts), so `ansible-inventory` rejected the file outright
+and every play silently fell back to role defaults. It also declared `localhost`
+*outside* the `[ksf:vars]` group, so none of those vars applied even when the
+file did parse. Both are fixed: the file is now a YAML inventory with localhost
+inside the `ksf` group. The live FA/WordPress containers were built by hand for
+this reason.
+
+**The plays still cannot run without the vault password**: `group_vars/all/`
+contains only `vault.yml.example`, and the roles template
+`{{ vault_mariadb_pass }}`. Do not inline real secrets into defaults to work
+around it — supply the password at run time.
+
+## FA extension hooks: by-reference parameter trap (PHP 7.4)
+
+`hook_invoke_all($method, &$data)` takes `$data` **by reference**. Passing an
+array literal is a runtime fatal in PHP 7.4 — `Only variables can be passed by
+reference` — and `php -l` does **not** catch it. Every staging dispatch died
+before reaching `ksf_FA_ImportStagingProcessing`. Always assign the payload to a
+variable first:
+
+```php
+$hookPayload = ['source' => $source, 'customer' => $hookData];
+\hook_invoke_all('STAGE_CUSTOMER', $hookPayload);
+```
+
+Grep for the anti-pattern when touching any hooks class:
+`hook_invoke(_all)?\([^)]*\[\s*'` or `...\(` with a literal/array expression.

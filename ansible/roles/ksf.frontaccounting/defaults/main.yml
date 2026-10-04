@@ -14,6 +14,11 @@ ksf_infra_root: "/home/kevin/Documents/ksf_Infrastructure"
 fa_source_tree: "{{ ksf_infra_root }}/FA/{{ fa_version }}"
 fa_modules_dir: "{{ ksf_infra_root }}/fa_modules"
 fa_pod_dir: "{{ ksf_infra_root }}/FA/{{ pod_name }}"
+# Private CA + server cert issued by the ksf.wordpress role for this pod. The
+# WooCommerce REST API the sync talks to is HTTPS-only, so FA has to trust this
+# CA before ksf_FA_Woocommerce can authenticate at all (see container-run.yml).
+pod_tls_dir: "{{ ksf_infra_root }}/WT/{{ pod_name }}/tls"
+pod_ca_bundle: "{{ pod_tls_dir }}/ca.crt"
 fa_entrypoint_dir: "{{ ksf_infra_root }}/containerfiles/FA"
 fa_schema_sql: "{{ fa_source_tree }}/sql/en_US-new.sql"
 fa_items_patch: ""

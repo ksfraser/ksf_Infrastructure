@@ -4,10 +4,21 @@ pod_name: ksfii_app
 wp_container_name: "{{ pod_name }}-wordpress"
 wp_hostname: "{{ wp_container_name }}"
 wp_network: "{{ pod_name }}"
-wp_image: docker.io/wordpress:6.7-php8.2-apache
+# Derived image: stock wordpress:*-apache + mod_ssl enabled (see Containerfile).
+# WooCommerce REST needs https on both ends for consumer-key auth.
+wp_image: localhost/wordpress-ksf-ssl:6.7-php8.2
+wp_base_image: docker.io/wordpress:6.7-php8.2-apache
 wp_cli_image: docker.io/wordpress:cli-php8.2
+# The cli image runs as uid 82, but the apache image's www-data (and
+# therefore everything in {{ wp_data_volume }}) is uid 33. Without this the
+# seeding tasks cannot create wp-content/upgrade and fail with
+# "Could not create directory", which is why seeding silently did nothing.
+wp_cli_user: "33:33"
 wp_port: 8091
 wp_container_port: 80
+# TLS port for WooCommerce REST. wp_port stays HTTP for browsers/wp-cli/health.
+wp_https_port: 8093
+wp_https_container_port: 443
 wp_data_volume: "{{ pod_name }}_wp_data"
 wp_mariadb_host: "{{ pod_name }}-mariadb"
 wp_db: ksf_wp
@@ -23,6 +34,21 @@ wp_config_file: "{{ wp_pod_dir }}/wp-config.php"
 wp_plugins_dir: "{{ wp_pod_dir }}/plugins"
 wp_uploads_dir: "{{ wp_pod_dir }}/uploads"
 wp_muplugins_dir: "{{ wp_pod_dir }}/mu-plugins"
+# Private CA + server cert for the pod's TLS vhost (no public DNS in pods, so a
+# publicly-trusted certificate is impossible - see tasks/tls.yml).
+wp_tls_dir: "{{ wp_pod_dir }}/tls"
+wp_tls_ca_cn: "{{ pod_name }} pod CA"
+wp_tls_ca_days: 3650
+wp_tls_server_days: 3650
+# Names the server certificate must be valid for: the pod-network container name
+# (what FA dials), the bare pod name (podman short name / legacy hosts), and
+# localhost for humans and wp-cli on the host. Entries carry their own SAN type.
+wp_tls_sans:
+  - "DNS:{{ wp_container_name }}"
+  - "DNS:{{ pod_name }}"
+  - "DNS:localhost"
+  - "IP:127.0.0.1"
+wp_tls_san_csv: "{{ wp_tls_sans | join(',') }}"
 
 # Site identity / URLs (overrides are handy in debug; defaults auto-derive)
 wp_site_url: "http://localhost:{{ wp_port }}"
@@ -48,13 +74,14 @@ wp_staff_pass: "{{ ksf_staff_pass }}"
 wp_staff_email: "{{ ksf_staff_email | default('kevin@ksfraser.ca') }}"
 
 # Plugins to install via wp-cli (tagged: ecommerce, crm, forms, etc.)
-wp_plugins: []
-  # - name: woocommerce
-  #   tags: [ecommerce]
-  # - name: jetpack-crm
-  #   tags: [crm]
-  # - name: contact-form-7
-  #   tags: [forms]
+# Versions are pinned: wp_image pins WP 6.7, and WooCommerce >= 10.6 requires
+# WP 7.0 ("This plugin does not work with your version of WordPress").
+# 10.2.0 is the newest line verified against WP 6.7.2 on this pod.
+wp_plugins:
+  - name: woocommerce
+    version: "10.2.0"
+    tags: [ecommerce]
+wp_plugin_extra_args: "--force"
 
 # Seed WP core + users on the one-shot db
 wp_seed_db: true

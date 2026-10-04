@@ -11,18 +11,32 @@
   command: podman volume create "{{ wp_data_volume }}"
   when: vol_exists.rc != 0
 
-- name: Ensure WP image is present
-  command: podman image exists "{{ wp_image }}"
-  register: img_exists
+# wp_image is built locally from Containerfile (stock apache image + mod_ssl);
+# it is never pulled. {{ wp_base_image }} is the FROM layer and is pulled.
+- name: Ensure WP base image is present
+  command: podman image exists "{{ wp_base_image }}"
+  register: base_img_exists
   failed_when: false
   changed_when: false
 
-- name: Pull WP image
-  command: podman pull "{{ wp_image }}"
-  when: img_exists.rc != 0
+- name: Pull WP base image
+  command: podman pull "{{ wp_base_image }}"
+  when: base_img_exists.rc != 0
+
+- name: Build WP TLS image
+  command: >
+    podman build
+    -t "{{ wp_image }}"
+    -f "{{ role_path }}/Containerfile"
+    "{{ role_path }}"
 
 - name: Scaffold per-pod overlay
   include_tasks: scaffold.yml
+
+# Certificates must exist before the container starts: the vhost references
+# /etc/ssl/ksf/server.{key,crt}, which is the {{ wp_tls_dir }} bind mount.
+- name: Ensure pod TLS material exists
+  include_tasks: tls.yml
 
 - name: Check WP container exists
   command: podman container exists "{{ wp_container_name }}"
@@ -42,6 +56,7 @@
     --hostname "{{ wp_hostname }}"
     --network "{{ wp_network }}"
     -p "{{ wp_port }}:{{ wp_container_port }}"
+    -p "{{ wp_https_port }}:{{ wp_https_container_port }}"
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
@@ -52,10 +67,11 @@
     -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
     -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
     -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    -v "{{ wp_tls_dir }}:/etc/ssl/ksf:ro,Z"
     "{{ wp_image }}"
 
 - name: Wait for WP HTTP endpoint
-  uri:
+  ansible.builtin.uri:
     url: "http://127.0.0.1:{{ wp_port }}/"
     method: GET
     status_code: 200,302,403
@@ -64,6 +80,25 @@
   delay: 5
   until: wp_http_check.status in [200, 302, 403]
   ignore_errors: true
+
+# The HTTPS listener is the one that matters: WooCommerce consumer-key auth is
+# gated on is_ssl() server side, and the official FA client only signs with
+# basic auth for https:// URLs. A pod that answers HTTP but not HTTPS cannot
+# authenticate the sync at all, so assert it separately. validate_certs is off
+# because the cert is issued by the pod's private CA; the CA itself is verified
+# by tls.yml and by the FA role's trust-store install.
+- name: Wait for WP HTTPS endpoint
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ wp_https_port }}/"
+    method: GET
+    status_code: 200,301,302,403
+    validate_certs: false
+  register: wp_https_check
+  retries: 12
+  delay: 5
+  until: wp_https_check.status in [200, 301, 302, 403]
+  failed_when: false
+
 
 - name: Seed WordPress (core install + users + plugins)
   include_tasks: seed.yml

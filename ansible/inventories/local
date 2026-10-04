@@ -1,75 +1,90 @@
 # KSF Infrastructure - Local Development Inventory
-# Usage: ansible-playbook -i inventories/local ksf-playbook.yaml --ask-vault-pass
+# Usage: ansible-playbook -i inventories/local plays/ksfii_app.yml --ask-vault-pass
 #
-# Credentials come from group_vars/all/vault.yml (ansible-vault encrypted).
+# YAML inventory (not INI): this file carries list-of-dicts and list-of-string
+# vars (firewall_allowed_tcp_ports, fa_modules) that the INI plugin cannot
+# represent - it rejected the file outright, so ansible-inventory parsed nothing
+# and every play silently fell back to role defaults.
+#
+# Credentials come from group_vars/all/vault.yml (ansible-encrypted).
 # See group_vars/all/vault.yml.example for the required structure.
 
-localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
+all:
+  children:
+    ksf:
+      hosts:
+        # Local development pod: the plays target `hosts: localhost`, and the
+        # host name matches the group name, so both `ksf` and `localhost`
+        # patterns select it. It MUST be inside a group for group vars to
+        # apply - a bare top-level host line belongs to no group, which is why
+        # the vars below used to be dead.
+        localhost:
+          ansible_connection: local
+          ansible_python_interpreter: /usr/bin/python3
+      vars:
+        # Port configuration
+        fa_port: 8090
+        wp_port: 8091
+        pma_port: 8082
+        ocr_port: 8100
+        tts_port: 10200
+        stt_port: 10300
 
-[ksf:vars]
-# Port configuration
-fa_port=8090
-wp_port=8091
-pma_port=8082
-ocr_port=8100
-tts_port=10200
-stt_port=10300
+        # Volume prefix (for data persistence uniqueness)
+        volume_prefix: ksf_infrastructure
 
-# Volume prefix (for data persistence uniqueness)
-volume_prefix=ksf_infrastructure
+        # Database name (non-sensitive)
+        mariadb_db: ksf_fa
 
-# Database name (non-sensitive)
-mariadb_db=ksf_fa
+        # Enable/disable optional workers
+        enable_ocr_worker: false
+        enable_tts_worker: false
+        enable_stt_worker: false
 
-# Enable/disable optional workers
-enable_ocr_worker=false
-enable_tts_worker=false
-enable_stt_worker=false
+        # GitHub org for module repos
+        module_github_org: ksfraser
+        module_branch: main
 
-# GitHub org for module repos
-module_github_org=ksfraser
-module_branch=main
+        # FA Modules to deploy
+        fa_modules:
+          - ksf_FA_Assets
+          - ksf_FA_Subscriptions
+          - ksf_FA_Service
+          - ksf_FA_KnowledgeBase
+          - ksf_FA_Fleet
+          - ksf_FA_TravelExpense
+          - ksf_FA_HRM
+          - ksf_FA_ProjectManagement
+          - ksf_FA_Timesheets
+          - ksf_FA_Leave
+          - ksf_FA_Onboarding
+          - ksf_FA_Performance
+          - ksf_FA_Recruitment
+          - ksf_FA_Training
+          - ksf_FA_OrgChart
+          - ksf_FA_JobDescriptions
+          - ksf_FA_Teams
+          - ksf_FA_Roster
+          - ksf_FA_Documents
+          - ksf_FA_Forms
+          - ksf_FA_EmailManager
+          - ksf_FA_CampaignBuilder
+          - ksf_FA_CRM
+          - ksf_FA_Tracking
+          - ksf_FA_Notes
+          - ksf_FA_WarrantyManagement
+          - ksf_FA_Workflow
+          - ksf_FA_AsteriskPBX
+          - ksf_FA_API
+          - ksf_FA_Calendar
+          - ksf_FA_DataIntegrity
+          - ksf_fa_downloader
 
-# FA Modules to deploy
-fa_modules:
-  - ksf_FA_Assets
-  - ksf_FA_Subscriptions
-  - ksf_FA_Service
-  - ksf_FA_KnowledgeBase
-  - ksf_FA_Fleet
-  - ksf_FA_TravelExpense
-  - ksf_FA_HRM
-  - ksf_FA_ProjectManagement
-  - ksf_FA_Timesheets
-  - ksf_FA_Leave
-  - ksf_FA_Onboarding
-  - ksf_FA_Performance
-  - ksf_FA_Recruitment
-  - ksf_FA_Training
-  - ksf_FA_OrgChart
-  - ksf_FA_JobDescriptions
-  - ksf_FA_Teams
-  - ksf_FA_Roster
-  - ksf_FA_Documents
-  - ksf_FA_Forms
-  - ksf_FA_EmailManager
-  - ksf_FA_CampaignBuilder
-  - ksf_FA_CRM
-  - ksf_FA_Tracking
-  - ksf_FA_Notes
-  - ksf_FA_WarrantyManagement
-  - ksf_FA_Workflow
-  - ksf_FA_AsteriskPBX
-  - ksf_FA_API
-  - ksf_FA_Calendar
-  - ksf_FA_DataIntegrity
-  - ksf_fa_downloader
-
-# Firewall ports for firewall role
-firewall_allowed_tcp_ports:
-  - { port: "8090", proto: tcp }
-  - { port: "8091", proto: tcp }
-  - { port: "8082", proto: tcp }
-  - { port: "8100", proto: tcp }
-  - { port: "10200", proto: tcp }
-  - { port: "10300", proto: tcp }
+        # Firewall ports for firewall role
+        firewall_allowed_tcp_ports:
+          - { port: "8090", proto: tcp }
+          - { port: "8091", proto: tcp }
+          - { port: "8082", proto: tcp }
+          - { port: "8100", proto: tcp }
+          - { port: "10200", proto: tcp }
+          - { port: "10300", proto: tcp }
