@@ -20,29 +20,47 @@ package (`symfony\`, `monolog\`) does the same thing.
 - `ksf_FA_<Module>` -> `ksfraser\FrontAccounting\<Module>\`
 - `ksf_<Module>`     -> `ksfraser\<Module>\`
 
-## Tier 1 -- vendor casing (MECHANICAL, bulk)
+## HOW TO APPLY: rename on touch (NOT a bulk sweep)
 
-123 modules declare a `Ksfraser\` vendor segment. This is a
-pure rename of the vendor segment plus the composer PSR-4 key and the
-on-disk `src/Ksfraser` directory. It is mechanical but NOT risk-free: each
-module needs its suite run and a push, and any consumer that references the
-class by string must be updated too.
+**Do not run the casing rename as a bulk migration.** Per the user directive
+(2026-10-08): as we touch each package for real work, rename its vendor segment
+in the same commit. That way every rename rides along with a change we were making
+anyway, is individually testable, and never becomes an unreviewable 120-repo diff.
 
-Do these in small batches, one repo per commit, running that repo's tests.
+Mechanically, in the repo being touched:
 
-```
+1. `python3 ksf_Infrastructure/tools/fix_vendor_case.py <module-dir>`
+   (rewrites only `Ksfraser\` and `Ksfraser/`; PSR-4 depth is preserved;
+   a bare `Ksfraser` is never touched; generated artefacts are skipped)
+2. `composer dump-autoload && php vendor/bin/phpunit` -- the suite is the gate.
+   Test count must be unchanged.
+3. Commit the namespace change **separately** from the feature work, so a
+   reviewer can see one concern per commit.
+4. Leave the shared `AGENTS.md` / `AGENTS_ARCH.md` hardlink edits alone -- they
+   are not yours in a per-module commit.
+
+Gate order matters: rename the leaf packages first (below), because a consumer
+whose reference is renamed ahead of its dependency breaks at autoload.
+
+### Leaf packages to rename when we first touch them
+
+| package | declares | note |
+|---|---|---|
+| `ksfraser/traits` | `Ksfraser\Traits\` | gate for many consumers |
+| `ksfraser/fa-hooks` | `Ksfraser\` | gate for others |
+| `ksfraser/staging-dto` | `Ksfraser\StagingDto\` | **published (v0.0.1)** -- needs a republish |
+| `ksfraser/ksf-modules-dao` | `Ksfraser\ModulesDAO\` | **published (v0.5.3)** -- needs a republish |
+| `ksfraser/ksf-common-db` | published v1.0.1 says `Ksfraser\`, its own tag says `ksfraser\` | artifact does not match its tag; republish |
+
+Remaining modules still on `Ksfraser\` (informational count, shrinks as we
+touch them):
+
 FA_ProductAttributes
 FA_ProductAttributes_Core
 FA_ProductAttributes_Variations
-ksf_AsteriskPBX
-ksf_CRM
-ksf_CRM_GEDCOM
 ksf_CRM_UI
 ksf_Calendar
 ksf_Calendar_UI
-ksf_CampaignBuilder
-ksf_DataIO
-ksf_Documents
 ksf_DynamicPricing_Core
 ksf_ESS
 ksf_EmailManager
@@ -102,13 +120,9 @@ ksf_KnowledgeBase
 ksf_LLM
 ksf_Leave
 ksf_Marketing
-ksf_ModuleBuilder
 ksf_ModulesDAO
 ksf_Nextcloud
-ksf_Notes
 ksf_Notes_UI
-ksf_Onboarding
-ksf_OrgChart
 ksf_Performance
 ksf_PriceBook
 ksf_ProductLookup
@@ -116,7 +130,6 @@ ksf_ProjectManagement
 ksf_ProjectManagement_UI
 ksf_RBAC
 ksf_Recruitment
-ksf_Roster
 ksf_Shipping_Core
 ksf_SuggestedPurchaseOrder
 ksf_SupportTickets
@@ -124,7 +137,6 @@ ksf_SupportTickets_UI
 ksf_Teams
 ksf_Timesheets
 ksf_Tracking
-ksf_Training
 ksf_TravelExpense
 ksf_WP_CustomerPortal
 ksf_WP_EstatePlanning
@@ -154,7 +166,6 @@ ksf_staging_dto
 ksf_stockmarket
 ksfii_app
 ksfraser
-```
 
 ## Tier 2 -- PSR-4 root not the canonical prefix
 
@@ -563,3 +574,62 @@ back to 1010 tests / 2343 assertions green.
 The fixer does not distinguish "this module's own namespace" from "an external
 package's namespace". Until it does, it must be run per-module with the test
 suite as the gate -- never blind across the tree.
+
+---
+
+# DEPLOYMENT PRIORITY ORDER (user directive, 2026-10-08)
+
+Work in this order. Rename each package's vendor segment as you touch it.
+
+| P | Modules | Gate to reach |
+|---|---|---|
+| **1** | Square, Woocommerce, ImportStagingProcessing, ProductAttributes | **UAT, then prod** |
+| **2** | Calendar; then Warehouse, SerialNumber, InventoryCount | |
+| **3** | CRM | |
+| **4** | HRM | |
+| **5** | ProjectManagement | |
+
+P1 is the staging pipeline end to end: two source systems stage into ISU, ISU
+matches and creates in FA, ProductAttributes carries the item data they need.
+
+### P1 deployment state as of 2026-10-08
+
+Suites: Square 318, Woocommerce 715, ISU 185, ProductAttributes 1010 -- all
+green. All four repos fully pushed; the working trees only carry the hardlinked
+AGENTS doc edits.
+
+Deployed copy `ksf_Infrastructure/fa_modules/` is **behind on three of four**:
+
+| module | same | differ | missing | stale in deploy |
+|---|---|---|---|---|
+| ksf_FA_Square | 120 | 16 | 3 | 0 |
+| ksf_FA_Woocommerce | 2 | 1 | **31** | **31** |
+| ksf_FA_ImportStagingProcessing | 38 | 2 | 5 | 0 |
+| FA_ProductAttributes | 161 | 0 | 0 | 0 |
+
+- **ProductAttributes** is in sync -- nothing to deploy.
+- **Square** needs a sync (the logRefund fix and the dead-event removals are not
+  deployed).
+- **Woocommerce** needs a sync *and* a stale-tree purge: fa_modules still has 31
+  files at the old `src/Ksfraser/...` path alongside the new `src/Woocommerce/`.
+  Copying over the top would leave both.
+- **ISU** needs a sync (CreationInvoker, SearchInvoker, MatchConfig, Similarity
+  and LineItemComparer are all absent from the deployed copy).
+
+### Deployment mechanics -- read before syncing
+
+`AGENTS_ARCH.md` §7 and the module-notes sections govern this. The traps:
+
+- Sync dev -> `fa_modules/` -> container, in that order. fa_modules is not
+  automatically refreshed.
+- Single-file binds resolve to an **inode**, not a path. Never edit
+  `config_db.php`, `installed_extensions.php` or `default.css` with `sed -i` or
+  `rsync` (use `cat >` / `tee` / `rsync --inplace`), or the container keeps
+  reading the unlinked original with no visible diff.
+- Verify with `stat -c%i` on both sides, never with `podman inspect` -- inspect
+  reports the correct source path even when the bind is dead.
+- Activation writes the GLOBAL `company/installed_extensions.php`; a stale
+  global poisons every company registry.
+- `podman exec <c> grep -l <file> /proc/mounts` after any container create.
+- `Refresh=Update` is a full-state replace: a POST omitting a module's checkbox
+  DEACTIVATES it. Re-parse the page and submit every `Active<i>=1`.
