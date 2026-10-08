@@ -525,6 +525,56 @@ use FA-native classes (`inputsubmit`) — `FormFooter` defaults `useAjax=false`;
   that silently removed `FaDbAdapter` from a deployed module. If a package looks
   wrong, download its zipball and read it before changing dependency resolution.
 
+## 10.1 FA lifecycle hooks -- the verified map
+
+Verified 2026-10-08 against FA 2.4.3 source. Getting this wrong wastes a lot of
+design effort, so read it before proposing a hook-based integration.
+
+| Event | Dispatcher | Payload | Notes |
+|---|---|---|---|
+| Sales order / quote write | `hook_db_prewrite` / `db_postwrite` | `$cart`, `ST_SALESORDER`/`ST_SALESQUOTE` | `sales_order_db.inc:18,77,130,214` |
+| Sales delivery write | `hook_db_prewrite` / `db_postwrite` | `$cart`, **`ST_CUSTDELIVERY` (13)** | `sales_delivery_db.inc:24,200`. NOT `ST_SALESDELIVERY` |
+| Sales invoice write | `hook_db_prewrite` / `db_postwrite` | `$cart`, `ST_SALESINVOICE` | `sales_invoice_db.inc:28,214` |
+| Credit note write | `hook_db_prewrite` / `db_postwrite` | `$cart`, `ST_CUSTCREDIT` | `sales_credit_db.inc:39,169` |
+| Customer payment | `hook_db_prewrite` / `db_postwrite` | `$args`, `ST_CUSTPAYMENT` | `payment_db.inc:32,116` |
+| **Void** | `hook_db_prevoid` | `($trans_type, $trans_no)` | **fires in 13 places** |
+| Before every page render | `hook_invoke_all('pre_header')` | `$page_header_args` | `includes/page/header.inc:132` |
+| Before every page footer | `hook_invoke_all('pre_footer')` | `$page_header_args` | `includes/page/footer.inc:17` |
+
+### The two traps
+
+**1. Never `exit` from `db_postwrite`.** In `write_sales_delivery()` the order is
+`hook_db_postwrite` at **line 200** and `commit_transaction()` at **line 201**.
+Terminating the request there leaves the delivery uncommitted. A
+`hook_db_prewrite` responder also cannot abort the write -- `write_sales_delivery()`
+ignores the dispatcher's return value.
+
+**`pre_header` is the correct redirect point.** It runs at `header.inc:132`,
+*after* session setup but *before* any HTML output and *before*
+`header("Content-type: ...")` at line 135, so `headers_sent()` is still false. A
+responder can `header('Location: ...'); exit;` there safely.
+
+**2. Voids DO fire hooks.** `void_transaction()` (`admin/db/voiding_db.inc:17`)
+switches on type and calls e.g. `void_sales_delivery()`, which fires
+`hook_db_prevoid($type, $type_no)` (`sales_delivery_db.inc:225`). Also fired for
+sales invoice (227), sales order (90), customer payment (128), stock transfer,
+inventory adjustment, GRN, PO, supplier payment and work orders. So a
+reversal/deactivation driven by `db_prevoid` is entirely feasible: it gives you
+the transaction identity, and you look up what you recorded against it.
+
+> An earlier commit message for the `allocation_read` capability asserted that
+> voids fire nothing. That was wrong -- it came from grepping `void_transaction()`
+> alone and missing that it delegates to the per-type void functions. Corrected
+> here.
+
+### What the cart payload gives you
+
+`sales/includes/cart_class.inc` -- the `$cart` passed to the delivery/invoice
+hooks carries `customer_id`, `Branch` (branch id), `document_date`, `reference`,
+`trans_no`, **`order_no`** ("the original order number", line 57), and
+`get_items()` for the lines. That is enough to prompt per serialisable line and
+to link the result to both debtor and order.
+
 ## 11. Inter-module communication
 
 - Use FA hooks via `hook_invoke` / `hook_invoke_first` / `hook_invoke_all`.
