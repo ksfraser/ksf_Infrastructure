@@ -633,3 +633,89 @@ Deployed copy `ksf_Infrastructure/fa_modules/` is **behind on three of four**:
 - `podman exec <c> grep -l <file> /proc/mounts` after any container create.
 - `Refresh=Update` is a full-state replace: a POST omitting a module's checkbox
   DEACTIVATES it. Re-parse the page and submit every `Active<i>=1`.
+
+---
+
+# Customer warranty tracking (deferred — after the priority list above)
+
+User directive 2026-10-08: **do this after the rest of the todos.** Recorded here
+so the investigation is not lost.
+
+## What exists today (investigated)
+
+**ProductAttributes owns the per-ITEM warranty definition.**
+`0_product_warranty`, one row per `stock_id`:
+
+| column | meaning |
+|---|---|
+| `warranty_type` | `none` / `manufacturer` / `extended` / `third_party` / `lifetime` |
+| `manufacturer_duration` + `..._unit` | e.g. 24 + `months` |
+| `extended_duration` + `..._unit` | |
+| `third_party_duration` + `..._unit` | |
+| `lifetime_notes`, `warranty_notes` | |
+
+DAO: `src/.../Dao/ProductWarrantyDao.php`, action `UpsertWarrantyAction`, UI tab
+`WarrantyTab`. So "is this product warrantable and for how long" is answered.
+
+**CRM has NO warranty data.** The 8 hits in `ksf_FA_CRM` are all the licence
+disclaimer "WITHOUT ANY WARRANTY" in report headers. `ksf_CRM` has zero.
+`ksf_FA_CRM_Tags` zero.
+
+**`ksf_FA_WarrantyManagement` is the natural owner of the customer side** but is
+currently broken: its `sql/install.sql` is a placeholder while `pages/rma.php` and
+`pages/liabilities.php` query `TB_PREF."fa_wm_liability"`, which nothing creates.
+It also greps for `warrantyId`/`warranty_id`, suggesting a half-built notion of
+warranty records.
+
+## The gap
+
+There is a **missing join**: ProductAttributes knows the warranty *duration* per
+item, and `ksf_FA_SerialNumber` now records `warranty_end` per *serial*, but there
+is **no customer-facing view**. Nothing lists "what is this customer under
+warranty for, and until when".
+
+## Scope to build (customer-facing warranty)
+
+1. **Source of truth for a customer's covered items.** `ksf_FA_SerialNumber`
+   already records `warranty_end` on each serial and answers
+   `warranty_cover` / `days_remaining`, and its clock runs from
+   `installed_date` (not sale date). Prefer that over a new parallel table —
+   one authority for warranty dates, as with `warranty_cover`.
+   **Open question:** for non-serialised goods (consumables), there is no serial,
+   so an instance-level record is needed. Decide whether that table lives in
+   WarrantyManagement or SerialNumber.
+
+2. **Start the clock on sale.** `ST_SALESINVOICE` fires `db_postwrite`. For a
+   serialised line, create/activate the serial record and set
+   `warranty_end = installed_date + 0_product_warranty.duration`.
+   Note the real install date may lag the invoice date — see the open question in
+   `ksf_FA_SerialNumber/AGENTS.local.md` about the clock running from install.
+
+3. **Customer record view** — items under warranty with an expiry date, filterable:
+   - show all
+   - show expired
+   - show active
+
+4. **Report: items expiring in X days.** There is a direct hook for this:
+   `ksf_FA_SerialNumber::WarrantyService::expiringSoon($itemCode, $withinDays)`
+   already returns installed units whose cover ends inside a window. It needs
+   lifting from per-item to per-customer/all-customers.
+
+5. **Follow-up calendar entry.** When an extended warranty is sold, or when cover
+   is near expiry, create a calendar entry for the **assigned salesman / account
+   rep** to follow up. `ksf_FA_Calendar` is the target; it must be driven by
+   capability, not a hardcoded module name, and the entry must record the customer,
+   the item, and the expiry date so the follow-up is traceable.
+
+6. **Extended warranty as a sale.** If an extended warranty is purchasable it is
+   naturally a service item (`mb_flag='D'`, no stock) so it does not pollute
+   stock reports. Its `sales_account` should be the extended-warranty revenue
+   account, and the customer's `warranty_end` extends. Note this is a *warranty*
+   sale, not a gift card — do not conflate with the wallet design.
+
+## Dependencies / ordering
+
+- Blocks on **P2**: `ksf_FA_SerialNumber` (warranty_end), `ksf_FA_Calendar`
+  (follow-up entries), and repairing `ksf_FA_WarrantyManagement`.
+- P3 CRM is where the customer-facing view most likely lands, so it also blocks on
+  that.
