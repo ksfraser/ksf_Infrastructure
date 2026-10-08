@@ -527,3 +527,39 @@ Watch for two traps the guard tests themselves fell into:
    passes everything vacuously. Emit `$token[1]` for non-comment tokens.
 2. A guard that greps raw file text will match its own explanatory comment.
 
+
+## BLOCKER: external packages still declare `Ksfraser\` (2026-10-08)
+
+The casing rename is **not** purely mechanical. Several of our modules consume
+externally-vendored packages that declare the OLD casing:
+
+| package | declares | notes |
+|---|---|---|
+| `ksfraser/traits` | `Ksfraser\Traits\` | confirmed in FA_ProductAttributes/vendor |
+| `ksfraser/fa-hooks` | `Ksfraser\` | |
+| `ksfraser/staging-dto` | `Ksfraser\StagingDto\` | **published on Packagist (v0.0.1)** |
+| `ksfraser/ksf-modules-dao` | `Ksfraser\ModulesDAO\` | **published on Packagist (v0.5.3)** |
+| `ksfraser/ksf-common-db` | `Ksfraser\CommonDb\` in the **published v1.0.1 artifact**; the repo's own tags say `ksfraser\CommonDb\` | artifact does not match its tag |
+
+Renaming a *consumer's* reference to one of these breaks autoloading immediately.
+`FA_ProductAttributes` failed this way:
+
+```
+PHP Fatal error: Trait "ksfraser\Traits\InlinePostActionsTrait" not found
+```
+
+because the fixer rewrote `Ksfraser\Traits\InlinePostActionsTrait` ->
+`ksfraser\Traits\...` while the vendored `ksfraser/traits` still declares
+`Ksfraser\Traits\`. That change was reverted (`git reset --hard`); the module is
+back to 1010 tests / 2343 assertions green.
+
+### Consequence: the rename has a dependency order
+
+1. Rename the **leaf packages first**: `ksfraser/traits`, `ksfraser/fa-hooks`.
+2. Republish the ones already on Packagist: `staging-dto`, `ksf-modules-dao`,
+   `ksf-common-db` (the last also needs its v1.0.1/v1.0.2 tag mismatch fixed).
+3. Only then sweep the consumers.
+
+The fixer does not distinguish "this module's own namespace" from "an external
+package's namespace". Until it does, it must be run per-module with the test
+suite as the gate -- never blind across the tree.

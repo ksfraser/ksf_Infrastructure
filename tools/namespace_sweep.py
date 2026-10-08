@@ -2,14 +2,27 @@
 """
 Namespace / PSR-4 compliance sweep across every ksf_* module.
 
-Three separate defects are checked, because they fail differently:
+FOUR categories are reported, but only ONE is actionable:
 
-  1. CAPS      vendor segment not lowercase (Ksfraser, KSFRASER) -- violates
-               Composer's lowercase-vendor rule.
-  2. PREFIX    FA module (ksf_FA_*) not under ksfraser\\FrontAccounting\\<Module>\\,
-               or non-FA module (ksf_*) not under ksfraser\\<Module>\\.
-  3. LAYOUT    composer PSR-4 root does not match the on-disk directory, or a
-               namespace's trailing segments do not match its directory.
+  CAPS    (ACTIONABLE)  vendor segment is 'Ksfraser' rather than 'ksfraser'.
+  PREFIX  (informational) namespace is not ksfraser\\FrontAccounting\\<Module>\\.
+  PSR4    (informational) composer psr-4 root is not the canonical root.
+  LAYOUT  (informational) namespace tail vs its directory.
+
+SCOPE, per the user directive (2026-10-08): we are changing Ksfraser to ksfraser
+and NOTHING ELSE. PREFIX, PSR4 and LAYOUT are reported for information only and
+must NOT be acted on by this sweep. In particular:
+
+  * Do NOT restructure a PSR-4 root to the canonical deep path. If a module has
+    "Ksfraser\\": "src/Ksfraser/" it becomes "ksfraser\\": "src/ksfraser/" --
+    the depth is preserved.
+  * Do NOT rename module namespaces (Ksfraser\\Warehouse is not becoming
+    ksfraser\\FrontAccounting\\Warehouse here).
+  * Do NOT touch any other vendor segment: KsfCommon\\, Ksf\\HRM\\,
+    FrontAccounting\\, KsfPriceBook\\, KsfBankImport\\, KSFII\\, Automattic\\,
+    Action_Scheduler\\, OCA\\, OCP\\, PhpXmlRpc\\, Tests\\ are all out of
+    scope. Several are vendored third-party code (WordPress core in
+    ksf_Infrastructure, Odoo in others) and must never be renamed at all.
 
 Also reports repos that exist on GitHub but are not cloned locally, which is the
 long-term TODO list -- a namespace cannot be audited without the source.
@@ -207,7 +220,7 @@ def main():
         prefix = f["prefix"]
         layout = f["layout"]
         mismatch = f.get("psr4_mismatch")
-        if not (caps or prefix or layout or mismatch):
+        if not caps:
             continue
         total += 1
         vendors = sorted({c["vendor"] for c in caps})
@@ -231,11 +244,24 @@ def main():
             print(f"  PSR-4   expected {mismatch['expected']}")
             print(f"            found    {mismatch['found']}")
 
-    print("\n" + "=" * 78)
+        info = []
+        if prefix:
+            info.append(f"PREFIX x{len({p['namespace'] for p in prefix})}")
+        if layout:
+            info.append(f"LAYOUT x{len(layout)}")
+        if mismatch:
+            info.append("PSR4")
+        if info:
+            print(f"  (info)  {'  '.join(info)} -- informational, OUT OF SCOPE, do not act")
+
+    print("=" * 78)
+    print("ACTIONABLE = vendor casing only (Ksfraser -> ksfraser).")
+    print("PREFIX / PSR4 / LAYOUT above are informational -- DO NOT act on them.")
+    print("-" * 78)
     if total == 0:
-        print("LOCAL: all modules compliant")
+        print("LOCAL: every module already uses a lowercase vendor segment")
     else:
-        print(f"LOCAL: {total} module(s) with findings")
+        print(f"LOCAL: {total} module(s) need the vendor-casing rename")
     print(f"SCANNED: {len(local)} local module dirs")
 
     if not_cloned:
