@@ -50,7 +50,7 @@ whose reference is renamed ahead of its dependency breaks at autoload.
 | `ksfraser/fa-hooks` | `Ksfraser\` | gate for others |
 | `ksfraser/staging-dto` | `Ksfraser\StagingDto\` | **published (v0.0.1)** -- needs a republish |
 | `ksfraser/ksf-modules-dao` | `Ksfraser\ModulesDAO\` | **published (v0.5.3)** -- needs a republish |
-| `ksfraser/ksf-common-db` | published v1.0.1 says `Ksfraser\`, its own tag says `ksfraser\` | artifact does not match its tag; republish |
+| ~~`ksfraser/ksf-common-db`~~ | published v1.0.1 says `Ksfraser\` | **NOT A REAL PROBLEM** — verified false, see below |
 
 Remaining modules still on `Ksfraser\` (informational count, shrinks as we
 touch them):
@@ -569,7 +569,34 @@ back to 1010 tests / 2343 assertions green.
 1. Rename the **leaf packages first**: `ksfraser/traits`, `ksfraser/fa-hooks`.
 2. Republish the ones already on Packagist: `staging-dto`, `ksf-modules-dao`,
    `ksf-common-db` (the last also needs its v1.0.1/v1.0.2 tag mismatch fixed).
-3. Only then sweep the consumers.
+3. Only then rename consumers.
+
+### ksf-common-db: NOT a defect (verified 2026-10-08)
+
+The published v1.0.1 artifact was claimed to declare `Ksfraser\CommonDb\` while
+its tag declared `ksfraser\CommonDb\`, and a path repository was added on the
+strength of that claim. **Both were wrong.** Downloaded the actual zipball
+(`api.github.com/repos/ksfraser/ksf_common_db/zipball/14865577c8`) and it
+declares:
+
+```
+namespace ksfraser\CommonDb\Contract;
+namespace ksfraser\CommonDb\Adapter;
+```
+
+The published package is correct and matches its tag. The real fault was
+`ksf_fa_warehouse`'s own code using the capital-K namespace. Fixed in `8ecebee`,
+which drops the path repository, resolves `^1.0` from Packagist, and passes 41/106
+on a clean install.
+
+**Lesson:** the claim came from a class-not-found error message, which pointed at
+the consumer, not the package. Verify the artifact before changing dependency
+resolution.
+
+**And never use a path repository for a published package anyway** — composer
+vendors it as a relative symlink (`../../../ksf_common_db/`), which arrives
+DANGLING in `fa_modules` because it resolves outside the mounted modules tree.
+That broke `FaDbAdapter` in the deployed warehouse module.
 
 The fixer does not distinguish "this module's own namespace" from "an external
 package's namespace". Until it does, it must be run per-module with the test

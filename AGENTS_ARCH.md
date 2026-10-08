@@ -22,6 +22,22 @@ Read this before creating or refactoring any ksf module.
   libraries may differ — each repo records its own floor in `_APPENDIX`.
 - `declare(strict_types=1);` at the top of every PHP file.
 
+**OPEN TENSION (2026-10, needs a ruling).** The floor above says "no typed
+properties", but two modules use them and declare `>=7.4`:
+`ksf_FA_Customer` (`src/Customer/Models/CustomerDTO.php`) and `ksf_FA_Payment`
+(`src/Payment/Models/PaymentDTO.php`). Their composer constraints were corrected
+from a false `>=7.3` to an honest `>=7.4`, and both pin
+`config.platform.php = 7.4.33`. So the *code* is 7.4 while the *documented floor*
+is 7.3. Either the two modules are rewritten to drop typed properties, or the
+floor is raised to 7.4 to match the container runtime. Not yet decided — do not
+"fix" this unilaterally in either direction.
+
+If a module keeps typed properties, note the second trap: a typed property
+without a default is **uninitialised**, and reading it throws
+`Typed property ... must not be accessed before initialization`. Both DTOs above
+had this bug, which made `toArray()` on a bare `new DTO()` a fatal. Every typed
+property must be defaulted.
+
 ## 2. Core design principles
 
 - **SOLID, DRY, SRP, DI, TDD** — single responsibility, dependencies injected
@@ -33,6 +49,90 @@ Read this before creating or refactoring any ksf module.
 - **Business logic + platform adapter split** — framework-agnostic business
   logic lives in a `*_Core` package (`ksfraser\<Package>\`); the FA adapter
   module (`ksf_FA_*` → `ksfraser\FrontAccounting\<Module>\`) is a thin wrapper.
+
+### 2.1 Namespace convention (canonical, no variations)
+
+**The prefix decides the namespace. Check the directory name first.**
+
+| Module directory | Namespace | Meaning |
+|---|---|---|
+| `ksf_FA_<Module>` | `ksfraser\FrontAccounting\<Module>\` | an FA module |
+| `ksf_<Module>` | `ksfraser\<Module>\` | standalone business logic, not attached to FA |
+
+A module is an FA module because it is **named** `ksf_FA_*` and ships an FA
+`hooks.php` — not because of what it integrates with. WooCommerce is the case
+that gets this wrong, because there are two distinct things that can be built:
+
+- `ksf_FA_Woocommerce` — a WooCommerce integration **inside FA**. It stages into
+  FA's tables and lives in the FA module tree, so:
+  `ksfraser\FrontAccounting\Woocommerce\`.
+- `ksf_Woo*` — WooCommerce code **not attached to FA** (standalone REST clients,
+  a Woo plugin, sync tooling). These are `ksf_*`, so: `ksfraser\Woocommerce\`.
+
+The `FrontAccounting\` segment is not cosmetic. Dropping it from an FA module
+makes the namespace read as though the module were part of WooCommerce itself or
+shipped with WooCommerce upstream, which is exactly the impression to avoid:
+these are private KSF modules. Conversely, an FA-attached Woo module **must**
+keep the `FrontAccounting\` segment, because that is what marks it as living
+inside FA rather than beside it.
+
+If you are unsure which bucket a module falls in, look at the directory name and
+whether it has a `hooks.php` — do not infer it from the third-party system the
+module talks to.
+
+
+An FA module named `ksf_FA_<Module>` uses exactly:
+
+```
+ksfraser\FrontAccounting\<Module>\
+```
+
+Lowercase vendor segment, then `FrontAccounting`, then the module name. The
+PSR-4 mapping and the on-disk layout must match, e.g.
+
+```json
+"psr-4": { "ksfraser\FrontAccounting\<Module>\": "src/FrontAccounting/<Module>/" }
+```
+
+**These are NOT acceptable** — they were all found in the wild and had to be
+migrated (2026-10): `ksfraser\FA\<Module>\`, `ksfraser\FA<Module>\`,
+`ksfraser\FA\<Module>\`, `ksfraser\FA<Module>\`. They read as "FA" plus an
+abbreviation and are not the documented vendor path.
+
+Migrated in the 2026-10 pass, all with tests green and a
+`NamespaceConventionTest` guard added to `ksf_FA_CRM`:
+
+| Module | Was | Now |
+|---|---|---|
+| `ksf_FA_Customer` | `ksfraser\FACustomer\` | `ksfraser\FrontAccounting\Customer\` |
+| `ksf_FA_Payment` | `ksfraser\FAPayment\` | `ksfraser\FrontAccounting\Payment\` |
+| `ksf_FA_Sales` | `ksfraser\FA\Sales\` | `ksfraser\FrontAccounting\Sales\` |
+| `ksf_FA_CRM` | `ksfraser\FA\CRM\` | `ksfraser\FrontAccounting\CRM\` |
+
+Do not add a second autoloader. Put the PSR-4 mapping in the module's own
+`composer.json` and let `tests/bootstrap.php` reuse Composer's loader, rather
+than hand-rolling a prefix matcher (those drift from composer.json and then
+resolve nothing).
+
+### 2.2 One module owns each FA-native capability
+
+Each FA-native aggregate gets ONE focused module that wraps FA's own routines:
+`ksf_FA_Customer` (debtor + branch + contact), `ksf_FA_Payment` (customer
+payment + allocation), `ksf_FA_Sales` (sales invoice). They expose the full
+CRUD/search responder set (`CREATE_*`, `GET_*`, `SEARCH_*`, `UPDATE_*`), not
+just the one capability they were first written for.
+
+A capability must have exactly one owner. Two modules answering the same hook
+name makes `hook_invoke_first` nondeterministic and defeats targeted
+`hook_invoke`. `CREATE_CUSTOMER` was briefly duplicated into `ksf_FA_CRM` before
+`ksf_FA_Customer` was found; the CRM copy was removed.
+
+**Callers reach owners through hooks only** —
+`hook_invoke('<Module>', '<RESPONDER>', $data)`. Never instantiate the owner's
+classes directly: that bypasses the hook boundary, hard-couples the caller to
+whichever module happens to own the capability, and (in ISU's case) could not
+have worked at all because ISU's vendor tree has no autoloader for those
+modules.
 
 ## 3. Standard module layout
 
@@ -91,6 +191,85 @@ Each table gets a `{table}_db.inc` gateway exposing `write_{table}()` /
 - Container deploy: run `composer install --no-dev` (a `require-dev` that pulls
   PHP 8+ transitive deps breaks a PHP 7.x container) — pin
   `config.platform.php` to the container's PHP where needed.
+
+### Dev tree vs deploy tree — three different topologies (verified 2026-10)
+
+`~/Documents/<Module>` (dev) and `ksf_Infrastructure/fa_modules/<Module>` (deploy)
+are **not** hardlinks or a shared worktree, and they are **not always two clones**.
+Do not assume — classify first:
+
+```bash
+git -C fa_modules/<Module> rev-parse --show-toplevel
+```
+
+- Returns `…/ksf_Infrastructure` → the deploy path is just a **directory inside the
+  ksf_Infrastructure monorepo**, not a repo of its own. There is no clone to
+  fast-forward: deploy = copy the changed files in, then commit in
+  `ksf_Infrastructure`. Current examples: `ksf_FA_ImportStagingProcessing`,
+  `ksf_FA_Logging`, `ksf_FA_GPG`, `ksf_FA_PurchaseOrderTracking`,
+  `ksf_FA_StockReservations`, `ksf_FA_StockTurnover`,
+  `ksf_FA_ManufacturerConsolidation`, `ksf_payment_destinations`,
+  `ksf_fa_downloader`, `ksf_FA_Customer`.
+  Their `git log` shows **ksf_Infrastructure's** history (`feat(ansible): …`),
+  which makes a naive "deploy is BEHIND" check compare two unrelated histories.
+- Returns `…/<Module>` → an **independent clone**. Dev and deploy each have their
+  own `.git` and `HEAD`, and they diverge silently: `ksf_FA_CRM`'s deploy clone
+  sat 3 commits behind with nothing surfacing it. Different inodes on every file,
+  so `stat -c%i` is never a "same file?" test.
+- Some modules exist **only** under `fa_modules/` (`ksf_FA_Contacts`,
+  `ksf_FA_Employee`, `ksf_FA_ExpenseReport`, `ksf_FA_QuickBudget`,
+  `ksf_FA_Users`) — there is no separate dev tree, so they cannot be diffed
+  against one. Treat `fa_modules/` as the source of truth for those.
+
+**Never edit the deploy tree.** An edit there is invisible to the dev repo,
+uncommitted in the wrong place, and gets overwritten by the next sync. Two
+mistakes of this kind happened in one session (an `index.php` reorder and a
+table-prefix rename were both written to the deploy clone first). Confirm
+before writing: `git -C <path> rev-parse --git-dir`.
+
+For independent clones, deploy with a fast-forward:
+`git fetch origin && git merge --ff-only origin/main`.
+
+#### Dirty files in the deploy clone are usually NOT real work
+
+Before a fast-forward, check whether the deploy clone's local modifications are
+genuine. Per file, compare against upstream — if the deploy copy hashes equal
+`git show origin/main:<file>`, the "modification" is a hand-applied **duplicate
+of a commit that already exists upstream** and is safe to discard via
+`git checkout -- <file>`:
+
+```bash
+[ "$(git show origin/main:$f | md5sum)" = "$(md5sum < $f)" ] && echo "duplicate of upstream"
+```
+
+That is how three deploy-clone "modifications" (`composer.json`, `phpunit.xml`,
+`_init/config`) turned out to be local re-applications of already-pushed commits
+`25e5a55` / `b048dde`. Blindly stashing them creates conflicts for nothing.
+
+Beware huge dirty counts that are just runtime artifacts, not source drift —
+`ksf_Calendar_UI` (2490) and `ksf_FA_API` (1682) are dominated by `vendor/` and
+generated files. Inspect before concluding anything is wrong.
+
+#### The shared .md docs are hardlinked — but NOT everywhere
+
+- `AGENTS.md` (182 links) and `AGENTS_ARCH.md` (183 links) at
+  `~/Documents/` are **hardlinked**, so editing them propagates to every linked
+  repo automatically. That is the intended mechanism; prefer it over copying.
+- Verify before assuming: `stat -c%h <file>`. `ksf_FA_HRM` and `ksf_FA_Calendar`
+  each held a **divergent private copy** (`links=1`) of `AGENTS_ARCH.md` that was
+  missing §7 "Integration-environment gotchas" entirely. Editing the shared
+  inode will *not* reach them. Re-link with `ln -f` after editing (done
+  2026-10-05; now 185 links, all in agreement), and check `md5sum` across repos
+  when you need the docs to actually agree.
+- Always confirm a copy that is about to be discarded holds nothing the shared
+  version lacks. The HRM/Calendar copies did hold 15 unique lines — but the
+  shared doc had deliberately *corrected* them, so they were obsolete.
+- The deploy clone's `AGENTS.md` is typically a **private, un-hardlinked** file
+  (`links=1`) carrying local operational notes that are not upstream. It will
+  conflict on fast-forward. Preserve it: capture
+  `git diff -- AGENTS.md > /tmp/x.patch`, `git checkout -- AGENTS.md`, fast-forward,
+  then `git apply --3way` and resolve in favour of the *local* notes where they
+  carry information upstream lacks (e.g. the pod port map). Then commit.
 
 ### Integration-environment gotchas (ksfii_app pod, verified 2026-09)
 
@@ -161,12 +340,128 @@ The guard is **namespace-scoped** (sentinel constant derived from `__NAMESPACE__
   modules start at 114. Current highest: `SS_GPG = 145` (`SS_DataIntegrity = 144`).
   Next available: **146**. Always take the next unused number — never reuse.
 
+### The `SS_*|N` you declare is NOT the code FA enforces (verified 2026-10)
+
+`add_access_extensions()` (`includes/access_levels.inc`) **reassigns every
+extension section and area code** at runtime:
+
+```php
+$scode = 100; $acode = 100; $extcode = $extid << 16;
+section_code = ($scode++ << 8) | $extcode;   // per extension, per section
+area_code    = ($acode++ << 8) | $extcode;   // per extension, per area
+```
+
+So `define('SS_CRM', 114 << 8)` (= 29184) and its areas `SS_CRM | 1 … | 20` are
+purely a **declaration order**. At runtime on the ksfii_app pod those became
+section **1205248** and areas **1205348…1205367** in `0_security_roles.areas`
+(`$extid` 18, the CRM's index in the extension registry).
+
+Rules:
+- The **`SA_*` string is the only stable contract.** Never reason about, store,
+  log, or compare the integer `SS_*|N`; look up `$security_areas['SA_X'][0]`
+  at runtime.
+- **Call `add_access_extensions()` before any `can_access()` /
+  `check_page_security()` evaluation**, including in throwaway probe scripts.
+  Without it the area is simply `UNDEFINED` and access is `false` — which reads
+  as "this area is denied" and is a false conclusion for a granted area. This
+  cost a full debugging cycle: a probe including only `session.inc` reported
+  `SA_CUSTOMER_TYPE` as `UNDEFINED` / `can_access=false` while the real page
+  context returned `code=1205353` / `true`.
+- When a page renders despite a supposedly-denied area, check in this order:
+  (1) did the script call `add_access_extensions()`; (2) is `$security_groups`
+  set (legacy RBAC path — `can_access()` then ignores `$page_security` entirely
+  and returns `is_admin_company() && in_array(20, $security_groups[$access])`);
+  (3) `page_nested` — `page()` returns early via `if (++$page_nested) return;`,
+  so a second `page()` in one request **skips the security check entirely**.
+- `0_security_roles` also holds grants from an abandoned numbering scheme
+  (sections `6244<<8`, `4708<<8`, `7524<<8` — nothing in the live 102–156
+  range). Harmless, but do not read those rows as evidence that a module's
+  areas are granted.
+- Denied pages return **HTTP 200** with FA's message *"The security settings on
+  your account do not permit you to access this function"*. A 200 is not proof
+  of access — grep for that string when testing a security area.
+
+### Granting an area to a role requires granting its SECTION too (verified 2026-10)
+
+`0_security_roles` has two parallel semicolon-separated lists, `sections` and
+`areas`, and an area is **inert unless its section is also granted**
+(`includes/current_user.inc:124`):
+
+```php
+$role = get_security_role($this->access);
+foreach ($role['areas'] as $code)
+    // filter only area codes for enabled security sections
+    if (in_array($code & ~0xff, $role['sections']))
+        $this->role_set[] = $code;
+```
+
+`can_access()` (`includes/current_user.inc:195`) tests membership in
+`$this->role_set`. So an area present in `areas` but absent from `sections` is
+dropped at login and the page stays denied — **while the database row looks
+exactly right.** Posting `Area*` without `Section*` produces that state and the
+grant silently does nothing. Rule: whenever you grant extension areas, grant the
+parent section codes in the same transaction.
+
+Extension sections are always `(extid << 16) | (100 << 8)` because
+`add_access_extensions()` resets `$scode = 100` per extension
+(`includes/access_levels.inc`), e.g. extid 17 (HRM) → section `1139712`.
+
+`admin/security_roles.php` makes this hard to do by hand:
+
+- It is **full-state** — the handler (`admin/security_roles.php:87-99`) rebuilds
+  `sections`/`areas` purely from the `$_POST` keys it receives. Any previously
+  granted code whose key is absent is deleted. Save key is `addupdate`; the
+  `Update view` button does not persist.
+- Area inputs are only *rendered* when their section is on (line 220);
+  otherwise FA emits `hidden('Area'.$code)` (line 224), so the area exists in
+  the DOM but is never checkable. Grant order is therefore forced: check the
+  `Section<code>` checkbox first, let the `submit_on_change` AJAX reload reveal
+  the areas, then check the areas and save once with the complete set.
+- Section checkboxes whose parent section is *not* granted are rendered
+  `hidden()` too, so an editor can appear to lack controls that exist.
+- Areas belonging to a section the role does not hold are also invisible to the
+  editor. Granting access to such a module therefore removes any stray area
+  codes that were in `areas` for an unheld section — expect that diff and restore
+  deliberately rather than assuming a clean edit.
+
+Do not hand-write these lists in SQL. Use the Security Roles UI with a
+before/after diff of both columns (see `AGENTS_ARCH.md` §8 verification note in
+`ksf_FA_Calendar/AGENTS.local.md` for the working script).
+
 ## 9. FA page security
 
 Every direct-access module page MUST call `add_access_extensions()` (registering
 its security areas) **before** `page_header()`. Missing it produces a blank
 (~855-byte) page. Guard so that a user without the area is refused before any
 output.
+
+### `$page_security` is read by `page()`, so assign it before you call `page()`
+
+FA enforces module-page security in **`includes/main.inc`, inside `page()`**:
+
+```php
+function page($title, $no_menu=false, ...) {
+    global $path_to_root, $page_security, $page_nested;
+    if (++$page_nested) return;            // second page() in a request SKIPS the check
+    include_once($path_to_root . "/includes/page/header.inc");
+    page_header(...);
+    check_page_security($page_security);   // <-- reads the CURRENT global
+}
+```
+
+Consequences for any module whose access area is **derived at runtime**
+(app-shell tab registries, per-record or per-tab permissions):
+
+- Set a provisional `$page_security` before `session.inc` so nothing reads an
+  undefined global, then compute the real value and call `page()`. Do not call
+  `page()` before the value is final.
+- Any "register-with-me" extension hook (`<app>_register_tabs`) that other
+  modules answer must be fired **before** the area is resolved, or contributed
+  views silently fall back to the default view and inherit the default area —
+  i.e. the page renders but under the wrong permission. Fixed for CRM in
+  `4db5a07`; the invariant is general.
+- Never rely on the HTTP status to detect a refusal: see the 200-with-denial-body
+  note in §8.
 
 ### FA UI bootstrap — `ui.inc` is NOT auto-loaded
 
@@ -218,6 +513,17 @@ use FA-native classes (`inputsubmit`) — `FormFooter` defaults `useAjax=false`;
 - **Hard rule:** FA modules MUST use native `db_*` calls at runtime. PDO only in
   the standalone/portable side (tests, CLI, non-FA embedding). `DbConnectionInterface`
   (ksf-common-db) is the PDO-shaped contract; `FaDbAdapter` translates to `db_*`.
+- **Never use a path repository for a published package.** `ksfraser/ksf-common-db`
+  is published and correct: the v1.0.1 zipball (commit `1486557`) declares
+  `ksfraser\CommonDb\`, matching its tag. An earlier version of this file claimed
+  the published artifact used the old capital-K namespace and recommended a path
+  repository — that claim was inferred from a class-not-found error and was never
+  verified; it was **false**, and the real fault was the consumer's own code.
+  Two reasons this matters: a path repo hides the true state of the package, and
+  composer vendors it as a **relative symlink** (`../../../pkg/`), which arrives
+  DANGLING in `fa_modules` because it resolves outside the mounted modules tree —
+  that silently removed `FaDbAdapter` from a deployed module. If a package looks
+  wrong, download its zipball and read it before changing dependency resolution.
 
 ## 11. Inter-module communication
 
@@ -233,6 +539,150 @@ use FA-native classes (`inputsubmit`) — `FormFooter` defaults `useAjax=false`;
   `record_id`, `data`.
 - Cross-module services: `ksf_log()` (ksf_FA_Common) routes to `ksf_log` hook →
   writes `company/<n>/logs/<module>_<date>.log`.
+
+### 11.2 Request/response payload & by-reference rule (2026-10)
+
+Verified against `ksf_FA_ImportStagingProcessing/hooks.php` + Square's
+`src/Staging/IsuStagingGateway.php`. Read this before writing any new
+`STAGE_*`/`CREATE_*`-style responder.
+
+**Payload direction.** Requests in the `STAGE_*` family cross the boundary as
+**DTO objects** (`ksfraser/staging-dto`, namespace `ksfraser\StagingDto\...`,
+abstract base `StagingEntity`). Responders **serialize** their reply with
+`StagingResult::toArray()` and tag it `_event` / `_module` / `_dto_type`. This
+is the current path; the nested-array `STAGE_CUSTOMER` / `STAGE_TRANSACTION` /
+`STAGE_PAYMENT` responders are the **legacy** shape and should be migrated, not
+copied.
+
+> Rule: for a `STAGE_*` request, **the caller passes a DTO instance by
+> reference and the responder REPLACES `$data` with a response array.**
+
+**The by-reference trap (this broke every `STAGE_ENTITY`/`STAGING_EXISTS` call).**
+FA passes `$data` by reference. A DTO is a plain object implementing
+`JsonSerializable`, **not** `ArrayAccess`, so a responder that receives a DTO
+and then writes `$data['result'] = ...` fatals with
+`Cannot use object of type ... as array`. It fails on the success path *and*
+on every error path (`$data['error'] = ...`), and it fails whether or not the
+DTO check passes first.
+
+Correct responder shape:
+
+```php
+public function STAGE_ENTITY(&$data, $opts = null)
+{
+    if (!$data instanceof \ksfraser\StagingDto\StagingEntity) {
+        $data = ['error' => '... requires a StagingEntity DTO instance', 'success' => false];
+        return null;
+    }
+    $dto = $data;                      // hold the handle BEFORE overwriting
+    try {
+        $arr = $this->getDtoAdapter()->stageEntity($dto)->toArray();
+        $data = ['success' => true, 'result' => $arr];   // replace, don't offset
+        return $arr;
+    } catch (\Exception $e) {
+        $data = ['error' => $e->getMessage(), 'success' => false];
+        return null;
+    }
+}
+```
+
+Corollary for **callers**: `$data` may still hold your DTO if no responder ran
+(the module is inactive) or if a responder violated this rule. Always re-check
+the type before reading offsets, and treat "not an array" as *no responder* —
+never as success:
+
+```php
+$data = $dto;
+hook_invoke('ksf_FA_ImportStagingProcessing', 'STAGE_ENTITY', $data);
+if (!is_array($data)) { /* inactive module / no responder -> report honestly */ }
+```
+
+**Never infer success from a broadcast.** `hook_invoke_all()` returns nothing,
+so a service that broadcasts and then records `'pushed'` asserts work that never
+happened. Use `hook_invoke()` and branch on the actual reply; Square's
+`refreshAllCustomers()` reported every customer as `pushed` for a
+`push_customer` broadcast with no listener, and `createDebtor()` returned a
+fabricated, unsaved debtor array that callers reported as a created FA row.
+Both were removed.
+
+**FAR customer creation is exclusively ISU's job (user directive, 2026-10).**
+Source systems (Square, WooCommerce) MUST NOT call `CREATE_CUSTOMER` or write
+FA debtors — they only `STAGE_ENTITY`/`STAGE_*` into Import Staging. Only ISU,
+after human review, may create the FA debtor/branch/contact (via CRM's
+`CREATE_CUSTOMER` responder, which ISU — never a source system — initiates).
+Square's `refreshAllCustomers()` now stages every customer through the same
+`stageCustomerForReview()` path as incremental sync and reports per-customer
+staging outcomes; it never touches CRM.
+
+### 11.4 Verify existence remotely before declaring anything dead (2026-10)
+
+**A grep over `~/Documents` returning nothing is NOT evidence that a class does
+not exist.** Three repos existed on GitHub with full implementations while having
+no local checkout at all:
+
+- `ksfraser/ksf_FA_Customer` — `CREATE_CUSTOMER` / `GET_CUSTOMER` /
+  `SEARCH_CUSTOMER` / `UPDATE_CUSTOMER`
+- `ksfraser/ksf_FA_Payment` — `CREATE_PAYMENT` / `GET_PAYMENT` /
+  `SEARCH_PAYMENT` / `UPDATE_PAYMENT`
+- `ksfraser/ksf_FA_CRM` already existed too (the adapter, not the capability)
+
+Both were pushed on 2026-05-27 and simply never cloned into `~/Documents`.
+
+**What this cost.** Because ISU's `createPaymentDirect()` referenced
+`\ksfraser\FAPayment\Services\PaymentService` and a local grep found nothing,
+that fallback was deleted as "referencing classes that do not exist in any tree".
+The claim was written into a commit message and was simply false. Separately, a
+duplicate `ksf_FA_Payment` and a duplicate `CREATE_CUSTOMER` in `ksf_FA_CRM`
+were written from scratch before the originals were found, and only the second
+duplicate was caught before it shipped.
+
+Rules:
+
+1. Before concluding a class/module/responder is dead or absent:
+   `gh repo view ksfraser/<name>`, and `git ls-remote` to confirm it has commits.
+2. Before writing a new module, check whether the repo already exists.
+3. Before `git push` to a repo you did not create, **fetch and read what is
+   already there.** A `git init` + force-push would have destroyed two months of
+   work in `ksf_FA_Payment`.
+4. If a statement about the codebase has been committed, it needs to be true.
+   When a premise turns out to be wrong, add a correcting commit rather than
+   leaving it — and do not silently change the conclusion's justification.
+
+Related: several modules' `_init/config`, `_APPENDIX` and docs existed only in
+the remote copy. Local absence and remote absence are different questions.
+
+### 11.3 STAGE_ENTITY live contract (verified E2E 2026-10 on ksfii_app-fa)
+
+End-to-end verified against the real container + `ksf_fa` DB
+(`DTO -> hook responder -> 0_staging_customers` row landed, then cleanup).
+
+- **Canonical `source` values** (ISU `InvalidSourceException` /
+  `StagingService::$validSources`): `woocommerce`, `square_api`, `square_csv`,
+  `paypal`, `bank`. Square's API sync MUST send `square_api` — plain `square`
+  fails "Unknown source". When ISU (post-review) requests customer creation it
+  passes `source=square_api` to CRM's `CREATE_CUSTOMER` responder.
+- **Response array shape** (`StagingExistsResult::toArray()`): `exists`,
+  `stagingId`, `status`, `message` (+ hook tags `_event`/`_module`/`_dto_type`).
+  The staging reference `staging_id` is read from `result['stagingId']`, NOT
+  `result['id']`.
+- **`name` is required by CustomerValidator but the DTO adapter must supply it**:
+  `DtoAdapter::stageCustomerDto()` composes `first + last + company`.
+- **Deployed module vs dev-vendor staleness is a real 500/failure source.**
+  The ksfii_app-fa module run from `fa_modules/` (container
+  `/var/www/html/modules/`) uses ITS OWN `vendor/`, which drift from the dev
+  tree. Instance: the deployed `ksf_ModulesDAO` was an old iteration whose
+  param binder did `addslashes(null)` -> `''`, so `INSERT ... source_updated_at`
+  died on MySQL strict-mode errno 1292 ("Incorrect datetime value: ''") — the
+  dev copy (explode-`?` + `quoteValue(null) => 'NULL'`) was fine. When a live
+  run misbehaves under the container, diff `fa_modules/.../vendor` against the
+  dev tree before touching app code.
+- Live CLI harness pattern (uknown to FA session bootstrap, drives `db_*`
+  directly): include `config_db.php` + `includes/db/connect_db.inc`, set
+  `$SysPrefs`/`$Ajax` stubs, `mysqli_connect` into `$db_connections[0]`, define
+  a `check_db_error()` stub that no-ops on `mysqli_errno==0`, then load the
+  module's `vendor/autoload.php` + `ksf_ModulesDAO` + `hooks.php` and call the
+  responder. `authorizeAction()` returns true without a session user, so CLI is
+  a safe bypass for exercising responders.
 
 ### 11.1 Inter-module dependencies (verified against FA 2.4.3, 2026-09)
 
@@ -409,6 +859,82 @@ $data = [
 - Use `class_exists()` guard before using other modules' classes
 - Log errors, don't throw (hook methods must be fault-tolerant)
 
+### 11.1 Staging: what can actually be staged (learned 2026-10)
+
+**The staging DTO package is NOT the contract. `DtoAdapter` is.**
+
+`ksfraser/staging-dto` ships 23 DTO types, but ISU's
+`ksfraser\FrontAccounting\ImportStaging\Services\DtoAdapter::stageEntity()`
+dispatches on exactly **nine** and throws
+`InvalidArgumentException('Unsupported DTO type: ...')` for everything else:
+
+| Stagingable | In the package but NOT stageable |
+|---|---|
+| `StagingOrder` | `StagingCoupon`, `StagingDiscount`, `StagingInventory` |
+| `StagingInvoice` | `StagingLineItem` (child of another DTO only) |
+| `StagingPayment` | `StagingLoyaltyAccount` / `LoyaltyProgram` / `LoyaltyReward` |
+| `StagingRefund` | `StagingNote`, `StagingShipment`, `StagingTax` |
+| `StagingSubscription` | `StagingTransaction` (internal) |
+| `StagingCustomer` | `StagingEntity` (abstract base) |
+| `StagingProduct`, `StagingProductVariant` | `StagingExistsQuery` / `StagingExistsResult` (internal) |
+| `StagingCategory` | |
+
+Adding a DTO type is therefore **not** enough to make something stageable: the
+adapter needs a dispatch branch, a mapper method, and somewhere to put the row.
+**Check the adapter, not the package.**
+
+**The staging entry point is the `STAGE_*` capability family only**, and its
+responder requires a `StagingEntity` instance:
+
+```php
+if (!$data instanceof \ksfraser\StagingDto\StagingEntity) {
+    $data = ['error' => 'stageEntity requires a StagingEntity DTO instance', 'success' => false];
+    return null;
+}
+```
+
+Three traps this creates. All three shipped; all are now guarded by tests.
+
+1. **A raw array can never stage** — and because `hook_invoke_all` is
+   fire-and-forget, the rejection is discarded, so the caller believes it staged
+   and nothing was written. Square had seven such broadcasts, Woo had four.
+2. **`hook_invoke_all` cannot substitute for `hook_invoke_first`.** Its return is
+   `array_merge_recursive()` of every provider's reply, so unwrapping `[0]` picks
+   whichever module is first in the registry rather than the one that answered.
+   Never write an `_all` fallback for a DTO capability. (`hook_invoke_first` has
+   existed since FA 2.3 — `hooks.inc` breaks on `isset($result)` — so such a
+   fallback is unreachable anyway.)
+3. **A duplicate DTO type is a live hazard, not a hypothetical.** If the working
+   path already stages the record, "fixing" a dead event by building the obvious
+   DTO creates a second row; ISU dedupes on `source` + `source_payment_id`, so
+   the two race and the winner is arbitrary. Square shipped two such traps:
+   `stage_payment_type` (→ `StagingPayment`) and `stage_order_lifecycle`
+   (→ `StagingOrder`), both duplicating what
+   `IsuStagingGateway::stageSquareOrder()` already stages. **Before implementing
+   any staging event, check whether the working path already covers it.**
+
+Square's `stage_refund` was the one dead event genuinely implementable
+(`StagingRefund` is stageable) and it now works.
+
+Money amounts: Square reports **minor units** (cents). Divide by 100 before
+building a DTO — the staging layer stores decimals, as `ImportService` does.
+
+#### Guard tests for the above
+
+- `ksf_FA_Square/tests/Unit/NoRawArrayStagingBroadcastTest.php` — no
+  `hook_invoke_all` to a DTO capability; no `stage_*`/`log_*` broadcast lacking a
+  responder.
+- `ksf_FA_Square/tests/Unit/NoHardcodedStagerTest.php` — no production file
+  names a stager module.
+- `ksf_FA_Woocommerce/tests/Unit/Staging/StagingResponseNotDiscardedTest.php` — a
+  rejected staging call must report `staged => false`, never look successful.
+
+Both Square guards strip comments with `token_get_all`. **When doing that, emit
+`$token[1]` for every non-comment array token.** A stray `continue` drops all
+`T_STRING` tokens, so function names never reach the regex and the guard passes
+everything silently. Both guards were broken exactly that way and had to be
+fixed — verify a guard fails when you reintroduce a violation.
+
 ## 12. FA module packaging
 
 - `_init/config` file is **gzip-compressed** `Key: Value` lines (`Name:`, `Version:`,
@@ -559,11 +1085,15 @@ function deactivate_extension($company, $check_only = true)
 Shape of each file (all `0_`-prefixed, `DROP`s inert):
 
 ```sql
--- fa_crm_customer_types_uninstall.sql
--- 0_fa_crm_customer_types
+-- ksf_crm_customer_types_uninstall.sql
+-- 0_ksf_crm_customer_types
 -- DESTRUCTIVE: uncomment only when the data is knowingly being discarded.
--- DROP TABLE IF EXISTS 0_fa_crm_customer_types;
+-- DROP TABLE IF EXISTS 0_ksf_crm_customer_types;
 ```
+
+Note the name must match the table **exactly** — the file is found by glob and
+the name is a convention only, but a `0_fa_crm_*` name here (the CRM's original
+mistake, fixed in `4db5a07`) documents a table that never existed.
 
 **No `run_db_import()` exists** in FA 2.4.3 or in any ksf module — an earlier
 revision of this doc referenced it. The real helpers are `db_import()` (one
