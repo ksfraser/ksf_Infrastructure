@@ -393,3 +393,40 @@ $hookPayload = ['source' => $source, 'customer' => $hookData];
 
 Grep for the anti-pattern when touching any hooks class:
 `hook_invoke(_all)?\([^)]*\[\s*'` or `...\(` with a literal/array expression.
+
+## Browser access for verification (added 2026-10-10)
+
+A headless Chromium is available for logging into a running FA instance and
+exercising the UI directly — activating extensions, submitting forms, capturing
+screenshots. **This is the fastest way to verify activation**, because extension
+activation has several silent failure modes that no amount of `php -l` catches:
+
+| Symptom | Cause |
+|---|---|
+| Extensions page renders only its footer | A load-time fatal in `hooks.php` (trait missing, LSP signature violation, PHP 8 syntax under a PHP 7.4 platform pin) |
+| "version '-' is incompatible" | `local_extension()` stored `-` because `_init/config` had no `Version` |
+| "Cannot redeclare X()" | A function defined in two files the module both loads |
+
+Credentials for the local instance: **opencode / opencode**
+
+### Load-time check, before touching the browser
+
+Cheaper than a browser and catches the first row above:
+
+    podman exec <container> php -d display_errors=1 /tmp/hookone.php <module_name>
+
+`/tmp/hookone.php` loads one extension's `hooks.php` exactly as FA does —
+including `applications/application.php`, which modules subclass at file scope —
+and instantiates the class. A fatal there is exactly what the browser would show.
+
+### Registry repairs
+
+`/var/www/html/installed_extensions.php` on `ksfii_app-fa` is **not** bind-mounted
+from the repo; the container holds its own 9293-byte copy while the host copy is
+844 bytes. Registry edits must therefore be made inside the container. Write by
+truncation (`fopen('r+')` + `ftruncate`), never rename, so the inode survives.
+
+Match each `package` to its own `version` **within the same entry**. A non-greedy
+regex across the whole file will run past the end of one entry into the next and
+hand a module another module's version — which happened once and produced a
+registry that looked plausible but activated the wrong thing.
