@@ -459,9 +459,89 @@ Consequences for any module whose access area is **derived at runtime**
   modules answer must be fired **before** the area is resolved, or contributed
   views silently fall back to the default view and inherit the default area —
   i.e. the page renders but under the wrong permission. Fixed for CRM in
-  `4db5a07`; the invariant is general.
+  `4db5a07`; the invariant is general. **Adopting
+  `AbstractFrontController` (below) makes this structural** — see §9.1.
 - Never rely on the HTTP status to detect a refusal: see the 200-with-denial-body
   note in §8.
+
+### 9.1 `AbstractFrontController` — the app host's preamble as a base class
+
+**Package:** `ksfraser/ksf-fa-common`, `ksfraser\FrontAccounting\Common\App\AbstractFrontController`
+(`src/App/AbstractFrontController.php`). `@since 1.1.0`; first published
+**v1.0.13**, `loadUiIncludes()` fixed in **v1.0.14**.
+
+| App | Adopted? | Front controller | Shell | appId | Register hook |
+|---|---|---|---|---|---|
+| `ksf_FA_HRM` | yes (`18fcba5`) | `HRM\App\HrmFrontController` | `HrmAppShell` | `hrm` | `hrm_register_tabs` |
+| `ksf_FA_CRM` | yes (`a81db58`) | `CRM\App\CrmFrontController` | `CrmAppShell` | `crm` | `crm_register_tabs` |
+| `ksf_FA_ProjectManagement` | **no** | — (hand-rolled `index.php`) | `PmAppShell` | `pm` | `pm_register_tabs` |
+
+PM's shell exists with six controller-backed tabs; what it lacks is this base
+class, so a `pm_register_tabs` contribution is currently served under
+`SA_ksf_FA_ProjectManagementVIEW` rather than under the contributor's own area.
+
+**Read the app id off the shell, never from memory.**
+`AbstractAppShell::getRegisterHook()` returns `$this->appId . '_register_tabs'`,
+and the `appId` is the first argument to `parent::__construct()`:
+
+```bash
+grep -n "parent::__construct(" modules/ksf_FA_*/src/**/App/*AppShell.php
+```
+
+A contributing module exposes exactly one method, named after that hook, with
+**`&$data` as its first parameter** — FA's `hook_invoke_all()` passes `$data` by
+value, so without the reference nothing appended is visible to the caller.
+
+**The security guarantee, stated precisely.** `run()` is `final`,
+`enforceSecurity()` is `final protected`, enforcement runs **once** before the
+action path is chosen, the constructor rejects an empty fallback area, and the
+absence of `check_page_security()` **refuses** rather than renders. Because
+enforcement happens *after* `boot()`, a hook-registered tab is checked against
+**its own** area — which is exactly the manual re-check the rule above used to
+require of every hand-rolled router.
+
+**The two-phase split is forced by FA, not by style.** `session.inc` and
+`includes/ui.inc` read `$page_security` / `$path_to_root` as **globals in their
+including scope**. From inside a method they are method locals, so every
+`include_once($path_to_root . …)` inside them resolves against `/` and fails
+**silently**. Symptoms seen live: `Call to undefined function array_selector_row()`
+mid-render (no `ui_input.inc`), and a **500 on every page of the module**
+(`Call to undefined function _()` in `includes/sysnames.inc`) when the include was
+"tidied" above `session.inc` — because `session.inc` is what loads gettext.
+Hence:
+
+```php
+$fc = new CrmFrontController(new CrmAppShell(), 'SA_CRM_DASHBOARD', $path_to_root);
+$page_security = $fc->getSecurityArea();        // phase A — global scope
+include_once($path_to_root . "/includes/session.inc");
+add_access_extensions();
+include_once($path_to_root . "/includes/ui.inc");
+$fc->run();                                      // phase B
+```
+
+**Options that decide whether an adoption is behaviour-preserving** — see
+`APP_TAB_ARCHITECTURE.md` §11.1 for the table. The two that bite:
+
+- `normalise_get` must be `false` when the app's controllers do not return
+  `[$tabParam]` from `preserveParams()`, because `MasterSummaryTable::pagerUrl()`
+  copies those `$_GET` keys **verbatim** and normalising strips the tab off every
+  pager link. CRM and PM keep `?view=`; HRM uses `?tab=`.
+- Check whether the tab controllers implement `runAction()` **before** adopting
+  the base unmodified. The base routes an `action` verb to `runAction()` and
+  renders "not available" when it is absent. CRM's controllers never implemented
+  it, so the unmodified base made every POST save a silent no-op.
+
+**Out of scope by design:** CSRF tokens, record-level authorisation, and
+POST-vs-GET verb policy. The last is the tab controller's contract — HRM makes
+`action=delete` POST-only itself.
+
+### 9.2 `ui.inc` and the register hook
+
+The "register-with-me" hook needs a session, so it fires *after*
+`session.inc`; the security area must be chosen *before* it. That ordering is the
+whole reason `AbstractFrontController` splits into `getSecurityArea()` +
+`run()`. Do not "simplify" it by moving `session.inc` into `run()` — it will work
+syntactically and fail silently at every nested include.
 
 ### FA UI bootstrap — `ui.inc` is NOT auto-loaded
 
@@ -500,6 +580,39 @@ use FA-native classes (`inputsubmit`) — `FormFooter` defaults `useAjax=false`;
 `ajaxsubmit` is only opt-in for content that genuinely wants in-place XHR.
 `MasterSummaryTable` row actions (Edit/Delete) already render native
 `inputsubmit` rows (the tab controller passes `'ajax' => false`).
+
+### 9.3 Working-directory check — MANDATORY before any file change (2026-10-11)
+
+Run this before editing **any** file:
+
+```bash
+pwd                                              # must NOT contain fa_modules
+basename "$(git rev-parse --show-toplevel)"     # which repo
+git remote get-url origin                        # ksf_X (logic) or ksf_FA_X (FA wrapper)?
+git branch --show-current
+```
+
+**If the path contains `fa_modules/`, STOP.** That is deployed output. Find the
+dev checkout under `~/Documents` and work there.
+
+Why, concretely: on 2026-10-11 six modules' changes were committed and pushed
+from inside `fa_modules/` because this check was not performed. 32 git clones
+live there, each duplicating a dev checkout. A commit made in the deploy tree
+lives only in that clone and is **silently overwritten** by the next deploy
+`sync`. Full reasoning: `ksf_Architecture_Docs/ADR/ADR-001`.
+
+### 9.4 `ksf_<module>` vs `ksf_FA_<module>` — two DIFFERENT repos (2026-10-11)
+
+They are **not** clones of each other and must never be reconciled:
+
+- `ksfraser/ksf_<module>` — target-agnostic business logic (FA, WP, Joomla…)
+- `ksfraser/ksf_FA_<module>` — FA wrapper: `hooks.php`, security areas, pages,
+  controller. **Consumes** the business-logic package.
+
+Identify the repo by **remote URL**, not directory name. Branch conventions
+differ per repo and are not interchangeable — check before comparing against a
+remote. Mistaking these cost an unnecessary rebase on 2026-10-11.
+Full reasoning: `ksf_Architecture_Docs/ADR/ADR-002`.
 
 ## 10. FA DB layer — correct API (gotchas)
 
