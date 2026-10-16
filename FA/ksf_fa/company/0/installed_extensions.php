@@ -76,4 +76,64 @@ $installed_extensions = array (
     'path' => 'modules/ksf_FA_HRM',
     'active' => 1,
   ),
+  7 => 
+  array (
+    'package' => 'ksf_FA_Calendar',
+    'name' => 'ksf_FA_Calendar',
+    'version' => '2.4.19-0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Calendar',
+    'active' => 1,
+  ),
+  12 => 
+  array (
+    'package' => 'ksf_FA_Square',
+    'name' => 'ksf_FA_Square',
+    'version' => '2.4.3',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Square',
+    'active' => 1,
+  ),
+  13 => 
+  array (
+    'package' => 'ksf_FA_ImportStagingProcessing_UI',
+    'name' => 'ksf_FA_ImportStagingProcessing_UI',
+    'version' => '2.4.3',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_ImportStagingProcessing_UI',
+    'active' => 1,
+  ),
+  14 => 
+  array (
+    'package' => 'ksf_fa_downloader',
+    'name' => 'ksf_fa_downloader',
+    'version' => '2.4.3',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_fa_downloader',
+    'active' => true,
+  ),
+  15 => 
+  array (
+    'package' => 'ksf_payment_destinations',
+    'name' => 'ksf_payment_destinations',
+    'version' => '2.4.3-1',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_payment_destinations',
+    'active' => 1,
+  ),
+  16 => 
+  array (
+    'package' => 'ksf_FA_Rep_SalesGroups',
+    'name' => 'ksf_FA_Rep_SalesGroups',
+    'version' => '2.4.19-1.0.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Rep_SalesGroups',
+    'active' => 1,
+  ),
 );

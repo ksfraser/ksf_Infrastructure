@@ -16,6 +16,17 @@
             "php": "7.4.33"
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "vendor/ksfraser/famock",
+            "canonical": false
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ksfraser/Traits.git"
+        }
+    ],
     "require": {
         "php": ">=7.3",
         "ext-json": "*",
