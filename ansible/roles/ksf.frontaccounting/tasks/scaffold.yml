@@ -39,6 +39,42 @@
     dest: "{{ fa_pod_dir }}/company/0/index.php"
     mode: '0644'
 
+# The FA container runs Apache as www-data (uid 33 in the image). The company
+# tree is bind-mounted RW and FA writes to it at runtime (js_cache, attachments,
+# backup, pdf_files, images, reporting). The directories created above are
+# root-owned 0775, which is NOT writable by uid 33, so FA logs
+# "unlink(./company/0/js_cache/0/login.js): Permission denied" on every page
+# load and silently serves stale cached JS.
+#
+# Files can also be left owned by an orphaned container uid (e.g. 165568 from a
+# previous image) that has no passwd entry on the host; those are re-owned to
+# the pod directory's owner.
+- name: Ensure the company tree is writable by the container's Apache user
+  become: true
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      podir_owner="$(stat -c %U:%G "{{ fa_pod_dir }}")"
+      chmod -R o+rwX "{{ fa_pod_dir }}/company"
+      find "{{ fa_pod_dir }}/company" \( -nouser -o -nogroup \) -exec chown "$podir_owner" {} + 2>/dev/null || true
+  changed_when: false
+
+# fa_modules is bind-mounted into BOTH pods and read by the container's Apache
+# user. A module file that is not world-readable (e.g. 0600 from a dev tree
+# checkout) makes FA fail to include the module's hooks.php:
+#   include_once(.../modules/ksf_FA_Upc2Item/hooks.php): failed to open stream:
+#   Permission denied
+# which breaks the whole page, not just that module. Add the read bit where it
+# is missing; never touch write bits or ownership here.
+- name: Ensure deployed modules are readable by the container's Apache user
+  become: true
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      find "{{ fa_modules_dir }}" -type f ! -perm -o+r -exec chmod o+r {} +
+      find "{{ fa_modules_dir }}" -type d ! -perm -o+rx -exec chmod o+rx {} +
+  changed_when: false
+
 - name: Template config_db.php for this pod
   become: true
   template:
