@@ -1,0 +1,50 @@
+---
+# ksf-restore.yaml - rebuild the pod's containers after a host reboot/power loss.
+#
+# WHY THIS EXISTS
+# After a hard reboot, podman containers are left in the "Created" state and
+# nothing starts them: the generated systemd units are stale (they point at
+# "fa/..." lowercase paths and at an image that no longer exists), so the
+# stacks stay dark. This playbook rebuilds them from the SAME roles that
+# created them, so the mount set stays canonical:
+#
+#   FA/<ver>            -> /var/www/html          (core code, RO)
+#   fa_modules          -> /var/www/html/modules  (RW)
+#   FA/<pod>/config_db.php                 -> /var/www/html/config_db.php
+#   FA/<pod>/installed_extensions.php      -> /var/www/html/installed_extensions.php
+#   FA/<pod>/company                       -> /var/www/html/company
+#   FA/<pod>/themes/default/default.css    -> /var/www/html/themes/default/default.css
+#   WT/<pod>/tls          -> /etc/ksf/tls   (pod CA, WordPress TLS)
+#
+# USAGE
+#   ansible-playbook -i inventories/local ksf-restore.yaml \
+#     --vault-password-file /root/.ansible/.vaultpass \
+#     -e pod_name=ksfii_app
+#
+# WHAT THIS DELIBERATELY DOES NOT DO
+# It does NOT run the "ksfii_app" role. That role TEMPLATES both extension
+# registries from a 3-module list (ksfii_modules) with version 2.4.4 and
+# active=true for every entry. The live registries carry 38 entries with
+# per-module versions and a deliberate active/inactive split, so running that
+# role would drop 35 extensions from the registry and activate modules whose
+# schema was never installed. Container restoration must not touch them.
+#
+# The FA role's own scaffold templates the registries ONLY when missing
+# (force: false), so a restore never rewrites a live registry either.
+- name: "Restore pod {{ pod_name | default('ksfii_app') }} containers"
+  hosts: localhost
+  become: true
+  vars:
+    pod_name: ksfii_app
+    # WordPress overlay (WT/<pod>) only exists for the ksfii_app pod.
+    restore_wordpress: true
+  roles:
+    - role: ksf.pod
+    - role: ksf.mariadb
+    - role: ksf.phpmyadmin
+    - role: ksf.frontaccounting
+    - role: ksf.wordpress
+      when: restore_wordpress | bool
+  post_tasks:
+    - name: "Verify (and repair) FA bind mounts"
+      ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
