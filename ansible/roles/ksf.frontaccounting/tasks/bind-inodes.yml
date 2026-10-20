@@ -37,10 +37,9 @@
       - sh
       - -c
       - >-
-        printf '%s %s %s\n'
+        printf '%s %s\n'
         "$(stat -c%i {{ item.host | quote }} 2>/dev/null || echo MISSING)"
         "$(podman exec {{ fa_container_name }} stat -c%i {{ item.container | quote }} 2>/dev/null || echo MISSING)"
-        {{ item.host | quote }}
   loop: "{{ fa_bind_map }}"
   loop_control:
     label: "{{ item.host }}"
@@ -55,9 +54,16 @@
 # "inspect shows 6 mounts but /proc/mounts has 3" failure, where the container
 # simply has no such file and the host never had one either. Comparing the two
 # MISSING tokens for equality would report that bind as healthy.
+# Initialise the list unconditionally. If every bind is healthy the loop task
+# below is skipped for every item, so the fact would otherwise never be set
+# and verify_binds.yml would die on "'fa_bind_mismatched' is undefined".
+- name: Initialise bind mismatch list
+  ansible.builtin.set_fact:
+    fa_bind_mismatched: []
+
 - name: Collect bind inode mismatches
   ansible.builtin.set_fact:
-    fa_bind_mismatched: "{{ fa_bind_mismatched | d([]) + [item.item.host] }}"
+    fa_bind_mismatched: "{{ fa_bind_mismatched + [item.item.host] }}"
   loop: "{{ fa_bind_cmp.results | d([]) }}"
   loop_control:
     label: "{{ item.item.host | d('') }}"
