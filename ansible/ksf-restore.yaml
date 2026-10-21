@@ -38,6 +38,23 @@
     pod_name: ksfii_app
     # WordPress overlay (WT/<pod>) only exists for the ksfii_app pod.
     restore_wordpress: true
+    # The systemd units that own this pod's containers. They run
+    # `podman run --new`, so they RECREATE a container the moment it
+    # disappears. The roles below do `podman rm -f` + `podman run`, which
+    # races with that: the unit wins and the role's `podman run` fails with
+    # "the container name ... is already in use". Park the units for the
+    # duration of the run and hand the containers back afterwards.
+    pod_container_units: >-
+      container-{{ pod_name }}-mariadb.service
+      container-{{ pod_name }}-fa.service
+      container-{{ pod_name }}-phpmyadmin.service
+      container-{{ pod_name }}-wordpress.service
+  pre_tasks:
+    - name: "Park the pod's systemd container units for the duration of the restore"
+      ansible.builtin.command:
+        cmd: "systemctl stop {{ pod_container_units }}"
+      failed_when: false
+      changed_when: false
   roles:
     - role: ksf.pod
     - role: ksf.mariadb
@@ -48,3 +65,18 @@
   post_tasks:
     - name: "Verify (and repair) FA bind mounts"
       ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
+    - name: "Hand the containers back to systemd"
+      ansible.builtin.command:
+        cmd: "systemctl start {{ pod_container_units }}"
+      failed_when: false
+      changed_when: false
+    - name: "Wait for FA to answer again under systemd control"
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ fa_port }}/"
+        method: GET
+        status_code: 200,302
+      register: fa_http_after
+      retries: 15
+      delay: 5
+      until: fa_http_after.status in [200, 302]
+      failed_when: false
