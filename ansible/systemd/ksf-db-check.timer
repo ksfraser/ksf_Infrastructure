@@ -1,0 +1,12 @@
+[Unit]
+Description=Weekly KSF MariaDB consistency check
+Requires=ksf-db-check.service
+
+[Timer]
+OnCalendar=Sun 03:30
+Persistent=true
+RandomizedDelaySec=1800
+Unit=ksf-db-check.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=KSF MariaDB weekly consistency check
+After=container-ksfii_app-mariadb.service
+RequiresMountsFor=/home/kevin/Documents
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ksf-db-check.sh
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=multi-user.target
