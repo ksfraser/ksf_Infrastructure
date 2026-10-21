@@ -1,10 +1,42 @@
 ---
 # ksf.pod - per-pod podman network/pod provisioner
-# Default model: named bridge network matching pod_name, standalone containers
-# on it (avoids shared-netns port collisions; same as proven start-fa.sh model).
-# Set use_pod: true to instead create a real podman pod (containers join via --pod).
+#
+# MODEL: a real podman POD, not loose containers on a shared bridge network.
+# The pod owns the network namespace, the port publishing and the lifecycle:
+#
+#   ksfii_app pod = mariadb + FA + WordPress(Woocommerce) + phpMyAdmin
+#
+# Consequences of the pod model that the roles must respect:
+#
+#  * Port publishing belongs to the POD, not to the individual containers.
+#    A container joining a pod cannot publish ports itself, and the pod's
+#    mapping is what the host sees (8090 FA, 8091/8093 WordPress, 8092
+#    phpMyAdmin, 3307 MariaDB).
+#  * All containers share one network namespace, so FA reaches the database
+#    at the container name (ksfii_app-mariadb) AND at localhost, and the
+#    WooCommerce client reaches WordPress on the published 8093.
+#  * `podman run --pod X` auto-starts the pod's infra container if the pod
+#    exists but is stopped, so the container units can bring the pod up on
+#    their own at boot.
+#
+# Set use_pod: false for the legacy "containers on a shared bridge network"
+# model (still supported, but the pod is the target model).
 pod_name: ksfii_app
 pod_state: present
-use_pod: false
+use_pod: true
 pod_network_state: present
-pod_ports: []
+# Containers that belong to this pod. They are removed before the pod is
+# (re)created, because the pod binds the host ports they currently hold.
+pod_member_containers:
+  - "{{ pod_name }}-mariadb"
+  - "{{ pod_name }}-fa"
+  - "{{ pod_name }}-wordpress"
+# Host:container mappings published on the pod. The values come from
+# group_vars/all/main.yml so the pod and the service roles cannot disagree.
+# phpMyAdmin is NOT in the list: it stays outside the pod and publishes its
+# own port (see ksf.phpmyadmin's phpmyadmin_in_pod).
+pod_ports:
+  - "{{ mariadb_host_port }}:{{ mariadb_container_port }}"
+  - "{{ fa_port }}:{{ fa_container_port }}"
+  - "{{ wp_port }}:{{ wp_container_port }}"
+  - "{{ wp_https_port }}:{{ wp_https_container_port }}"

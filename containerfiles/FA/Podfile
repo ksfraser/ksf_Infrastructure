@@ -31,7 +31,7 @@ COPY php.ini /usr/local/etc/php/conf.d/zz-ksf.ini
 COPY entrypoint.sh /usr/local/bin/ksf-entrypoint.sh
 RUN chmod +x /usr/local/bin/ksf-entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/ksf-entrypoint.sh"]
 CMD ["apache2-foreground"]

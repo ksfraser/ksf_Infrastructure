@@ -29,9 +29,13 @@
 - name: Run phpMyAdmin container
   command: >
     podman run -d --name "{{ phpmyadmin_container_name }}"
+    {% if use_pod | bool and phpmyadmin_in_pod | bool %}
+    --pod "{{ pod_name }}"
+    {% else %}
     --hostname "{{ phpmyadmin_hostname }}"
     --network "{{ pod_name }}"
     -p "{{ phpmyadmin_port }}:{{ phpmyadmin_container_port }}"
+    {% endif %}
     -e PMA_HOST="{{ phpmyadmin_host }}"
     -e PMA_PORT="{{ phpmyadmin_port_db }}"
     {% if phpmyadmin_user | length > 0 %}-e PMA_USER="{{ phpmyadmin_user }}"{% endif %}

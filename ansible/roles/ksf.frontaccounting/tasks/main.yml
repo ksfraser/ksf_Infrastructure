@@ -8,11 +8,35 @@
   failed_when: false
   changed_when: false
 
+# The image is created once and then never refreshed, so a change to the
+# Podfile or the entrypoint (e.g. the FA_HTTP_PORT handling) would silently
+# not apply. Compare the image's creation time with the build context.
+- name: Compare the FA image age with its build context
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      created=$(podman image inspect "{{ fa_image }}" --format '{% raw %}{{.Created}}{% endraw %}' 2>/dev/null || echo 0)
+      created_ts=$(date -d "$created" +%s 2>/dev/null || echo 0)
+      newest=$(find "{{ fa_entrypoint_dir }}" -maxdepth 1 -type f -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+      newest_ts=$(stat -c %Y "$newest" 2>/dev/null || echo 0)
+      if [ "$newest_ts" -gt "$created_ts" ]; then echo "STALE $newest"; else echo "CURRENT"; fi
+  register: fa_image_age
+  changed_when: false
+  failed_when: false
+
+- name: Decide whether the FA image must be rebuilt
+  ansible.builtin.set_fact:
+    fa_image_needs_build: >-
+      {{ img_exists.rc != 0
+         or (fa_image_rebuild | string | lower == 'auto'
+             and 'STALE' in (fa_image_age.stdout | default('')))
+         or (fa_image_rebuild | string | lower in ['true', 'yes', 'on', '1']) }}
+
 - name: Build FA runtime image from Podfile
   command: >
     podman build -t "{{ fa_image }}"
     -f "{{ fa_entrypoint_dir }}/Podfile" "{{ fa_entrypoint_dir }}"
-  when: img_exists.rc != 0
+  when: fa_image_needs_build | bool
 
 - name: Check source tree has FA install marker
   stat:

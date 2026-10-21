@@ -7,7 +7,13 @@ phpmyadmin_container_name: "{{ pod_name }}-phpmyadmin"
 phpmyadmin_hostname: "{{ phpmyadmin_container_name }}"
 phpmyadmin_port: 8092
 phpmyadmin_container_port: 80
-phpmyadmin_host: "{{ pod_name }}-mariadb"
+# phpMyAdmin is deliberately NOT a member of the pod: it is an admin tool,
+# not part of the application, and its Apache would have to share the pod's
+# :80 with WordPress (one network namespace -> one listener per port).
+# It stays a standalone container on the pod's network and talks to the
+# database through the POD's network alias.
+phpmyadmin_in_pod: false
+phpmyadmin_host: "{{ pod_name }}"
 phpmyadmin_port_db: 3306
 phpmyadmin_user: ""
 phpmyadmin_password: ""

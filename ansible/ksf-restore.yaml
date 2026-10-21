@@ -65,6 +65,10 @@
   post_tasks:
     - name: "Verify (and repair) FA bind mounts"
       ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
+    - name: "Regenerate the podman systemd units from the rebuilt containers"
+      ansible.builtin.command:
+        cmd: "{{ playbook_dir }}/systemd/install-boot-units.sh"
+      changed_when: true
     - name: "Hand the containers back to systemd"
       ansible.builtin.command:
         cmd: "systemctl start {{ pod_container_units }}"

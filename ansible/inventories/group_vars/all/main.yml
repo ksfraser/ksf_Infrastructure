@@ -14,3 +14,32 @@ fa_container_name: "{{ pod_name }}-fa"
 
 # WordPress per-pod defaults (ksf.wordpress)
 wp_container_name: "{{ pod_name }}-wordpress"
+
+# ---------------------------------------------------------------------------
+# Service ports - the SINGLE source of truth.
+#
+# In pod mode the pod publishes the host ports for the whole pod, because its
+# containers share one network namespace. The pod's port map (ksf.pod) and the
+# service roles that answer on those ports must therefore agree, so they all
+# read these values from here (group_vars beat role defaults, and they are
+# visible in EVERY play - including the ksf.pod play that creates the pod
+# before the service roles exist).
+#
+# Inventories may still override a value per environment, but then the pod's
+# published map follows automatically.
+# ---------------------------------------------------------------------------
+mariadb_host_port: 3307
+mariadb_container_port: 3306
+fa_port: 8090
+# Container port FA listens on INSIDE the pod. Every container in a pod
+# shares one network namespace, so two of them cannot both bind :80 -
+# WordPress keeps 80/443 in the pod, so FA takes 8080. The pod publishes
+# fa_port -> this port, so the URL people use (http://<host>:8090/) is
+# unchanged.
+fa_container_port: 8080
+phpmyadmin_port: 8092
+phpmyadmin_container_port: 80
+wp_port: 8091
+wp_container_port: 80
+wp_https_port: 8093
+wp_https_container_port: 443

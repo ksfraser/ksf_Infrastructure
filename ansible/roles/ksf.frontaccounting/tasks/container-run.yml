@@ -14,9 +14,13 @@
   command: >
     podman run -d
     --name "{{ fa_container_name }}"
-    --hostname "{{ fa_hostname }}"
+    {% if use_pod | bool %}
+    --pod "{{ pod_name }}"
+    {% else %}
     --network "{{ fa_network }}"
     -p "{{ fa_port }}:{{ fa_container_port }}"
+    {% endif %}
+    -e FA_HTTP_PORT="{{ fa_container_port }}"
     -v "{{ fa_source_tree }}:/var/www/html:ro,Z"
     -v "{{ fa_modules_dir }}:/var/www/html/modules:rw,Z"
     -v "{{ fa_pod_dir }}/config_db.php:/var/www/html/config_db.php:rw,Z"

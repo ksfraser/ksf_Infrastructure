@@ -53,10 +53,13 @@
 - name: Run WP container (FA-style overlay mounts)
   command: >
     podman run -d --name "{{ wp_container_name }}"
-    --hostname "{{ wp_hostname }}"
+    {% if use_pod | bool %}
+    --pod "{{ pod_name }}"
+    {% else %}
     --network "{{ wp_network }}"
     -p "{{ wp_port }}:{{ wp_container_port }}"
     -p "{{ wp_https_port }}:{{ wp_https_container_port }}"
+    {% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"

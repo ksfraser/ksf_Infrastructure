@@ -4,7 +4,7 @@
 
 - name: Check WP is installed (wp core is-installed)
   command: >
-    podman run --rm --user {{ wp_cli_user }} --network "{{ wp_network }}"
+    podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
@@ -21,7 +21,7 @@
 
 - name: Install WordPress core
   command: >
-    podman run --rm --user {{ wp_cli_user }} --network "{{ wp_network }}"
+    podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
@@ -42,7 +42,7 @@
 
 - name: Add staff user
   command: >
-    podman run --rm --user {{ wp_cli_user }} --network "{{ wp_network }}"
+    podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
@@ -58,7 +58,7 @@
 
 - name: Install and activate plugins
   command: >
-    podman run --rm --user {{ wp_cli_user }} --network "{{ wp_network }}"
+    podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
     -e WORDPRESS_DB_USER="{{ wp_db_user }}"
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"

@@ -37,9 +37,12 @@
 - name: Run mariadb container
   command: >
     podman run -d --name "{{ mariadb_container_name }}"
-    --hostname "{{ mariadb_hostname }}"
+    {% if use_pod | bool %}
+    --pod "{{ pod_name }}"
+    {% else %}
     --network "{{ pod_name }}"
     -p "{{ mariadb_host_port }}:{{ mariadb_container_port }}"
+    {% endif %}
     -e MARIADB_ROOT_PASSWORD="{{ mariadb_root_pass }}"
     -e MARIADB_DATABASE="{{ mariadb_db }}"
     -e MARIADB_USER="{{ mariadb_user }}"

@@ -1,5 +1,5 @@
 ---
-# ksf.pod tasks - ensure the per-pod network (and optionally a real pod)
+# ksf.pod tasks - ensure the per-pod network and (in pod mode) the pod itself.
 
 - name: Check podman network exists
   command: podman network exists "{{ pod_name }}"
@@ -15,6 +15,18 @@
   command: podman network rm "{{ pod_name }}"
   when: pod_network_state == 'absent' and net_exists.rc == 0
 
+# The pod publishes the host ports for the whole pod, so the previous
+# incarnation's containers MUST go first: as long as the old ksfii_app-fa
+# still holds 8090, `podman pod create -p 8090:80` fails with "address
+# already in use". The service roles recreate every container immediately
+# afterwards with the same canonical specs.
+- name: Remove the pod's previous containers (they hold the pod's published ports)
+  command: podman rm -f "{{ item }}"
+  loop: "{{ pod_member_containers }}"
+  failed_when: false
+  changed_when: false
+  when: use_pod | bool and pod_state == 'present'
+
 - name: Check pod exists
   command: podman pod exists "{{ pod_name }}"
   register: pod_exists
@@ -22,9 +34,64 @@
   changed_when: false
   when: use_pod | bool
 
+# The pod publishes the host ports for every service in it, so the pod is
+# (re)created with the full mapping.
 - name: Create pod
-  command: podman pod create --name "{{ pod_name }}" --network "{{ pod_name }}" --replace
+  command: >
+    podman pod create
+    --name "{{ pod_name }}"
+    --network "{{ pod_name }}"
+    --replace
+    {% for p in pod_ports %}
+    -p {{ p }}
+    {% endfor %}
+  register: pod_create
+  changed_when: true
   when: use_pod | bool and pod_state == 'present' and pod_exists.rc != 0
+
+# An existing pod keeps whatever port map it was created with. If the map in
+# the inventory changed, the pod has to be recreated to publish the new one.
+- name: Get the pod's infra container id
+  command: >
+    podman pod inspect "{{ pod_name }}"
+    --format '{% raw %}{{.InfraContainerID}}{% endraw %}'
+  register: pod_infra_id
+  failed_when: false
+  changed_when: false
+  when: use_pod | bool and pod_state == 'present' and pod_exists.rc == 0
+
+- name: Read the pod's published port map
+  command: >
+    podman inspect "{{ pod_infra_id.stdout | trim }}"
+    --format '{% raw %}{{range $k, $v := .HostConfig.PortBindings}}{{range $v}}{{.HostPort}}:{{$k}};{{end}}{{end}}{% endraw %}'
+  register: pod_ports_current
+  failed_when: false
+  changed_when: false
+  when: use_pod | bool and pod_state == 'present' and pod_exists.rc == 0
+
+- name: Recreate the pod when its published ports drifted from the inventory
+  vars:
+    current_map: >-
+      {{ pod_ports_current.stdout | default('') | trim | split(';')
+         | reject('equalto', '') | map('regex_replace', '/tcp$', '')
+         | sort | join(';') }}
+    desired_map: >-
+      {{ pod_ports | map('string') | sort | join(';') }}
+  command: >
+    podman pod create
+    --name "{{ pod_name }}"
+    --network "{{ pod_name }}"
+    --replace
+    {% for p in pod_ports %}
+    -p {{ p }}
+    {% endfor %}
+  register: pod_recreate
+  changed_when: true
+  when:
+    - use_pod | bool
+    - pod_state == 'present'
+    - pod_exists.rc == 0
+    - current_map != desired_map
 
 - name: Remove pod
   command: podman pod rm -f "{{ pod_name }}"

@@ -6,7 +6,11 @@ fa_hostname: "{{ fa_container_name }}"
 fa_image: localhost/ksf-fa:php7.4
 fa_network: "{{ pod_name }}"
 fa_port: 8090
-fa_container_port: 80
+# Container port FA listens on INSIDE the pod. Every container in a pod shares
+# one network namespace, so two of them cannot both bind :80 - WordPress keeps
+# 80/443 in the pod, so FA takes 8080. The pod publishes fa_port -> this port,
+# so the URL people use (http://<host>:8090/) is unchanged.
+fa_container_port: 8080
 
 # FA source tree (kept apart from per-pod dirs; RO in container)
 fa_version: 2.4.3
@@ -41,3 +45,8 @@ fa_theme: default
 
 # Seed the DB with clean FA schema (en_US-new.sql) + default users on first run
 fa_seed_db: true
+
+# Rebuild the FA image when the build context (Podfile, entrypoint.sh, php.ini)
+# is newer than the image. The image is created once and otherwise never
+# refreshed, so a change to the Containerfile would silently not apply.
+fa_image_rebuild: auto
