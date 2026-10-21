@@ -45,6 +45,7 @@
     # "the container name ... is already in use". Park the units for the
     # duration of the run and hand the containers back afterwards.
     pod_container_units: >-
+      pod-{{ pod_name }}.service
       container-{{ pod_name }}-mariadb.service
       container-{{ pod_name }}-fa.service
       container-{{ pod_name }}-phpmyadmin.service
