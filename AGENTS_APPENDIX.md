@@ -490,3 +490,68 @@ podman limitation:
   the byte hash. `ansible/ksf-restore.yaml` still never rewrites them
   (the `ksfii_app` role templates a 3-module registry and would drop 35
   extensions).
+
+## The deployment is a POD, not loose containers (changed 2026-10-21)
+
+The FA deployment is a real podman **pod**, one network namespace per
+environment, with the pod owning the ports and the lifecycle:
+
+| pod | members | published on the host |
+|---|---|---|
+| `ksfii_app` (rootful) | `ksfii_app-mariadb`, `ksfii_app-fa`, `ksfii_app-wordpress` + `ksfii_app-phpmyadmin` (outside) | 3307→3306, 8090→8080, 8091→80, 8093→443, 8092→80 |
+| `ksf_fa` (rootless, user kevin) | `ksf-mariadb`, `ksf-fa` | 8080→8080 |
+
+`use_pod: true` in `ksf.pod` is the model; the service roles switch to
+`--pod <name>` and drop their own `-p` when it is on.
+
+### What the shared netns forces
+
+- **One listener per port.** WordPress keeps 80/443, so **FA listens on 8080**
+  inside the pod. The FA image's entrypoint does the switch:
+  `FA_HTTP_PORT` rewrites `Listen 80` in `/etc/apache2/ports.conf`
+  (`containerfiles/FA/entrypoint.sh`). The pod publishes `8090 → 8080`, so the
+  URL people use (`http://<host>:8090/`) does not change.
+- **phpMyAdmin is deliberately NOT a pod member** (`phpmyadmin_in_pod: false`):
+  it is an admin tool, not part of the application, and its Apache would have
+  to share the pod's `:80` with WordPress. It stays on the pod's *network* and
+  reaches the database through the **pod's network alias** (`ksfii_app`), not
+  through the container name - a member container's name is only resolvable
+  from inside the pod.
+- **Container names resolve inside the pod** (aardvark-dns): FA reaches the
+  database as `ksfii_app-mariadb`, and the rootless pod's FA reaches
+  `ksf-mariadb` the same way.
+- **A pod member cannot set `--hostname`** (the pod owns the UTS namespace):
+  "cannot set hostname when joining the pod UTS namespace". The roles drop
+  `--hostname` in pod mode.
+
+### Pod traps (all hit, all fixed)
+
+- **The pod binds the host ports, so the old containers must go first.**
+  `podman pod create -p 8090:80` fails with "address already in use" while
+  the previous `ksfii_app-fa` still holds 8090. `ksf.pod` therefore removes the
+  pod's member containers before (re)creating the pod.
+- **A pod keeps the port map it was created with.** The `ksf.pod` role
+  compares the live map with the inventory and recreates the pod on drift -
+  that is how the FA 80 → 8080 move was applied.
+- **`podman generate systemd` cannot generate a pod unit by name**: it names
+  the unit after the pod's *infra container ID*, which changes every time the
+  pod is recreated. The pod unit is therefore written by hand
+  (`ansible/systemd/pod-<pod>.service`): name-based, idempotent, creates the
+  pod with the port map if it is missing, then starts it.
+- **`podman generate systemd --name X` fails for a pod** ("X is a pod, not a
+  container"); pass the pod object positionally.
+- **Two managers for one container fight.** The playbook does `podman rm -f` +
+  `podman run`; a running `--new` unit recreates the container the moment it
+  disappears, so the playbook's `podman run` fails with "the container name ...
+  is already in use" - and the stale unit's `--replace` then removes the
+  container the playbook had just created. The playbook parks the pod's units
+  before rebuilding and regenerates them afterwards
+  (`install-boot-units.sh`).
+- **The rootless store has its own images.** The rootless `ksf-fa:php7.4` was
+  a 6-week-old build without the `ksf-entrypoint.sh` (so without the
+  `FA_HTTP_PORT` switch). Images must be synced into the rootless store:
+  `podman save` (root) → `podman load` (as kevin).
+- **The FA image was never rebuilt** by the role: it only built when the image
+  was missing, so a change to the Podfile or the entrypoint silently did not
+  apply. The role now compares the image's creation time with the build
+  context and rebuilds when the context is newer (`fa_image_rebuild: auto`).

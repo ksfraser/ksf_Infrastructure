@@ -41,7 +41,8 @@ LOG_FILE=${LOG_FILE:-/var/log/ksf-reconcile.log}
 # a running --new unit recreates the container the moment it disappears, so
 # the playbook's `podman run` fails with "name already in use". The rebuild arm
 # therefore parks the units first and hands control back afterwards.
-ROOTFUL_UNITS=${ROOTFUL_UNITS:-"container-ksfii_app-mariadb.service container-ksfii_app-fa.service container-ksfii_app-phpmyadmin.service container-ksfii_app-wordpress.service"}
+# The pod unit is included: the containers cannot be recreated without it.
+ROOTFUL_UNITS=${ROOTFUL_UNITS:-"pod-ksfii_app.service container-ksfii_app-mariadb.service container-ksfii_app-fa.service container-ksfii_app-phpmyadmin.service container-ksfii_app-wordpress.service"}
 
 log() {
     local msg="[$(date -Is)] $*"
@@ -86,6 +87,24 @@ mariadb_report() {
 
 log "=== KSF reconcile start ==="
 
+# The pods own the network namespace and the published ports. A pod that is
+# not running takes every service in it down, so check the pods first.
+pod_report() {
+    local pod=$1
+    if podman pod exists "$pod"; then
+        local state
+        state=$(podman pod ps --format '{{.Status}}' --filter "name=$pod" 2>/dev/null | head -1)
+        log "POD $pod: ${state:-unknown}"
+    else
+        log "POD $pod: MISSING"
+    fi
+}
+pod_report ksfii_app
+su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=/run/user/$(id -u $KSF_USER); podman pod ps --format '{{.Name}} {{.Status}}'" 2>&1 |
+    while read -r name state; do
+        log "POD $name: $state (rootless)"
+    done
+
 # ---------------------------------------------------------------- rootful pod
 if wait_for "$ROOTFUL_FA_URL" 30; then
     log "rootful FA healthy at $ROOTFUL_FA_URL"
@@ -125,7 +144,9 @@ mariadb_report "$ROOTFUL_MARIADB"
 # The rootless pod runs as an unprivileged user, so it is driven through that
 # user's systemd manager. Linger is enabled, so the manager is up at boot.
 rootless_start() {
-    su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=/run/user/$(id -u $KSF_USER); systemctl --user start container-ksf-fa.service" >/dev/null 2>&1
+    # The pod unit comes first: the container units require it (the pod owns
+    # the network namespace and the published port).
+    su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=/run/user/$(id -u $KSF_USER); systemctl --user start pod-ksf_fa.service container-ksf-fa.service" >/dev/null 2>&1
 }
 rootless_mariadb_report() {
     su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=/run/user/$(id -u $KSF_USER); podman exec $ROOTLESS_MARIADB sh -c 'mysqladmin ping -uroot -p\"\$MYSQL_ROOT_PASSWORD\" --silent'" >/dev/null 2>&1 \

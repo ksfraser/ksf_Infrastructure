@@ -1,0 +1,29 @@
+# pod-ksfii_app.service
+# The pod owns the network namespace, the published ports and the lifecycle of
+# every container in it (FA + MariaDB + WordPress).
+#
+# Written by hand rather than by 'podman generate systemd': that names the
+# unit after the pod's infra container ID, which changes whenever the pod is
+# recreated. This unit is name-based and idempotent - it creates the pod with
+# the published port map if it is missing, then starts it.
+#
+# The port map below is read from the live pod by install-boot-units.sh.
+
+[Unit]
+Description=Podman pod ksfii_app (FA + MariaDB + WordPress)
+Documentation=man:podman-pod-create(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=on-failure
+TimeoutStopSec=70
+ExecStart=/bin/sh -c '/usr/bin/podman pod exists ksfii_app || /usr/bin/podman pod create --name ksfii_app --network ksfii_app -p 3307:3306 -p 8093:443 -p 8091:80 -p 8090:8080; /usr/bin/podman pod start ksfii_app'
+ExecStop=/usr/bin/podman pod stop -t 10 ksfii_app
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
