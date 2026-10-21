@@ -430,3 +430,63 @@ Match each `package` to its own `version` **within the same entry**. A non-greed
 regex across the whole file will run past the end of one entry into the next and
 hand a module another module's version — which happened once and produced a
 registry that looked plausible but activated the wrong thing.
+
+## Boot and recovery architecture (added 2026-10-20, after the blackout reboot)
+
+**A rebuild is NOT what a power outage requires.** `podman start` re-resolves
+every bind to the CURRENT host inode, so a stopped container comes back with
+the right content on its own (verified: replaced the host file, started the
+container, the container saw the new file). MariaDB/InnoDB replays its redo
+log on startup, so the database normally recovers by itself too. The historical
+"must rebuild the pods" incidents were all **provisioning drift**, not a
+podman limitation:
+
+| Historical cause | Reality |
+|---|---|
+| systemd units pointed at `fa/...` (lowercase) and `ksf_fa/company/0` | stale, hand-written units; the paths never existed |
+| `container-ksfii-app.service` referenced image `ksf-iiapp:latest` | image never existed; unit thrashed 99 times |
+| rootless podman: "RunRoot /run/user/1002 not writable" | kevin had no lingering session, so `/run/user/1002` did not exist |
+| bind-inode check reported every bind as dead | the check printed 3 fields and compared 2 (bug, fixed) |
+
+### The three layers now in place
+
+1. **Podman systemd units (native boot path)** — `ansible/systemd/container-*.service`,
+   generated from the running containers so the unit carries the canonical mount
+   set. Rootful units live in `/etc/systemd/system`; rootless ones in
+   `/home/kevin/.config/systemd/user` (linger enabled for kevin, otherwise the
+   user manager is not running at boot and they never fire).
+   Each unit runs `podman run --new ...`, i.e. it recreates the container at
+   boot from the stored spec.
+2. **`ksf-restore.service`** (oneshot, enabled) — runs
+   `ansible/systemd/ksf-boot-reconcile.sh`, which health-checks both stacks
+   (HTTP + MariaDB ping + table count) and repairs **only what is broken**:
+   unit restart first, then the ansible rebuild. A healthy stack is never
+   touched.
+3. **`ansible/ksf-restore.yaml`** — the rebuild arm (the roles, canonical
+   mounts, canonical DB wiring). Run it by hand or let the reconcile unit call it.
+
+### Traps this design hit (all fixed, do not reintroduce)
+
+- **Two managers for one container fight.** The playbook does `podman rm -f` +
+  `podman run`; a running `--new` unit recreates the container the moment it
+  disappears, so the playbook's `podman run` fails with *"the container name ...
+  is already in use"*. Both the playbook and the reconcile script now **park
+  the pod's systemd units before rebuilding and hand the containers back
+  afterwards** (the specs are identical, so the hand-back is a no-op replace).
+- **SELinux blocks systemd from executing scripts under `/home/kevin/Documents`.**
+  That tree is `user_home_t`; `init_t` may not `exec` it (AVC: denied { execute }
+  ... tcontext=...user_home_t). The units therefore exec copies installed in
+  `/usr/local/sbin` (`bin_t`); the repo copies are the source of truth and
+  `ansible/systemd/install-boot-units.sh` installs them.
+- **The pod company tree and the shared `fa_modules` tree must be writable /
+  readable by the container's Apache user (uid 33).** Root-owned 0775 company
+  dirs gave "unlink(...js_cache...): Permission denied" on every page load, and
+  0600 module files gave "include_once(.../hooks.php): Permission denied",
+  which kills the whole page. The FA role now normalises both trees.
+- **FA rewrites its own extension registries.** `next_extension_id` and the
+  per-entry ids shift when FA syncs the global registry down to the company
+  registry. A changed md5 on `FA/<pod>/installed_extensions.php` is therefore
+  NOT evidence that something overwrote it — compare the `package` lists, not
+  the byte hash. `ansible/ksf-restore.yaml` still never rewrites them
+  (the `ksfii_app` role templates a 3-module registry and would drop 35
+  extensions).
