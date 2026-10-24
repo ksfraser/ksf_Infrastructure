@@ -18,9 +18,6 @@
 #
 # FA_HTTP_PORT=8080 is what makes the FA image listen on 8080 instead of 80
 # (see containerfiles/FA/entrypoint.sh).
-#
-# After this script, run install-boot-units.sh to regenerate the user units
-# from the containers this script created.
 set -euo pipefail
 
 KSF_USER=${KSF_USER:-kevin}
@@ -68,6 +65,61 @@ as_kevin "podman run -d --name ksf-fa --pod $POD \
   localhost/ksf-fa:php7.4 apache2-foreground"
 
 sleep 8
+
+# Generate + enable rootless user systemd units from the live containers.
+# Rootless units live in the user manager (~kevin/.config/systemd/user) and
+# are owned by kevin; this script runs as root so we su to kevin for them.
+echo "==> generating rootless user systemd units"
+ROOTLESS_TMP=$(mktemp -d); chmod 0777 "$ROOTLESS_TMP"
+for c in ksf-mariadb ksf-fa; do
+    as_kevin "cd '$ROOTLESS_TMP' && podman generate systemd --new --name '$c' --container-prefix container > 'container-$c.service'" || {
+        echo "    SKIP $c - could not generate (container missing?)" >&2
+        continue
+    }
+    mv -f "$ROOTLESS_TMP/container-$c.service" "/home/$KSF_USER/.config/systemd/user/container-$c.service"
+    echo "    container-$c.service"
+done
+rm -rf "$ROOTLESS_TMP"
+
+# Add dependency: ksf-fa requires ksf-mariadb
+python3 - "$KSF_USER" <<'PY'
+import sys, os
+user = sys.argv[1]
+home = f"/home/{user}"
+p = f"{home}/.config/systemd/user/container-ksf-fa.service"
+s = open(p).read()
+if 'Requires=container-ksf-mariadb.service' not in s:
+    s = s.replace('After=network-online.target',
+                  'After=network-online.target container-ksf-mariadb.service\nRequires=container-ksf-mariadb.service')
+    open(p, 'w').write(s)
+PY
+
+# Install the rootless pod unit (hand-written, name-based, idempotent)
+cat >"/home/$KSF_USER/.config/systemd/user/pod-ksf_fa.service" <<'PODUNIT'
+[Unit]
+Description=Podman pod ksf_fa (FA + MariaDB, rootless)
+Documentation=man:podman-pod-create(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=on-failure
+TimeoutStopSec=70
+ExecStart=/bin/sh -c '/usr/bin/podman pod exists ksf_fa || /usr/bin/podman pod create --name ksf_fa --network ksf_network -p 8080:8080; /usr/bin/podman pod start ksf_fa'
+ExecStop=/usr/bin/podman pod stop -t 10 ksf_fa
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
+PODUNIT
+chown "$KSF_USER:$(id -gn "$KSF_USER")" "/home/$KSF_USER/.config/systemd/user/pod-ksf_fa.service"
+
+echo "==> enabling rootless user units"
+su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=$XDG; systemctl --user daemon-reload && systemctl --user enable pod-ksf_fa.service container-ksf-mariadb.service container-ksf-fa.service"
+
 echo "==> state:"
 as_kevin "podman pod ps --format '{{.Name}} {{.Status}}'"
 as_kevin "podman ps --format '{{.Names}} {{.Status}} {{.Ports}}'"
