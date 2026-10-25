@@ -1,0 +1,37 @@
+# KSF Infrastructure - ksf_fa pod inventory (rootless)
+# Usage: ansible-playbook -i inventories/ksf_fa.yaml ksf-fa.yaml \
+#          -e pod_name=ksf_fa -e rootful=false
+#
+# Ports follow the AGENTS.md port map:
+#   slot +2 FA:      UAT 8080
+#   slot +4 WordPress: UAT 8094
+#   slot +5 phpMyAdmin: UAT 8095
+#   slot base+2 MariaDB host: 3308
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+  vars:
+    pod_name: ksf_fa
+    # Ports (FA 8080, WP 8094, phpMyAdmin 8096, MariaDB host 3308)
+    fa_port: 8080
+    wp_port: 8094
+    pma_port: 8096
+    mariadb_host_port: 3308
+    # Optional workers stay off for ksf_fa scope
+    enable_ocr_worker: false
+    enable_tts_worker: false
+    enable_stt_worker: false
+    # Extra databases created on the pod's MariaDB
+    mariadb_additional_databases:
+      - ksf_wp
+    # FA modules to register + activate for this pod
+    fa_modules:
+      - ksf_FA_RBAC
+      - ksf_FA_HRM
+      - ksf_FA_Calendar
+    ksfii_modules_active:
+      - ksf_FA_RBAC
+      - ksf_FA_HRM
+      - ksf_FA_Calendar

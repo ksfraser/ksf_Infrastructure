@@ -1,0 +1,2 @@
+[24-Oct-2026 05:22:19 UTC] INFO cal_mail_with_ical: invoking mail_send_ical hook (to=adm@example.com, bcc=1, acct=)
+[24-Oct-2026 05:22:20 UTC] INFO cal_mail_with_ical: hook returned null (no handler), using fallback

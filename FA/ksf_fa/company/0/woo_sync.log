@@ -1,0 +1,35 @@
+[2026-09-28 18:43:21] INFO: Starting category export
+[2026-09-28 18:43:21] INFO: WooCommerce GET /products/categories
+[2026-09-28 18:43:21] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:21] ERROR: Failed to export category: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:21] INFO: WooCommerce GET /products/categories
+[2026-09-28 18:43:21] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:21] ERROR: Failed to export category: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:21] INFO: WooCommerce GET /products/categories
+[2026-09-28 18:43:21] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:21] ERROR: Failed to export category: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:21] INFO: WooCommerce GET /products/categories
+[2026-09-28 18:43:21] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:21] ERROR: Failed to export category: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:21] INFO: Action completed: export_categories
+[2026-09-28 18:43:34] INFO: Fetching orders from WooCommerce
+[2026-09-28 18:43:34] INFO: WooCommerce GET /orders
+[2026-09-28 18:43:34] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:34] ERROR: Failed to get orders: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:40] INFO: Fetching orders from WooCommerce
+[2026-09-28 18:43:40] INFO: WooCommerce GET /orders
+[2026-09-28 18:43:40] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:40] ERROR: Failed to get orders: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:40] INFO: Staging 0 orders from WooCommerce
+[2026-09-28 18:43:40] INFO: Fetching orders from WooCommerce
+[2026-09-28 18:43:40] INFO: WooCommerce GET /orders
+[2026-09-28 18:43:40] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:40] ERROR: Failed to get orders: WooCommerce API error: cURL Error: 
+[2026-09-28 18:43:46] INFO: Fetching orders from WooCommerce
+[2026-09-28 18:43:46] INFO: WooCommerce GET /orders
+[2026-09-28 18:43:46] ERROR: WooCommerce GET failed: cURL Error: 
+[2026-09-28 18:43:46] ERROR: Failed to get orders: WooCommerce API error: cURL Error: 
+[2026-09-28 18:45:16] INFO: Starting export of all simple products
+[2026-09-28 18:45:16] INFO: Action completed: export_products
+[2026-09-28 18:45:19] INFO: Starting customer export
+[2026-09-28 18:45:19] INFO: Action completed: export_customers

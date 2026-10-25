@@ -1,0 +1,4 @@
+[2026-10-03 20:37:27] INFO: Searching for customer with email: kevin@example.com
+[2026-10-03 20:37:27] INFO: WooCommerce GET /customers/email/kevin@example.com
+[2026-10-03 20:37:28] ERROR: WooCommerce GET failed: Error: No route was found matching the URL and request method. [rest_no_route]
+[2026-10-03 20:37:28] ERROR: Failed to find customer by email kevin@example.com: WooCommerce API error: Error: No route was found matching the URL and request method. [rest_no_route]
