@@ -8,8 +8,6 @@
     cmd: |
       set -e
       chown -R "{{ rootless_user }}:{{ rootless_user }}" "{{ fa_pod_dir }}" 2>/dev/null || true
-      chown -R "{{ rootless_user }}:{{ rootless_user }}" "{{ wp_modules_dir }}" 2>/dev/null || true
-    changed_when: false
 
 - name: Create per-pod base directory
   become: "{{ not rootful | bool }}"

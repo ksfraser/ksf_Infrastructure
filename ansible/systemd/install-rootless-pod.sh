@@ -32,8 +32,8 @@ as_kevin() {
     su - "$KSF_USER" -c "export XDG_RUNTIME_DIR=$XDG; $*"
 }
 
-echo "==> creating the rootless pod '$POD' (published 8080:8080)"
-as_kevin "podman pod exists $POD || podman pod create --name $POD --network $NET -p 8080:8080"
+echo "==> creating the rootless pod '$POD' (published 8080:8080, 8094:80, 8095:443)"
+as_kevin "podman pod exists $POD || podman pod create --name $POD --network $NET -p 8080:8080 -p 8094:80 -p 8095:443"
 
 echo "==> recreating the rootless containers as pod members"
 # Park the user units first. They run `podman run --new`, so they recreate
