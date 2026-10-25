@@ -1,38 +1,64 @@
 ---
 # ksf.mariadb tasks (CLI-based; no podman API socket required)
 # Depeps: ksf.pod, ksf.phpmyadmin (see meta/main.yml)
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become. XDG_RUNTIME_DIR is set accordingly.
 
 - name: Check mariadb data volume exists
   command: podman volume exists "{{ mariadb_data_volume }}"
   register: vol_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Create mariadb data volume
   command: podman volume create "{{ mariadb_data_volume }}"
   when: vol_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Check mariadb container exists
   command: podman container exists "{{ mariadb_container_name }}"
   register: cont_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Ensure mariadb image is present
   command: podman image exists "{{ mariadb_image }}"
   register: img_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Pull mariadb image
   command: podman pull "{{ mariadb_image }}"
   when: img_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Remove stale mariadb container
   command: podman rm -f "{{ mariadb_container_name }}"
-  when: cont_exists.rc == 0
   ignore_errors: true
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Run mariadb container
   command: >
@@ -51,6 +77,10 @@
     -v "{{ mariadb_data_volume }}:/var/lib/mysql"
     "{{ mariadb_image }}" {{ mariadb_extra_options }}
   register: run_result
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Wait for mariadb to accept connections
   command: >-
@@ -61,6 +91,10 @@
   delay: 5
   until: ping.rc == 0
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Create additional databases + grant to ksf user
   command: >
@@ -70,3 +104,7 @@
      GRANT ALL PRIVILEGES ON {{ item }}.* TO '{{ mariadb_user }}'@'%'; FLUSH PRIVILEGES;"
   loop: "{{ mariadb_additional_databases }}"
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"

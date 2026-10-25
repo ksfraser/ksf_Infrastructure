@@ -25,6 +25,15 @@ pod_name: ksfii_app
 pod_state: present
 use_pod: true
 pod_network_state: present
+# rootful: true -> run podman as root, system units in /etc/systemd/system
+# rootful: false -> run podman as the unprivileged user (kevin), system units
+#                   in ~/.config/systemd/user
+# The choice is NOT tied to a stack: both ksfii_app and ksf_fa can be
+# deployed either way.
+rootful: true
+# User who runs podman when rootful: false
+rootless_user: kevin
+rootless_uid: 1002
 # Containers that belong to this pod. They are removed before the pod is
 # (re)created, because the pod binds the host ports they currently hold.
 pod_member_containers:

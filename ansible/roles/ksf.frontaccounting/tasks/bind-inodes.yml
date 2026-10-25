@@ -9,6 +9,9 @@
 # content. Directory binds are inode-stable and are checked too, as a cheap
 # regression net.
 #
+# rootful/rootless: when rootful: false, `podman exec` runs as
+# rootless_user (kevin) via become.
+#
 # Sets: fa_bind_mismatched  (list of host paths whose inode differs)
 
 - name: Build FA bind map (host path -> container path)
@@ -46,6 +49,10 @@
   register: fa_bind_cmp
   changed_when: false
   failed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # A bind is unhealthy when the two inodes differ, when either side reports
 # MISSING, or when the probe produced an unparseable pair.

@@ -1,12 +1,19 @@
 ---
 # ksf.frontaccounting tasks (AGENTS-IMAGE: version tarball + per-pod overlay)
 # Pod/network provisioning comes from the calling play (ksf.pod), not here.
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become.
 
 - name: Ensure FA image exists
   command: podman image exists "{{ fa_image }}"
   register: img_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # The image is created once and then never refreshed, so a change to the
 # Podfile or the entrypoint (e.g. the FA_HTTP_PORT handling) would silently
@@ -23,6 +30,10 @@
   register: fa_image_age
   changed_when: false
   failed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Decide whether the FA image must be rebuilt
   ansible.builtin.set_fact:
@@ -37,6 +48,10 @@
     podman build -t "{{ fa_image }}"
     -f "{{ fa_entrypoint_dir }}/Podfile" "{{ fa_entrypoint_dir }}"
   when: fa_image_needs_build | bool
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Check source tree has FA install marker
   stat:
@@ -44,7 +59,10 @@
   register: fa_tree_index
 
 - name: Unpack FA version tarball if source tree empty
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   unarchive:
     src: "{{ fa_source_tree }}.tgz"
     dest: "{{ fa_source_tree | dirname }}"
@@ -57,7 +75,10 @@
   register: fa_config_php
 
 - name: Ensure config.php exists in FA tree (copy from config.default.php)
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   copy:
     src: "{{ fa_source_tree }}/config.default.php"
     dest: "{{ fa_source_tree }}/config.php"

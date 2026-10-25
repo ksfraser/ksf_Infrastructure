@@ -1,9 +1,16 @@
 ---
-# ksf-fa.yaml - bootstrap the ksf_fa pod (MySQL + FA only, no WordPress)
-# USAGE: ansible-playbook -i inventories/local ksf-fa.yaml -e pod_name=ksf_fa
+# ksf-fa.yml - bootstrap the ksf_fa pod (MySQL + FA + WP + phpMyAdmin)
+# USAGE: ansible-playbook -i inventories/local ksf-fa.yaml \
+#          -e pod_name=ksf_fa
+#   optional: -e rootful=true|false  (default: false)
+# rootful: true  -> run podman as root, system units in /etc/systemd/system
+# rootful: false -> run podman as rootless_user, system units in ~/.config/systemd/user
 - name: "Provision pod network for {{ pod_name | default('ksf_fa') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   roles:
     - role: ksf.pod
 

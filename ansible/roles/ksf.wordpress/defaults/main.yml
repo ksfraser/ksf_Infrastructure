@@ -83,5 +83,13 @@ wp_plugins:
     tags: [ecommerce]
 wp_plugin_extra_args: "--force"
 
+# Plugins deployed from the host via a bind mount. wp_modules_dir holds plugin
+# source directories (each subdir is a plugin). They are mounted over
+# wp-content/plugins so plugin development on the host deploys simply by
+# restarting the container. Plugins listed in wp_modules are activated via
+# wp-cli in seed.yml.
+wp_modules_dir: "{{ ksf_infra_root }}/wp_modules"
+wp_modules: []
+
 # Seed WP core + users on the one-shot db
 wp_seed_db: true

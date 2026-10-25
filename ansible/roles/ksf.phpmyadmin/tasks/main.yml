@@ -1,6 +1,9 @@
 ---
 # ksf.phpmyadmin tasks (CLI-based; no podman API socket required)
 # Deps: ksf.pod (see meta/main.yml)
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become.
 
 - name: Ensure phpMyAdmin image is present
   command: podman image exists "{{ phpmyadmin_image }}"
@@ -8,10 +11,18 @@
   failed_when: false
   changed_when: false
   when: phpmyadmin_enabled | bool
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Pull phpMyAdmin image
   command: podman pull "{{ phpmyadmin_image }}"
   when: phpmyadmin_enabled | bool and pma_img_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Check phpMyAdmin container exists
   command: podman container exists "{{ phpmyadmin_container_name }}"
@@ -19,12 +30,19 @@
   failed_when: false
   changed_when: false
   when: phpmyadmin_enabled | bool
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Remove stale phpMyAdmin container
   command: podman rm -f "{{ phpmyadmin_container_name }}"
-  when: phpmyadmin_enabled | bool and pma_cont_exists.rc == 0
   ignore_errors: true
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Run phpMyAdmin container
   command: >
@@ -42,3 +60,7 @@
     {% if phpmyadmin_password | length > 0 %}-e PMA_PASSWORD="{{ phpmyadmin_password }}"{% endif %}
     "{{ phpmyadmin_image }}"
   when: phpmyadmin_enabled | bool
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"

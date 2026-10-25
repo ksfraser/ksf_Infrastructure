@@ -1,15 +1,26 @@
 ---
 # main.yml - WordPress container with FA-style per-pod overlay mounts
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become.
 
 - name: Check WP data volume exists
   command: podman volume exists "{{ wp_data_volume }}"
   register: vol_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Create WP data volume
   command: podman volume create "{{ wp_data_volume }}"
   when: vol_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # wp_image is built locally from Containerfile (stock apache image + mod_ssl);
 # it is never pulled. {{ wp_base_image }} is the FROM layer and is pulled.
@@ -18,10 +29,18 @@
   register: base_img_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Pull WP base image
   command: podman pull "{{ wp_base_image }}"
   when: base_img_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Build WP TLS image
   command: >
@@ -29,6 +48,10 @@
     -t "{{ wp_image }}"
     -f "{{ role_path }}/Containerfile"
     "{{ role_path }}"
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Scaffold per-pod overlay
   include_tasks: scaffold.yml
@@ -43,12 +66,19 @@
   register: cont_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Remove stale WP container
   command: podman rm -f "{{ wp_container_name }}"
-  when: cont_exists.rc == 0
   ignore_errors: true
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Run WP container (FA-style overlay mounts)
   command: >
@@ -56,6 +86,7 @@
     {% if use_pod | bool %}
     --pod "{{ pod_name }}"
     {% else %}
+    --hostname "{{ wp_hostname }}"
     --network "{{ wp_network }}"
     -p "{{ wp_port }}:{{ wp_container_port }}"
     -p "{{ wp_https_port }}:{{ wp_https_container_port }}"
@@ -66,12 +97,22 @@
     -e WORDPRESS_DB_NAME="{{ wp_db }}"
     -e WORDPRESS_TABLE_PREFIX="{{ wp_table_prefix }}"
     --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
-    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:rw,Z"
-    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
-    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
-    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
-    -v "{{ wp_tls_dir }}:/etc/ssl/ksf:ro,Z"
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if wp_modules | length > 0 %}
+    # wp_modules is mounted over wp-content/plugins so host-developed plugins
+    # appear directly in WordPress. It replaces the per-pod plugins dir mount.
+    -v "{{ wp_modules_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% else %}
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% endif %}
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_tls_dir }}:/etc/ssl/ksf:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
     "{{ wp_image }}"
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Wait for WP HTTP endpoint
   ansible.builtin.uri:

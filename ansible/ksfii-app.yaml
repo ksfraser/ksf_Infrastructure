@@ -2,9 +2,15 @@
 # ksfii-app.yaml - bootstrap the ksfii_app pod (MySQL + FA + WP)
 # USAGE: ansible-playbook -i inventories/local ksfii-app.yaml
 #   optional: -e pod_name=ksfii_app  (default)
+#   optional: -e rootful=true|false  (default: true)
+# rootful: true  -> run podman as root, system units in /etc/systemd/system
+# rootful: false -> run podman as rootless_user, system units in ~/.config/systemd/user
 - name: "Provision pod network for {{ pod_name | default('ksfii_app') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   roles:
     - role: ksf.pod
 

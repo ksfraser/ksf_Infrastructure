@@ -1,6 +1,9 @@
 ---
 # seed.yml - WP core install + base users + plugins via wp-cli (one-shot)
 # wp-cli mounts the same overlay paths as the runtime container.
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become.
 
 - name: Check WP is installed (wp core is-installed)
   command: >
@@ -10,14 +13,22 @@
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
     -e WORDPRESS_DB_NAME="{{ wp_db }}"
     --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
-    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
-    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
-    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
-    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if wp_modules | length > 0 %}
+    -v "{{ wp_modules_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% else %}
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% endif %}
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
     "{{ wp_cli_image }}" wp core is-installed --path=/var/www/html
   register: wp_core_installed
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Install WordPress core
   command: >
@@ -27,18 +38,26 @@
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
     -e WORDPRESS_DB_NAME="{{ wp_db }}"
     --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
-    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
-    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
-    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
-    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if wp_modules | length > 0 %}
+    -v "{{ wp_modules_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% else %}
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% endif %}
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
     "{{ wp_cli_image }}" wp core install --path=/var/www/html
     --url="{{ wp_site_url }}"
     --title="{{ wp_site_title }}"
     --admin_user="{{ wp_admin_user }}"
-    --admin_password="{{ wp_admin_pass }}"
-    --admin_email="{{ wp_admin_email }}"
+    --admin-password="{{ wp_admin_pass }}"
+    --admin-email="{{ wp_admin_email }}"
     --skip-email
   when: wp_core_installed.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Add staff user
   command: >
@@ -48,15 +67,19 @@
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
     -e WORDPRESS_DB_NAME="{{ wp_db }}"
     --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
-    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
     "{{ wp_cli_image }}" wp user create --path=/var/www/html
     "{{ wp_staff_user }}" "{{ wp_staff_email }}"
     --role=administrator --user_pass="{{ wp_staff_pass }}"
   register: wp_staff_user_result
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
-- name: Install and activate plugins
+- name: Install and activate plugins from wp_plugins list
   command: >
     podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
     -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
@@ -64,12 +87,46 @@
     -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
     -e WORDPRESS_DB_NAME="{{ wp_db }}"
     --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
-    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro,Z"
-    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw,Z"
-    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw,Z"
-    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw,Z"
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if wp_modules | length > 0 %}
+    -v "{{ wp_modules_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% else %}
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% endif %}
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
     "{{ wp_cli_image }}" wp plugin install --path=/var/www/html
     "{{ item.name }}"{% if item.version is defined %} --version={{ item.version }}{% endif %} --activate {{ wp_plugin_extra_args }}
   loop: "{{ wp_plugins }}"
   when: wp_plugins | length > 0
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+
+- name: Activate plugins deployed via wp_modules dir
+  command: >
+    podman run --rm --user {{ wp_cli_user }} {% if use_pod | bool %}--pod "{{ pod_name }}"{% else %}--network "{{ wp_network }}"{% endif %}
+    -e WORDPRESS_DB_HOST="{{ wp_mariadb_host }}:3306"
+    -e WORDPRESS_DB_USER="{{ wp_db_user }}"
+    -e WORDPRESS_DB_PASSWORD="{{ wp_db_pass }}"
+    -e WORDPRESS_DB_NAME="{{ wp_db }}"
+    --mount type=volume,src={{ wp_data_volume }},dst=/var/www/html
+    -v "{{ wp_config_file }}:/var/www/html/wp-config.php:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if wp_modules | length > 0 %}
+    -v "{{ wp_modules_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% else %}
+    -v "{{ wp_plugins_dir }}:/var/www/html/wp-content/plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% endif %}
+    -v "{{ wp_uploads_dir }}:/var/www/html/wp-content/uploads:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ wp_muplugins_dir }}:/var/www/html/wp-content/mu-plugins:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    "{{ wp_cli_image }}" wp plugin activate --path=/var/www/html
+    "{{ item }}"
+  loop: "{{ wp_modules }}"
+  when: wp_modules | length > 0
+  changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"

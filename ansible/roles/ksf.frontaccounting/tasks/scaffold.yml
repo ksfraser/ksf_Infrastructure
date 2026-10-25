@@ -1,15 +1,31 @@
 ---
 # scaffold - create per-pod directory structure
 
-- name: Create per-pod base directory
+- name: Fix ownership of fa_pod_dir when switching rootful/rootless
   become: true
+  become_user: root
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      chown -R "{{ rootless_user }}:{{ rootless_user }}" "{{ fa_pod_dir }}" 2>/dev/null || true
+      chown -R "{{ rootless_user }}:{{ rootless_user }}" "{{ wp_modules_dir }}" 2>/dev/null || true
+    changed_when: false
+
+- name: Create per-pod base directory
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   file:
     path: "{{ fa_pod_dir }}"
     state: directory
     mode: '0775'
 
 - name: Create per-pod company/0 subdirectories
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   file:
     path: "{{ fa_pod_dir }}/{{ item }}"
     state: directory
@@ -24,6 +40,7 @@
     - company/0/reporting
     - themes
     - themes/default
+    - "{{ fa_pod_dir }}/themes/default"
 
 - name: Create company index.php
   become: true
@@ -50,7 +67,10 @@
 # previous image) that has no passwd entry on the host; those are re-owned to
 # the pod directory's owner.
 - name: Ensure the company tree is writable by the container's Apache user
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   ansible.builtin.shell:
     cmd: |
       set -e
@@ -67,7 +87,10 @@
 # which breaks the whole page, not just that module. Add the read bit where it
 # is missing; never touch write bits or ownership here.
 - name: Ensure deployed modules are readable by the container's Apache user
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   ansible.builtin.shell:
     cmd: |
       set -e
@@ -76,12 +99,15 @@
   changed_when: false
 
 - name: Template config_db.php for this pod
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: config_db.php.j2
     dest: "{{ fa_pod_dir }}/config_db.php"
     mode: '0666'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
 
 # The extension registries are owned by FA itself (admin/inst_module.php), which
 # rewrites them on every install/activate. Scaffold them ONLY when missing so a
@@ -89,21 +115,27 @@
 # them for a fresh environment. `force: false` also keeps the inode stable when
 # the file already exists, which matters because both files are bind-mounted.
 - name: Template global installed_extensions.php (only if absent)
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: installed_extensions.php.j2
     dest: "{{ fa_pod_dir }}/installed_extensions.php"
     mode: '0666'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
     force: false
 
 - name: Create per-company installed_extensions.php (only if absent)
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: installed_extensions.php.j2
     dest: "{{ fa_pod_dir }}/company/0/installed_extensions.php"
     mode: '0666'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
     force: false
 
 - name: Check default theme variant exists
@@ -146,11 +178,26 @@
   register: theme_yellow
 
 - name: Ensure yellow theme variant exists
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   copy:
     src: "{{ fa_pod_dir }}/themes/default/default.css.default"
     dest: "{{ fa_pod_dir }}/themes/default/default.css.yellow"
     remote_src: true
     force: false
     mode: '0644'
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
   when: not theme_yellow.stat.exists
+
+- name: Ensure pod TLS directory exists
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+  file:
+    path: "{{ pod_tls_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"

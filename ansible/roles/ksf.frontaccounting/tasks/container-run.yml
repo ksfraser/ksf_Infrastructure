@@ -4,11 +4,18 @@
 # Split out of container.yml so that verify_binds.yml can re-create the
 # container using the EXACT same spec when it detects a dead single-file bind.
 # Do not duplicate the podman run here; this file is the single source of truth.
+#
+# rootful/rootless: when rootful: false, all podman commands run as
+# rootless_user (kevin) via become.
 
 - name: Remove existing FA container
   command: podman rm -f "{{ fa_container_name }}"
-  failed_when: false
+  ignore_errors: true
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Run FA container (canonical mount set)
   command: >
@@ -21,17 +28,21 @@
     -p "{{ fa_port }}:{{ fa_container_port }}"
     {% endif %}
     -e FA_HTTP_PORT="{{ fa_container_port }}"
-    -v "{{ fa_source_tree }}:/var/www/html:ro,Z"
-    -v "{{ fa_modules_dir }}:/var/www/html/modules:rw,Z"
-    -v "{{ fa_pod_dir }}/config_db.php:/var/www/html/config_db.php:rw,Z"
-    -v "{{ fa_pod_dir }}/installed_extensions.php:/var/www/html/installed_extensions.php:rw,Z"
-    -v "{{ fa_pod_dir }}/company:/var/www/html/company:rw,Z"
-    -v "{{ fa_pod_dir }}/themes/default/default.css:/var/www/html/themes/default/default.css:rw,Z"
-    {% if pod_ca_bundle is file %}
-    -v "{{ pod_tls_dir }}:/etc/ksf/tls:ro,Z"
+    -v "{{ fa_source_tree }}:/var/www/html:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ fa_modules_dir }}:/var/www/html/modules:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ fa_pod_dir }}/config_db.php:/var/www/html/config_db.php:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ fa_pod_dir }}/installed_extensions.php:/var/www/html/installed_extensions.php:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ fa_pod_dir }}/company:/var/www/html/company:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    -v "{{ fa_pod_dir }}/themes/default/default.css:/var/www/html/themes/default/default.css:rw{% if not rootful | bool %}{% else %},Z{% endif %}"
+    {% if pod_tls_dir is defined and pod_tls_dir | length > 0 %}
+    -v "{{ pod_tls_dir }}:/etc/ksf/tls:ro{% if not rootful | bool %}{% else %},Z{% endif %}"
     {% endif %}
     "{{ fa_image }}" apache2-foreground
   register: fa_container_run
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Wait for FA container to be running
   command: >
@@ -42,6 +53,10 @@
   delay: 3
   until: fa_run_check.stdout == fa_container_name
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # Install the pod CA into the container trust store.
 #
@@ -60,6 +75,10 @@
   when: pod_ca_bundle is file
   changed_when: true
   register: fa_ca_install
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Assert FA can verify a WordPress certificate signed by the pod CA
   command: >
@@ -69,3 +88,7 @@
   when: pod_ca_bundle is file
   changed_when: false
   failed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"

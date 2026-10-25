@@ -10,16 +10,22 @@
 
 - name: "FA for {{ pod_name | default('ksfii_app') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   roles:
     - role: ksf.frontaccounting
     - role: ksfii_app
   post_tasks:
     - name: Verify (and repair) FA bind mounts
-      ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/../roles/ksf.frontaccounting/tasks/verify_binds.yml"
 
 - name: "WordPress for {{ pod_name | default('ksfii_app') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   roles:
     - role: ksf.wordpress

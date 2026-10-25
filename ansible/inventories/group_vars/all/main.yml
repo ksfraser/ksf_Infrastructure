@@ -4,6 +4,18 @@
 # These apply to every play, so roles resolve correctly even across
 # import_playbook boundaries where role defaults do not leak.
 
+# rootful/rootless:
+#   rootful: true  -> run podman as root (default)
+#   rootful: false -> run podman as rootless_user via become
+# The choice is NOT tied to a stack: both ksfii_app and ksf_fa can be
+# deployed either way.
+rootful: true
+rootless_user: kevin
+rootless_uid: 1002
+# Pod model: true -> real podman pod (containers share netns, pod publishes ports)
+# false -> legacy containers on a shared bridge network
+use_pod: true
+
 # MariaDB container/connection defaults (ksf.mariadb)
 mariadb_container_name: "{{ pod_name }}-mariadb"
 mariadb_db: ksf_fa

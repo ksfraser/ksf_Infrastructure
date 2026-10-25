@@ -1,35 +1,54 @@
 ---
 # scaffold.yml - per-pod overlay dirs + wp-config.php
-
+#
 # The wp-data named volume holds the WP core + default wp-content at
 # /var/www/html. Per-pod bind mounts are overlaid RW on the individual
 # subpaths (wp-content/plugins, wp-content/uploads, wp-content/mu-plugins,
 # wp-config.php) — the exact AGENTS-IMAGE pattern used for FA.
+#
+# wp_modules is a host directory of plugins to deploy into the pod. It is
+# mounted over wp-content/plugins so plugin development on the host and
+# deployed simply by restarting the container. Plugins are activated via
+# seed.yml (wp-cli plugin activate).
+#
+# rootful/rootless: when rootful: false, all file operations run as
+# rootless_user (kevin) via become.
 
 - name: Create per-pod WP overlay directory
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   file:
     path: "{{ item }}"
     state: directory
     mode: '0775'
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
   loop:
     - "{{ wp_pod_dir }}"
     - "{{ wp_pod_dir }}/plugins"
     - "{{ wp_pod_dir }}/uploads"
     - "{{ wp_pod_dir }}/mu-plugins"
+    - "{{ wp_modules_dir }}"
 
 - name: Template per-pod wp-config.php
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: wp-config.php.j2
     dest: "{{ wp_config_file }}"
     mode: '0664'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
 
 # www-data (uid 33/82) inside the containers must write these overlays; host
 # owner is root under rootless podman, so open them up like the FA entrypoint.
 - name: Make overlay dirs + wp-config writable by container uid
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   file:
     path: "{{ item }}"
     state: directory
@@ -38,9 +57,13 @@
     - "{{ wp_plugins_dir }}"
     - "{{ wp_uploads_dir }}"
     - "{{ wp_muplugins_dir }}"
+    - "{{ wp_modules_dir }}"
 
 - name: Make wp-config.php world-readable
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   file:
     path: "{{ wp_config_file }}"
     mode: '0664'

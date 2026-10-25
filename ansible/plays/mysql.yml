@@ -2,9 +2,32 @@
 # mysql.yml - MySQL stack (MariaDB + phpMyAdmin) for the pod
 # Composable: the bigger plays (ksfii_app, ksf_fa) import this via
 # import_playbook. Expects the pod network (ksf.pod) to already exist.
+#
+# The systemd units that manage the containers must be stopped before the
+# playbook runs, otherwise they race with `podman rm -f` and recreate
+# containers the playbook is trying to replace.
 - name: "MySQL stack for {{ pod_name | default('ksfii_app') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+  pre_tasks:
+    - name: Stop systemd units managing the pod's containers
+      ansible.builtin.command: >
+        {% if rootful | bool %}
+        systemctl stop {{ item }}
+        {% else %}
+        systemctl --user stop {{ item }}
+        {% endif %}
+      loop:
+        - container-{{ pod_name }}-mariadb.service
+        - container-{{ pod_name }}-fa.service
+        - container-{{ pod_name }}-phpmyadmin.service
+        - container-{{ pod_name }}-wordpress.service
+        - pod-{{ pod_name }}.service
+      ignore_errors: true
+      changed_when: false
   roles:
     - role: ksf.mariadb
     - role: ksf.phpmyadmin

@@ -1,19 +1,36 @@
 ---
 # ksf.pod tasks - ensure the per-pod network and (in pod mode) the pod itself.
+#
+# rootful/rootless:
+#   rootful: true  -> run podman as root (default)
+#   rootful: false -> run podman as rootless_user (kevin) via become
+#     Requires XDG_RUNTIME_DIR for rootless podman.
 
 - name: Check podman network exists
   command: podman network exists "{{ pod_name }}"
   register: net_exists
   failed_when: false
   changed_when: false
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Create per-pod podman network
   command: podman network create "{{ pod_name }}"
   when: pod_network_state == 'present' and net_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Remove per-pod podman network
   command: podman network rm "{{ pod_name }}"
   when: pod_network_state == 'absent' and net_exists.rc == 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # The pod publishes the host ports for the whole pod, so the previous
 # incarnation's containers MUST go first: as long as the old ksfii_app-fa
@@ -26,6 +43,10 @@
   failed_when: false
   changed_when: false
   when: use_pod | bool and pod_state == 'present'
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Check pod exists
   command: podman pod exists "{{ pod_name }}"
@@ -33,6 +54,10 @@
   failed_when: false
   changed_when: false
   when: use_pod | bool
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # The pod publishes the host ports for every service in it, so the pod is
 # (re)created with the full mapping.
@@ -48,6 +73,10 @@
   register: pod_create
   changed_when: true
   when: use_pod | bool and pod_state == 'present' and pod_exists.rc != 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 # An existing pod keeps whatever port map it was created with. If the map in
 # the inventory changed, the pod has to be recreated to publish the new one.
@@ -59,6 +88,10 @@
   failed_when: false
   changed_when: false
   when: use_pod | bool and pod_state == 'present' and pod_exists.rc == 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Read the pod's published port map
   command: >
@@ -68,6 +101,10 @@
   failed_when: false
   changed_when: false
   when: use_pod | bool and pod_state == 'present' and pod_exists.rc == 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Recreate the pod when its published ports drifted from the inventory
   vars:
@@ -92,7 +129,15 @@
     - pod_state == 'present'
     - pod_exists.rc == 0
     - current_map != desired_map
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
 
 - name: Remove pod
   command: podman pod rm -f "{{ pod_name }}"
   when: use_pod | bool and pod_state == 'absent' and pod_exists.rc == 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"

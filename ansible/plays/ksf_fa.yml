@@ -1,15 +1,46 @@
 ---
-# ksf-fa.yml - FA-only pod: MySQL + FA (no WordPress)
+# ksf-fa.yml - bootstrap the ksf_fa pod (MySQL + FA + WP + phpMyAdmin)
 # USAGE: ansible-playbook -i inventories/local ksf-fa.yaml \
 #          -e pod_name=ksf_fa
+#   optional: -e rootful=true|false  (default: false)
+# rootful: true  -> run podman as root, system units in /etc/systemd/system
+# rootful: false -> run podman as rootless_user, system units in ~/.config/systemd/user
 - import_playbook: mysql.yml
 
 - name: "FrontAccounting for {{ pod_name | default('ksf_fa') }}"
   hosts: localhost
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+  pre_tasks:
+    - name: Stop systemd units managing the pod's containers
+      ansible.builtin.command: >
+        {% if rootful | bool %}
+        systemctl stop {{ item }}
+        {% else %}
+        systemctl --user stop {{ item }}
+        {% endif %}
+      loop:
+        - container-{{ pod_name }}-mariadb.service
+        - container-{{ pod_name }}-fa.service
+        - container-{{ pod_name }}-phpmyadmin.service
+        - container-{{ pod_name }}-wordpress.service
+        - pod-{{ pod_name }}.service
+      ignore_errors: true
+      changed_when: false
   roles:
     - role: ksf.frontaccounting
     - role: ksfii_app
   post_tasks:
     - name: Verify (and repair) FA bind mounts
-      ansible.builtin.include_tasks: roles/ksf.frontaccounting/tasks/verify_binds.yml
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/../roles/ksf.frontaccounting/tasks/verify_binds.yml"
+
+- name: "WordPress for {{ pod_name | default('ksf_fa') }}"
+  hosts: localhost
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+  roles:
+    - role: ksf.wordpress

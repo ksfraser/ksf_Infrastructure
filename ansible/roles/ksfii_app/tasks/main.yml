@@ -1,33 +1,45 @@
 ---
 # ksfii_app - register/activate ksf modules in the pod's FA registries + SQL
+#
+# rootful/rootless: when rootful: false, podman exec runs as rootless_user via become.
 
 - name: Determine active module list
   set_fact:
     ksfii_registry_active: "{{ ksfii_modules_active | default(ksfii_modules) }}"
 
+- name: Initialize registry SQL list
+  set_fact:
+    ksfii_registry_active_sql: []
+
 - name: Resolve install.sql paths for active modules
   set_fact:
-    ksfii_registry_active_sql: "{{ ksfii_registry_active_sql | default([]) + [ (fa_modules_dir + '/' + item + '/sql/install.sql') | realpath ] }}"
+    ksfii_registry_active_sql: "{{ ksfii_registry_active_sql + [ (fa_modules_dir + '/' + item + '/sql/install.sql') | realpath ] }}"
   loop: "{{ ksfii_registry_active }}"
   when: (fa_modules_dir + '/' + item + '/sql/install.sql') is file
 
 - name: Template per-company installed_extensions.php (active set)
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: installed_extensions.php.j2
     dest: "{{ per_company_ext_file }}"
     mode: '0666'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
   vars:
     is_global: false
 
 - name: Template global installed_extensions.php (active set)
-  become: true
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
   template:
     src: installed_extensions.php.j2
     dest: "{{ fa_pod_dir }}/installed_extensions.php"
     mode: '0666'
-    owner: root
+    owner: "{{ rootless_user if not rootful | bool else 'root' }}"
   vars:
     is_global: true
 
@@ -40,3 +52,7 @@
   loop: "{{ ksfii_registry_active_sql }}"
   ignore_errors: true
   when: ksfii_registry_active_sql | length > 0
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
