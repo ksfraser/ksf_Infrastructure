@@ -35,7 +35,8 @@
         "ksfraser/staging-dto": "^0.0.1",
         "ksfraser/file": "dev-main",
         "ksfraser/traits": "dev-main",
-        "ksfraser/exceptions": "^1.3"
+        "ksfraser/exceptions": "^1.3",
+        "ksfraser/ksf-fa-common": "@dev"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6",
@@ -60,7 +61,7 @@
             "name": "Import Staging Processing",
             "description": "Unified staging and processing for post-import operations",
             "page": "ksf_import_staging.php",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "depends": ["ksf_ModulesDAO", "ksf_libs"]
         }
     }

@@ -1,0 +1,38 @@
+{"module":"square","level":"info","message":"Test log message","context":{"test":"data"},"timestamp":"2026-11-03T19:47:21","hostname":"ksf-fa","pid":24,"user_id":""}
+{"ts":"2026-11-03 19:47:21.000000","level":"INFO","msg":"Test log message","ctx":{"test":"data"},"pid":24}
+{"module":"square","level":"info","message":"Test sqLog call","context":{"test":"data"},"timestamp":"2026-11-03T20:08:33","hostname":"ksf-fa","pid":54,"user_id":""}
+{"ts":"2026-11-03 20:08:33.000000","level":"INFO","msg":"Test sqLog call","ctx":{"test":"data"},"pid":54}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"pending_empty":false},"timestamp":"2026-11-03T20:12:52","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:12:52.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"pending_empty":false},"pid":20}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":999},"timestamp":"2026-11-03T20:12:52","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:12:52.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":999},"pid":20}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"null"},"timestamp":"2026-11-03T20:12:52","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:12:52.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"null"},"pid":20}
+{"module":"square","level":"warning","message":"SquareInvoiceService is null","context":[],"timestamp":"2026-11-03T20:12:52","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:12:52.000000","level":"WARNING","msg":"SquareInvoiceService is null","ctx":[],"pid":20}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"pending_empty":false},"timestamp":"2026-11-03T20:14:45","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:14:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"pending_empty":false},"pid":20}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":999},"timestamp":"2026-11-03T20:14:45","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:14:45.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":999},"pid":20}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"null"},"timestamp":"2026-11-03T20:14:45","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:14:45.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"null"},"pid":20}
+{"module":"square","level":"warning","message":"SquareInvoiceService is null","context":[],"timestamp":"2026-11-03T20:14:45","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:14:45.000000","level":"WARNING","msg":"SquareInvoiceService is null","ctx":[],"pid":20}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"pending_empty":false},"timestamp":"2026-11-03T20:20:08","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:20:08.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"pending_empty":false},"pid":20}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":999},"timestamp":"2026-11-03T20:20:08","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:20:08.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":999},"pid":20}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-03T20:20:08","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:20:08.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":20}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":999},"timestamp":"2026-11-03T20:20:08","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:20:08.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":999},"pid":20}
+{"module":"square","level":"error","message":"Square Invoice creation/update failed","context":{"faInvoiceNo":999,"error":"Square Order creation failed: Not authorized to access orders with location_id=LHH5XQ0N8QK9P"},"timestamp":"2026-11-03T20:20:09","hostname":"ksf-fa","pid":20,"user_id":""}
+{"ts":"2026-11-03 20:20:09.000000","level":"ERROR","msg":"Square Invoice creation\/update failed","ctx":{"faInvoiceNo":999,"error":"Square Order creation failed: Not authorized to access orders with location_id=LHH5XQ0N8QK9P"},"pid":20}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"pending_empty":true},"timestamp":"2026-11-03T21:46:42","hostname":"ksf-fa","pid":21,"user_id":""}
+{"ts":"2026-11-03 21:46:42.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"pending_empty":true},"pid":21}
+{"module":"square","level":"warning","message":"db_postwrite early return","context":{"trans_type":30,"pending_empty":true},"timestamp":"2026-11-03T21:46:42","hostname":"ksf-fa","pid":21,"user_id":""}
+{"ts":"2026-11-03 21:46:42.000000","level":"WARNING","msg":"db_postwrite early return","ctx":{"trans_type":30,"pending_empty":true},"pid":21}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"pending_empty":true},"timestamp":"2026-11-03T21:46:42","hostname":"ksf-fa","pid":21,"user_id":""}
+{"ts":"2026-11-03 21:46:42.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"pending_empty":true},"pid":21}
+{"module":"square","level":"warning","message":"db_postwrite early return","context":{"trans_type":13,"pending_empty":true},"timestamp":"2026-11-03T21:46:42","hostname":"ksf-fa","pid":21,"user_id":""}
+{"ts":"2026-11-03 21:46:42.000000","level":"WARNING","msg":"db_postwrite early return","ctx":{"trans_type":13,"pending_empty":true},"pid":21}

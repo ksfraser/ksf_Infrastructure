@@ -1,0 +1,28 @@
+[2026-10-26 07:42:57] INFO: === Square import started === {"from_date":"2026-10-20","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 07:42:57] INFO: Found 1 Square location(s) configured
+[2026-10-26 07:42:58] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 07:42:58] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 07:43:09] INFO: === Square import started === {"from_date":"2026-10-20","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 07:43:09] INFO: Found 1 Square location(s) configured
+[2026-10-26 07:43:10] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 07:43:10] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 08:03:01] INFO: === Square import started === {"from_date":"2026-10-20","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 08:03:01] INFO: Found 1 Square location(s) configured
+[2026-10-26 08:03:02] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 08:03:02] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 08:45:09] INFO: === Square import started === {"from_date":"2026-10-20","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 08:45:09] INFO: Found 1 Square location(s) configured
+[2026-10-26 08:45:10] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 08:45:10] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 08:46:40] INFO: === Square import started === {"from_date":"2026-10-20","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 08:46:40] INFO: Found 1 Square location(s) configured
+[2026-10-26 08:46:41] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 08:46:41] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 22:29:00] INFO: === Square import started === {"from_date":"2026-10-02","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 22:29:00] INFO: Found 1 Square location(s) configured
+[2026-10-26 22:29:01] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 22:29:01] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-10-26 22:29:07] INFO: === Square import started === {"from_date":"2026-10-02","to_date":"2026-10-26","location_filter":"","environment":"sandbox"}
+[2026-10-26 22:29:07] INFO: Found 1 Square location(s) configured
+[2026-10-26 22:29:07] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-10-26 22:29:07] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}

@@ -12,7 +12,7 @@ all:
     # Ports (FA 8090, WP 8091, phpMyAdmin 8092, MariaDB host 3307)
     fa_port: 8090
     wp_port: 8091
-    pma_port: 8092
+    pma_port: 8094
     mariadb_host_port: 3307
     # Optional workers stay off for ksfii scope
     enable_ocr_worker: false

@@ -1,0 +1,54 @@
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"6ed2d3541683377237b8c2d6db57e545"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":11},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":25}
+{"ts":"2026-11-09 16:57:22.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":11},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChDKaJzsNI6ovIpT5qS3y9CgEPMM","square_order_id":"EMy94iODV7910cIOjOPgpRRbqjdZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:461ffb24-5b9b-4670-8576-09bc3e1e91e8","status":"UNPAID"}},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"3"},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":1},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test","person_id":"5","contact_id":"1"},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1]},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"buildNoteLinks returned","ctx":{"noteLinks_count":3,"noteLinks":[["customer","3","reference"],["invoice","11","source_invoice"],["contact",1,"invoice_contact"]]},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"About to invoke CREATE_NOTE hook","ctx":{"noteLinks":[["customer","3","reference"],["invoice","11","source_invoice"],["contact",1,"invoice_contact"]],"noteData_note":"Square Invoice created for FA Sales Invoice #11 \u2014 Square Invoice: https:\/\/app."},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"CREATE_NOTE hook returned","ctx":{"result":true,"resultType":"boolean","noteData_error":"none","noteData_note_id":11,"noteData_links_added":3},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"CRM note created (id=11) for Square Invoice #11","ctx":{"links_added":3},"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":25}
+{"ts":"2026-11-09 16:57:24.000000","level":"INFO","msg":"Square Invoice created: #11 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:461ffb24-5b9b-4670-8576-09bc3e1e91e8\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":25}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"5450c25121505850c48bbaf578ba6b24"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":12},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":31}
+{"ts":"2026-11-09 17:07:05.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":12},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChCy7Jz0DAzcBrWOW1XW8eVAEPMM","square_order_id":"u75COf9xriOKKwTPqGCQQPKxOlUZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:03d01600-8200-4be0-9823-914a9386d42c","status":"UNPAID"}},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"3"},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":1},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test","person_id":"5","contact_id":"28"},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[28]},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"buildNoteLinks returned","ctx":{"noteLinks_count":3,"noteLinks":[["customer","3","reference"],["invoice","12","source_invoice"],["contact",28,"invoice_contact"]]},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"About to invoke CREATE_NOTE hook","ctx":{"noteLinks":[["customer","3","reference"],["invoice","12","source_invoice"],["contact",28,"invoice_contact"]],"noteData_note":"Square Invoice created for FA Sales Invoice #12 \u2014 Square Invoice: https:\/\/app."},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"CREATE_NOTE hook returned","ctx":{"result":true,"resultType":"boolean","noteData_error":"none","noteData_note_id":12,"noteData_links_added":3},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"CRM note created (id=12) for Square Invoice #12","ctx":{"links_added":3},"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":31}
+{"ts":"2026-11-09 17:07:07.000000","level":"INFO","msg":"Square Invoice created: #12 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:03d01600-8200-4be0-9823-914a9386d42c\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":31}

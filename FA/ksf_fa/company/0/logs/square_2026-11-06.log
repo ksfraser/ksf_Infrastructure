@@ -1,0 +1,484 @@
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:24","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:24.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"ts":"2026-11-06 06:39:24.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:24","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:24.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"ts":"2026-11-06 06:39:24.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:24","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:24.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"ts":"2026-11-06 06:39:24.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"ts":"2026-11-06 06:39:25.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":69}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":69}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":69}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":71},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":71},"pid":69}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":69}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":71},"timestamp":"2026-11-06T06:39:25","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:25.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":71},"pid":69}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChB6qVl2ILzGwu3Q0-9nq-sCEPMM","square_order_id":"iR9PXjNEEqP1FaiNBzeo2QrAaxJZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:4eb7266d-3325-407f-bfd5-5611a43d7505","status":"UNPAID"}},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChB6qVl2ILzGwu3Q0-9nq-sCEPMM","square_order_id":"iR9PXjNEEqP1FaiNBzeo2QrAaxJZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:4eb7266d-3325-407f-bfd5-5611a43d7505","status":"UNPAID"}},"pid":69}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"1","customer_id":"1"},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"1"},"pid":69}
+{"module":"square","level":"info","message":"get_customer result","context":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"get_customer result","ctx":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"pid":69}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"1","rowCount":1},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":1},"pid":69}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"pid":69}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[1]},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1]},"pid":69}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":52,"noteData_links_added":3},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":52,"noteData_links_added":3},"pid":69}
+{"module":"square","level":"info","message":"CRM note created (id=52) for Square Invoice #71","context":{"links_added":3},"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"CRM note created (id=52) for Square Invoice #71","ctx":{"links_added":3},"pid":69}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"Square Invoice created: #71 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:4eb7266d-3325-407f-bfd5-5611a43d7505\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T06:39:30","hostname":"ksf-fa","pid":69,"user_id":""}
+{"ts":"2026-11-06 06:39:30.000000","level":"INFO","msg":"Square Invoice created: #71 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:4eb7266d-3325-407f-bfd5-5611a43d7505\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":69}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:29","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:29.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"ts":"2026-11-06 06:41:29.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:29","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:29.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"ts":"2026-11-06 06:41:29.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:29","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:29.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"ts":"2026-11-06 06:41:29.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"ts":"2026-11-06 06:41:30.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":84}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":84}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"34340948f10269105b8cff121d0c4b4e"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"34340948f10269105b8cff121d0c4b4e"},"pid":84}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":72},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":72},"pid":84}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":84}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":72},"timestamp":"2026-11-06T06:41:30","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:30.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":72},"pid":84}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChBs_LEF6m5YbUsEf7XEKgm3EPMM","square_order_id":"0ISyDAsoTSsHU3ePXEBrvAnM7bIZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:dbaa4fd8-669c-40ae-990e-d33030fbdf41","status":"UNPAID"}},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChBs_LEF6m5YbUsEf7XEKgm3EPMM","square_order_id":"0ISyDAsoTSsHU3ePXEBrvAnM7bIZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:dbaa4fd8-669c-40ae-990e-d33030fbdf41","status":"UNPAID"}},"pid":84}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"1","customer_id":"1"},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"1"},"pid":84}
+{"module":"square","level":"info","message":"get_customer result","context":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"get_customer result","ctx":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"pid":84}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"1","rowCount":3},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":3},"pid":84}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"pid":84}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"4","contact_id":"9","debtorRef":"test customer","match":false},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"4","contact_id":"9","debtorRef":"test customer","match":false},"pid":84}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"3","person_id":"6","contact_id":"15","debtorRef":"test customer","match":false},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"3","person_id":"6","contact_id":"15","debtorRef":"test customer","match":false},"pid":84}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[1]},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1]},"pid":84}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":53,"noteData_links_added":3},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":53,"noteData_links_added":3},"pid":84}
+{"module":"square","level":"info","message":"CRM note created (id=53) for Square Invoice #72","context":{"links_added":3},"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"CRM note created (id=53) for Square Invoice #72","ctx":{"links_added":3},"pid":84}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"Square Invoice created: #72 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:dbaa4fd8-669c-40ae-990e-d33030fbdf41\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T06:41:32","hostname":"ksf-fa","pid":84,"user_id":""}
+{"ts":"2026-11-06 06:41:32.000000","level":"INFO","msg":"Square Invoice created: #72 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:dbaa4fd8-669c-40ae-990e-d33030fbdf41\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":84}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"ts":"2026-11-06 17:01:52.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"ts":"2026-11-06 17:01:52.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"ts":"2026-11-06 17:01:52.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"ts":"2026-11-06 17:01:52.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":179}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:01:52","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:52.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":179}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"87e054110e093cb39671936531e7df9d"},"timestamp":"2026-11-06T17:01:53","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:53.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"87e054110e093cb39671936531e7df9d"},"pid":179}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":73},"timestamp":"2026-11-06T17:01:53","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:53.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":73},"pid":179}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T17:01:53","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:53.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":179}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":73},"timestamp":"2026-11-06T17:01:53","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:53.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":73},"pid":179}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChCWnesI6NHNVlQl5y33LxWbEPMM","square_order_id":"KxzlQc4KpCQNY1NIbSJlgvP9e15YY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:efb023da-4ceb-45db-aff5-b1c9fcebdc8f","status":"UNPAID"}},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChCWnesI6NHNVlQl5y33LxWbEPMM","square_order_id":"KxzlQc4KpCQNY1NIbSJlgvP9e15YY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:efb023da-4ceb-45db-aff5-b1c9fcebdc8f","status":"UNPAID"}},"pid":179}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"1","customer_id":"1"},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"1"},"pid":179}
+{"module":"square","level":"info","message":"get_customer result","context":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"get_customer result","ctx":{"customerId":"1","customer":"found","debtor_ref":"test customer"},"pid":179}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"1","rowCount":3},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":3},"pid":179}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test customer","person_id":"1","contact_id":"1","debtorRef":"test customer","match":true},"pid":179}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"4","contact_id":"9","debtorRef":"test customer","match":false},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"4","contact_id":"9","debtorRef":"test customer","match":false},"pid":179}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"3","person_id":"6","contact_id":"15","debtorRef":"test customer","match":false},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"3","person_id":"6","contact_id":"15","debtorRef":"test customer","match":false},"pid":179}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[1]},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1]},"pid":179}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":54,"noteData_links_added":3},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":54,"noteData_links_added":3},"pid":179}
+{"module":"square","level":"info","message":"CRM note created (id=54) for Square Invoice #73","context":{"links_added":3},"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"CRM note created (id=54) for Square Invoice #73","ctx":{"links_added":3},"pid":179}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"Square Invoice created: #73 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:efb023da-4ceb-45db-aff5-b1c9fcebdc8f\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T17:01:58","hostname":"ksf-fa","pid":179,"user_id":""}
+{"ts":"2026-11-06 17:01:58.000000","level":"INFO","msg":"Square Invoice created: #73 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:efb023da-4ceb-45db-aff5-b1c9fcebdc8f\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":179}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"ts":"2026-11-06 17:02:31.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"ts":"2026-11-06 17:02:31.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"ts":"2026-11-06 17:02:31.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"ts":"2026-11-06 17:02:31.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":182}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"871bce301af37a4026a4c905c92bfd12"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"871bce301af37a4026a4c905c92bfd12"},"pid":182}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":74},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":74},"pid":182}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":182}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":74},"timestamp":"2026-11-06T17:02:31","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:31.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":74},"pid":182}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChAxD255nDZNq0jVU0FeOteyEPMM","square_order_id":"sux7nhWiorWxglyrF1uyyAvEtuaZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:dad0d8f0-0129-424c-ab0b-34ddb02617fd","status":"UNPAID"}},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChAxD255nDZNq0jVU0FeOteyEPMM","square_order_id":"sux7nhWiorWxglyrF1uyyAvEtuaZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:dad0d8f0-0129-424c-ab0b-34ddb02617fd","status":"UNPAID"}},"pid":182}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"2","customer_id":"2"},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"2","customer_id":"2"},"pid":182}
+{"module":"square","level":"info","message":"get_customer result","context":{"customerId":"2","customer":"found","debtor_ref":"Test Customer 2"},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"get_customer result","ctx":{"customerId":"2","customer":"found","debtor_ref":"Test Customer 2"},"pid":182}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"2","rowCount":1},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"2","rowCount":1},"pid":182}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"Test Customer 2","person_id":"3","contact_id":"6","debtorRef":"Test Customer 2","match":true},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"Test Customer 2","person_id":"3","contact_id":"6","debtorRef":"Test Customer 2","match":true},"pid":182}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[6]},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[6]},"pid":182}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":55,"noteData_links_added":3},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":55,"noteData_links_added":3},"pid":182}
+{"module":"square","level":"info","message":"CRM note created (id=55) for Square Invoice #74","context":{"links_added":3},"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"CRM note created (id=55) for Square Invoice #74","ctx":{"links_added":3},"pid":182}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"Square Invoice created: #74 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:dad0d8f0-0129-424c-ab0b-34ddb02617fd\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T17:02:33","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 17:02:33.000000","level":"INFO","msg":"Square Invoice created: #74 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:dad0d8f0-0129-424c-ab0b-34ddb02617fd\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:25","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:25.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"ts":"2026-11-06 17:13:25.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:25","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:25.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"ts":"2026-11-06 17:13:25.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"ts":"2026-11-06 17:13:26.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"ts":"2026-11-06 17:13:26.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":188}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":188}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":188}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":75},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":75},"pid":188}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":188}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":75},"timestamp":"2026-11-06T17:13:26","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:26.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":75},"pid":188}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChDxxMrPnqqt4jXfKJha1XjEEPMM","square_order_id":"yzupbp6kVkOvXMXEjAUauP8DZIAZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:f7f9e6f5-778d-41d5-a852-4d8f5e39e7c9","status":"UNPAID"}},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChDxxMrPnqqt4jXfKJha1XjEEPMM","square_order_id":"yzupbp6kVkOvXMXEjAUauP8DZIAZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:f7f9e6f5-778d-41d5-a852-4d8f5e39e7c9","status":"UNPAID"}},"pid":188}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"1","customer_id":"1"},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"1"},"pid":188}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"1","rowCount":3},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":3},"pid":188}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"test customer","person_id":"1","contact_id":"1"},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test customer","person_id":"1","contact_id":"1"},"pid":188}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"4","contact_id":"9"},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"4","contact_id":"9"},"pid":188}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"3","person_id":"6","contact_id":"15"},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"3","person_id":"6","contact_id":"15"},"pid":188}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[1,9,15]},"timestamp":"2026-11-06T17:13:30","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:30.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1,9,15]},"pid":188}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":56,"noteData_links_added":5},"timestamp":"2026-11-06T17:13:31","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:31.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":56,"noteData_links_added":5},"pid":188}
+{"module":"square","level":"info","message":"CRM note created (id=56) for Square Invoice #75","context":{"links_added":5},"timestamp":"2026-11-06T17:13:31","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:31.000000","level":"INFO","msg":"CRM note created (id=56) for Square Invoice #75","ctx":{"links_added":5},"pid":188}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T17:13:31","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:31.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"Square Invoice created: #75 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:f7f9e6f5-778d-41d5-a852-4d8f5e39e7c9\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T17:13:31","hostname":"ksf-fa","pid":188,"user_id":""}
+{"ts":"2026-11-06 17:13:31.000000","level":"INFO","msg":"Square Invoice created: #75 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:f7f9e6f5-778d-41d5-a852-4d8f5e39e7c9\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":188}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:26","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"ts":"2026-11-06 17:24:27.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"ts":"2026-11-06 17:24:27.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"ts":"2026-11-06 17:24:27.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"ts":"2026-11-06 17:24:27.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"20a7ea9cc2c87114fa79aca7bf839953"},"pid":170}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":76},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":76},"pid":170}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":170}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":76},"timestamp":"2026-11-06T17:24:27","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:27.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":76},"pid":170}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChBOzSkBZXf1sYh0F-UYqpKQEPMM","square_order_id":"gyirmcXouBhmWRtiyjXNfpUDit7YY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:15a1efe5-4ea0-498b-a39a-6a28f5a5165c","status":"UNPAID"}},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChBOzSkBZXf1sYh0F-UYqpKQEPMM","square_order_id":"gyirmcXouBhmWRtiyjXNfpUDit7YY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:15a1efe5-4ea0-498b-a39a-6a28f5a5165c","status":"UNPAID"}},"pid":170}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"2","customer_id":"2"},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"2","customer_id":"2"},"pid":170}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"2","rowCount":1},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"2","rowCount":1},"pid":170}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"Test Customer 2","person_id":"3","contact_id":"6"},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"Test Customer 2","person_id":"3","contact_id":"6"},"pid":170}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[6]},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[6]},"pid":170}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":57,"noteData_links_added":3},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":57,"noteData_links_added":3},"pid":170}
+{"module":"square","level":"info","message":"CRM note created (id=57) for Square Invoice #76","context":{"links_added":3},"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"CRM note created (id=57) for Square Invoice #76","ctx":{"links_added":3},"pid":170}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Square Invoice created: #76 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:15a1efe5-4ea0-498b-a39a-6a28f5a5165c\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T17:24:31","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:31.000000","level":"INFO","msg":"Square Invoice created: #76 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:15a1efe5-4ea0-498b-a39a-6a28f5a5165c\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"ts":"2026-11-06 17:24:45.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"ts":"2026-11-06 17:24:45.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"ts":"2026-11-06 17:24:45.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"ts":"2026-11-06 17:24:45.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"9674be160ac2ad8ae4c2beed7890c134"},"pid":170}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":77},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":77},"pid":170}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":170}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":77},"timestamp":"2026-11-06T17:24:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:45.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":77},"pid":170}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChAkSNrQ8r1-rhh-yWFEx4I_EPMM","square_order_id":"W5C4EVVUebnfaw9fd5cLL5UtJffZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:6094e8cd-0464-4485-bd38-98ad2230e571","status":"UNPAID"}},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChAkSNrQ8r1-rhh-yWFEx4I_EPMM","square_order_id":"W5C4EVVUebnfaw9fd5cLL5UtJffZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:6094e8cd-0464-4485-bd38-98ad2230e571","status":"UNPAID"}},"pid":170}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"3","customer_id":"2"},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"3","customer_id":"2"},"pid":170}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"3","rowCount":1},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"3","rowCount":1},"pid":170}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"9","contact_id":"22"},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"9","contact_id":"22"},"pid":170}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[22]},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[22]},"pid":170}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":58,"noteData_links_added":3},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":58,"noteData_links_added":3},"pid":170}
+{"module":"square","level":"info","message":"CRM note created (id=58) for Square Invoice #77","context":{"links_added":3},"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"CRM note created (id=58) for Square Invoice #77","ctx":{"links_added":3},"pid":170}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Square Invoice created: #77 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:6094e8cd-0464-4485-bd38-98ad2230e571\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T17:24:46","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 17:24:46.000000","level":"INFO","msg":"Square Invoice created: #77 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:6094e8cd-0464-4485-bd38-98ad2230e571\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"ts":"2026-11-06 22:52:22.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"ts":"2026-11-06 22:52:22.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"ts":"2026-11-06 22:52:22.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"ts":"2026-11-06 22:52:22.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":182}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":182}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"d7f77eea62f8f1de41d3490f829e5bc7"},"pid":182}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":78},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":78},"pid":182}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":182}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":78},"timestamp":"2026-11-06T22:52:22","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:22.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":78},"pid":182}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChC0K5iJb_J2vn5lNbFBobFhEPMM","square_order_id":"MwgEkkxErixy3elLqBCvgatDDcQZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:b0b65409-175c-4919-a8d3-ad98d3aa249c","status":"UNPAID"}},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChC0K5iJb_J2vn5lNbFBobFhEPMM","square_order_id":"MwgEkkxErixy3elLqBCvgatDDcQZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:b0b65409-175c-4919-a8d3-ad98d3aa249c","status":"UNPAID"}},"pid":182}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"3","customer_id":"2"},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"3","customer_id":"2"},"pid":182}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"3","rowCount":1},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"3","rowCount":1},"pid":182}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"9","contact_id":"22"},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"9","contact_id":"22"},"pid":182}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[22]},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[22]},"pid":182}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":60,"noteData_links_added":3},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":60,"noteData_links_added":3},"pid":182}
+{"module":"square","level":"info","message":"CRM note created (id=60) for Square Invoice #78","context":{"links_added":3},"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"CRM note created (id=60) for Square Invoice #78","ctx":{"links_added":3},"pid":182}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"Square Invoice created: #78 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:b0b65409-175c-4919-a8d3-ad98d3aa249c\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T22:52:24","hostname":"ksf-fa","pid":182,"user_id":""}
+{"ts":"2026-11-06 22:52:24.000000","level":"INFO","msg":"Square Invoice created: #78 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:b0b65409-175c-4919-a8d3-ad98d3aa249c\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":182}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"ts":"2026-11-06 22:52:34.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"ts":"2026-11-06 22:52:34.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"ts":"2026-11-06 22:52:34.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"ts":"2026-11-06 22:52:34.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":199}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":199}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":199}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":79},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":79},"pid":199}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":199}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":79},"timestamp":"2026-11-06T22:52:34","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:34.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":79},"pid":199}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChBgtDCt01ZvjBlxlh-2UyclEPMM","square_order_id":"Kv6p0oLQik7gTnLgQOmKusmeXzfZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:0ac37934-47ae-49d5-b123-76e673343002","status":"UNPAID"}},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChBgtDCt01ZvjBlxlh-2UyclEPMM","square_order_id":"Kv6p0oLQik7gTnLgQOmKusmeXzfZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:0ac37934-47ae-49d5-b123-76e673343002","status":"UNPAID"}},"pid":199}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"2","customer_id":"2"},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"2","customer_id":"2"},"pid":199}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"2","rowCount":1},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"2","rowCount":1},"pid":199}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"Test Customer 2","person_id":"3","contact_id":"6"},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"Test Customer 2","person_id":"3","contact_id":"6"},"pid":199}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[6]},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[6]},"pid":199}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":61,"noteData_links_added":3},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":61,"noteData_links_added":3},"pid":199}
+{"module":"square","level":"info","message":"CRM note created (id=61) for Square Invoice #79","context":{"links_added":3},"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"CRM note created (id=61) for Square Invoice #79","ctx":{"links_added":3},"pid":199}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"Square Invoice created: #79 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:0ac37934-47ae-49d5-b123-76e673343002\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T22:52:36","hostname":"ksf-fa","pid":199,"user_id":""}
+{"ts":"2026-11-06 22:52:36.000000","level":"INFO","msg":"Square Invoice created: #79 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:0ac37934-47ae-49d5-b123-76e673343002\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":199}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":30,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"ts":"2026-11-06 22:52:45.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":30,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":30,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"ts":"2026-11-06 22:52:45.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":13,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"ts":"2026-11-06 22:52:45.000000","level":"DEBUG","msg":"db_prewrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":13,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":13,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"ts":"2026-11-06 22:52:45.000000","level":"DEBUG","msg":"db_postwrite early return: trans_type mismatch","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"db_prewrite called","context":{"trans_type":10,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_prewrite called","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice"},"pid":170}
+{"module":"square","level":"info","message":"db_postwrite called","context":{"trans_type":10,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"db_postwrite called","ctx":{"trans_type":10,"session_id":"2a922ac97c3a65aa36d4783d486134af"},"pid":170}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":80},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":80},"pid":170}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok"},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok"},"pid":170}
+{"module":"square","level":"info","message":"Calling createInvoiceFromFA","context":{"faInvoiceNo":80},"timestamp":"2026-11-06T22:52:45","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:45.000000","level":"INFO","msg":"Calling createInvoiceFromFA","ctx":{"faInvoiceNo":80},"pid":170}
+{"module":"square","level":"info","message":"Square API response","context":{"result":{"created":true,"square_invoice_id":"inv:0-ChDhkOXP2UyR6H6z55M3YIc-EPMM","square_order_id":"i1P5aatm9O75959jRlYMzyXsrZCZY","public_url":"https://app.squareupsandbox.com/pay-invoice/invtmp:c24405d4-56dd-4d71-92b0-e2c63a035c65","status":"UNPAID"}},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"Square API response","ctx":{"result":{"created":true,"square_invoice_id":"inv:0-ChDhkOXP2UyR6H6z55M3YIc-EPMM","square_order_id":"i1P5aatm9O75959jRlYMzyXsrZCZY","public_url":"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:c24405d4-56dd-4d71-92b0-e2c63a035c65","status":"UNPAID"}},"pid":170}
+{"module":"square","level":"info","message":"Creating CRM note via SquareNoteService","context":[],"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"Creating CRM note via SquareNoteService","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Looking up branch contacts","context":{"branch_code":"1","customer_id":"1"},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"Looking up branch contacts","ctx":{"branch_code":"1","customer_id":"1"},"pid":170}
+{"module":"square","level":"info","message":"get_crm_persons result","context":{"branchCode":"1","rowCount":3},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"get_crm_persons result","ctx":{"branchCode":"1","rowCount":3},"pid":170}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"test customer","person_id":"1","contact_id":"1"},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"test customer","person_id":"1","contact_id":"1"},"pid":170}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"1","person_id":"4","contact_id":"9"},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"1","person_id":"4","contact_id":"9"},"pid":170}
+{"module":"square","level":"info","message":"CRM person row","context":{"ref":"3","person_id":"6","contact_id":"15"},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"CRM person row","ctx":{"ref":"3","person_id":"6","contact_id":"15"},"pid":170}
+{"module":"square","level":"info","message":"Found branch contacts","context":{"branchContacts":[1,9,15]},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"Found branch contacts","ctx":{"branchContacts":[1,9,15]},"pid":170}
+{"module":"square","level":"info","message":"CREATE_NOTE hook result","context":{"result":true,"noteData_error":"none","noteData_note_id":62,"noteData_links_added":5},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"CREATE_NOTE hook result","ctx":{"result":true,"noteData_error":"none","noteData_note_id":62,"noteData_links_added":5},"pid":170}
+{"module":"square","level":"info","message":"CRM note created (id=62) for Square Invoice #80","context":{"links_added":5},"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"CRM note created (id=62) for Square Invoice #80","ctx":{"links_added":5},"pid":170}
+{"module":"square","level":"info","message":"SquareNoteService::createSquareInvoiceNote completed","context":[],"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"SquareNoteService::createSquareInvoiceNote completed","ctx":[],"pid":170}
+{"module":"square","level":"info","message":"Square Invoice created: #80 -- <a href=\"https://app.squareupsandbox.com/pay-invoice/invtmp:c24405d4-56dd-4d71-92b0-e2c63a035c65\" target=\"_blank\">View Square Payment Link</a>","context":[],"timestamp":"2026-11-06T22:52:47","hostname":"ksf-fa","pid":170,"user_id":""}
+{"ts":"2026-11-06 22:52:47.000000","level":"INFO","msg":"Square Invoice created: #80 -- <a href=\"https:\/\/app.squareupsandbox.com\/pay-invoice\/invtmp:c24405d4-56dd-4d71-92b0-e2c63a035c65\" target=\"_blank\">View Square Payment Link<\/a>","ctx":[],"pid":170}

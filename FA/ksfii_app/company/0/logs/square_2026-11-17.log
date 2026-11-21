@@ -1,0 +1,305 @@
+{"ts":"2026-11-17 03:30:46.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":54}
+{"ts":"2026-11-17 03:32:40.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":28}
+{"ts":"2026-11-17 03:33:20.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":31}
+{"ts":"2026-11-17 03:33:20.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":31}
+{"ts":"2026-11-17 03:33:20.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":31}
+{"ts":"2026-11-17 03:33:21.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:25.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":31}
+{"ts":"2026-11-17 03:33:25.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":31}
+{"ts":"2026-11-17 03:33:25.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:33:35.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":33}
+{"ts":"2026-11-17 03:33:40.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":17},"pid":35}
+{"ts":"2026-11-17 03:33:55.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":17},"pid":27}
+{"ts":"2026-11-17 03:33:55.000000","level":"DEBUG","msg":"activate_extension ENTRY","ctx":{"company":"0","check_only":false},"pid":27}
+{"ts":"2026-11-17 03:33:55.000000","level":"DEBUG","msg":"ensure_composer_dependencies ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:55.000000","level":"DEBUG","msg":"ensure_composer_dependencies EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:55.000000","level":"DEBUG","msg":"activate_extension EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":27}
+{"ts":"2026-11-17 03:33:59.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:00.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:00.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:00.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:34:00.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":27}
+{"ts":"2026-11-17 03:34:00.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:03.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:03.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:03.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:34:07.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:07.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:07.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:34:12.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:12.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:12.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:34:17.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:19.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":27}
+{"ts":"2026-11-17 03:34:20.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:22.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:22.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":27}
+{"ts":"2026-11-17 03:34:22.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:34:25.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:29.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:32.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":27}
+{"ts":"2026-11-17 03:34:38.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":79}
+{"ts":"2026-11-17 03:34:40.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":79}
+{"ts":"2026-11-17 03:36:53.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":31}
+{"ts":"2026-11-17 03:36:53.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":31}
+{"ts":"2026-11-17 03:36:53.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":31}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":26}
+{"ts":"2026-11-17 03:36:54.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:36:56.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":26}
+{"ts":"2026-11-17 03:36:56.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":26}
+{"ts":"2026-11-17 03:36:56.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":26}
+{"ts":"2026-11-17 03:37:02.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_CRM","ksf_FA_Attachments","ksf_FA_Contacts","ksf_FA_Customer","ksf_FA_DataIntegrity","ksf_FA_EmailManager","ksf_FA_HRM","ksf_FA_ProjectManagement","ksf_FA_QuickBudget","ksf_FA_Users","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":16},"pid":88}
+{"ts":"2026-11-17 03:52:47.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":7},"pid":62}
+{"ts":"2026-11-17 03:53:01.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":7},"pid":27}
+{"ts":"2026-11-17 03:53:01.000000","level":"DEBUG","msg":"activate_extension ENTRY","ctx":{"company":"0","check_only":false},"pid":27}
+{"ts":"2026-11-17 03:53:01.000000","level":"DEBUG","msg":"ensure_composer_dependencies ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:01.000000","level":"DEBUG","msg":"ensure_composer_dependencies EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:01.000000","level":"DEBUG","msg":"activate_extension EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":27}
+{"ts":"2026-11-17 03:53:04.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":27}
+{"ts":"2026-11-17 03:53:07.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":33}
+{"ts":"2026-11-17 03:53:07.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":33}
+{"ts":"2026-11-17 03:53:07.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":33}
+{"ts":"2026-11-17 03:53:07.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":33}
+{"ts":"2026-11-17 03:53:07.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":33}
+{"ts":"2026-11-17 03:53:10.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":33}
+{"ts":"2026-11-17 03:53:10.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":33}
+{"ts":"2026-11-17 03:53:10.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":33}
+{"ts":"2026-11-17 03:53:15.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":33}
+{"ts":"2026-11-17 03:53:15.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":33}
+{"ts":"2026-11-17 03:53:15.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":33}
+{"ts":"2026-11-17 03:53:19.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":33}
+{"ts":"2026-11-17 03:53:19.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":33}
+{"ts":"2026-11-17 03:53:19.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":33}
+{"ts":"2026-11-17 03:53:24.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":93}
+{"ts":"2026-11-17 03:53:24.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":93}
+{"ts":"2026-11-17 03:53:24.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":93}
+{"ts":"2026-11-17 03:53:31.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":28}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":95}
+{"ts":"2026-11-17 03:53:33.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:36.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:36.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":95}
+{"ts":"2026-11-17 03:53:36.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":95}
+{"ts":"2026-11-17 03:53:39.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:43.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:48.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:53:49.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":95}
+{"ts":"2026-11-17 03:54:01.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":88}
+{"ts":"2026-11-17 03:54:03.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":88}
+{"ts":"2026-11-17 03:55:42.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":21}
+{"ts":"2026-11-17 03:55:42.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":21}
+{"ts":"2026-11-17 03:55:42.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":21}
+{"ts":"2026-11-17 03:55:50.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":30}
+{"ts":"2026-11-17 03:55:52.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":["ksf_FA_Calendar","ksf_FA_DataIntegrity","ksf_fa_downloader","ksf_FA_Notes","ksf_FA_RelatedTo","ksf_FA_Logging","ksf_FA_ImportStagingProcessing","FA_ProductAttributes"],"square_in_hooks":"no","hook_count":8},"pid":30}

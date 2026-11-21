@@ -1,0 +1,101 @@
+{"ts":"2026-11-17 03:56:25.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_access ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_access EXIT","ctx":{"security_areas":["SA_SQUARE_VIEW","SA_SQUARE_MANAGE","SA_SQUARE_CONFIG"]},"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options ENTRY","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"install_options EXIT","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":512}
+{"ts":"2026-11-17 03:56:29.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:32.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":512}
+{"ts":"2026-11-17 03:56:32.000000","level":"DEBUG","msg":"pre_header ENTRY","ctx":{"page":"not set","stock_id":"not set"},"pid":512}
+{"ts":"2026-11-17 03:56:32.000000","level":"DEBUG","msg":"pre_header EXIT: not items page","ctx":[],"pid":512}
+{"ts":"2026-11-17 03:56:35.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":543}
+{"ts":"2026-11-17 03:56:39.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":543}
+{"ts":"2026-11-17 03:56:44.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"construct called","ctx":{"hooks_array_keys":[],"square_in_hooks":"no","hook_count":0},"pid":543}
+{"module":"square","level":"info","message":"db_prewrite ENTRY","context":{"trans_type":30,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite ENTRY","ctx":{"trans_type":30,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"db_prewrite EXIT: trans_type mismatch (got 30, expected 10)","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"db_postwrite ENTRY","context":{"trans_type":30,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_postwrite ENTRY","ctx":{"trans_type":30,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"db_postwrite EXIT: trans_type mismatch","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"db_prewrite ENTRY","context":{"trans_type":13,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite ENTRY","ctx":{"trans_type":13,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"db_prewrite EXIT: trans_type mismatch (got 13, expected 10)","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"db_postwrite ENTRY","context":{"trans_type":13,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_postwrite ENTRY","ctx":{"trans_type":13,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"db_postwrite EXIT: trans_type mismatch","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"db_prewrite ENTRY","context":{"trans_type":10,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite ENTRY","ctx":{"trans_type":10,"terms_indicator":"5","session_id":"2ebece2a4ec1c068790a67cb7bb98872","cart_customer_id":"1"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolvePaymentDestination ENTRY","ctx":{"terms_indicator":5},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolvePaymentDestination EXIT: found square_invoice pattern in payment_terms","ctx":{"term_name":"square invoice"},"pid":543}
+{"module":"square","level":"info","message":"db_prewrite resolved destination","context":{"destination":"square_invoice","terms_indicator":5},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite resolved destination","ctx":{"destination":"square_invoice","terms_indicator":5},"pid":543}
+{"module":"square","level":"info","message":"db_prewrite Set payment_terms cash_sale to 0","context":{"destination":"square_invoice","cash_sale":0},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite Set payment_terms cash_sale to 0","ctx":{"destination":"square_invoice","cash_sale":0},"pid":543}
+{"module":"square","level":"info","message":"db_prewrite EXIT: returning true","context":[],"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_prewrite EXIT: returning true","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"db_postwrite ENTRY","context":{"trans_type":10,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"db_postwrite ENTRY","ctx":{"trans_type":10,"session_id":"2ebece2a4ec1c068790a67cb7bb98872"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolvePaymentDestination ENTRY","ctx":{"terms_indicator":5},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolvePaymentDestination EXIT: found square_invoice pattern in payment_terms","ctx":{"term_name":"square invoice"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolveInvoiceNumber ENTRY","ctx":{"cart_trans_no":{"88":0},"cart_customer_id":"1","session_trans_no":"not set"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"resolveInvoiceNumber EXIT","ctx":{"faInvoiceNo":88},"pid":543}
+{"module":"square","level":"info","message":"Resolved invoice number","context":{"faInvoiceNo":88,"cart_trans_no":88,"session_trans_no":"none"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"Resolved invoice number","ctx":{"faInvoiceNo":88,"cart_trans_no":88,"session_trans_no":"none"},"pid":543}
+{"module":"square","level":"info","message":"About to build SquareInvoiceService","context":{"faInvoiceNo":88},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"About to build SquareInvoiceService","ctx":{"faInvoiceNo":88},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"buildSquareInvoiceService ENTRY","ctx":[],"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"buildSquareInvoiceService config","ctx":{"access_token_set":true,"location_id":"LVYS0BD21EPMD","environment":"sandbox"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"buildSquareInvoiceService EXIT: service created","ctx":[],"pid":543}
+{"module":"square","level":"info","message":"Built SquareInvoiceService","context":{"service":"ok","class":"ksfraser\\FrontAccounting\\Square\\Services\\SquareInvoiceService"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"Built SquareInvoiceService","ctx":{"service":"ok","class":"ksfraser\\FrontAccounting\\Square\\Services\\SquareInvoiceService"},"pid":543}
+{"module":"square","level":"info","message":"About to call createInvoiceFromFA","context":{"faInvoiceNo":88,"customer_id":1,"delivery_method":"SHARE_MANUALLY"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"INFO","msg":"About to call createInvoiceFromFA","ctx":{"faInvoiceNo":88,"customer_id":1,"delivery_method":"SHARE_MANUALLY"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"extractLineItems ENTRY","ctx":{"has_line_items":true,"freight_cost":"0"},"pid":543}
+{"ts":"2026-11-17 03:56:47.000000","level":"DEBUG","msg":"extractLineItems EXIT","ctx":{"item_count":1},"pid":543}
+{"module":"square","level":"error","message":"Square Invoice creation/update failed","context":{"faInvoiceNo":88,"error":"Could not resolve host: connect.squareupsandbox.com","class":"Square\\Exceptions\\ApiException"},"timestamp":"2026-11-17T03:56:47","hostname":"ksf-fa","pid":543,"user_id":""}
+{"ts":"2026-11-17 03:56:47.000000","level":"ERROR","msg":"Square Invoice creation\/update failed","ctx":{"faInvoiceNo":88,"error":"Could not resolve host: connect.squareupsandbox.com","class":"Square\\Exceptions\\ApiException"},"pid":543}

@@ -5,6 +5,24 @@
 #   optional: -e rootful=true|false  (default: false)
 # rootful: true  -> run podman as root, system units in /etc/systemd/system
 # rootful: false -> run podman as rootless_user, system units in ~/.config/systemd/user
+- name: "Create ksf_fa pod"
+  hosts: localhost
+  become: "{{ not rootful | bool }}"
+  become_user: "{{ rootless_user if not rootful | bool else 'root' }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ '/run/user/' + rootless_uid | string if not rootful | bool else omit }}"
+  roles:
+    - role: ksf.pod
+      vars:
+        pod_name: "{{ pod_name | default('ksf_fa') }}"
+        pod_state: present
+        use_pod: true
+        pod_ports:
+          - "{{ fa_port }}:80"
+          - "{{ wp_port }}:80"
+          - "{{ pma_port }}:80"
+          - "{{ mariadb_host_port }}:3306"
+
 - import_playbook: mysql.yml
 
 - name: "FrontAccounting for {{ pod_name | default('ksf_fa') }}"

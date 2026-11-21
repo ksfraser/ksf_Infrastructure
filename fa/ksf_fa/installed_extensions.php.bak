@@ -1,0 +1,292 @@
+<?php
+
+/* List of installed additional extensions. If extensions are added to the list manually
+	make sure they have unique and so far never used extension_ids as a keys,
+	and $next_extension_id is also updated. More about format of this file yo will find in 
+	FA extension system documentation.
+*/
+
+$next_extension_id = 21; // unique id for next installed extension
+
+$installed_extensions = array (
+  1 => 
+  array (
+    'package' => 'ksf_Calendar',
+    'name' => 'ksf_Calendar',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_Calendar',
+    'active' => false,
+  ),
+  2 => 
+  array (
+    'package' => 'ksf_FA_Calendar',
+    'name' => 'ksf_FA_Calendar',
+    'version' => '2.4.19'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Calendar',
+    'active' => false,
+  ),
+  3 => 
+  array (
+    'package' => 'ksf_FA_Contacts',
+    'name' => 'ksf_FA_Contacts',
+    'version' => '2.4.19'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Contacts',
+    'active' => false,
+  ),
+  4 => 
+  array (
+    'package' => 'ksf_FA_Customer',
+    'name' => 'ksf_FA_Customer',
+    'version' => '2.4.19'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Customer',
+    'active' => false,
+  ),
+  7 => 
+  array (
+    'package' => 'ksf_FA_Mail',
+    'name' => 'ksf_FA_Mail',
+    'version' => '2.4.3'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Mail',
+    'active' => false,
+  ),
+  8 => 
+  array (
+    'package' => 'ksf_FA_RBAC',
+    'name' => 'ksf_FA_RBAC',
+    'version' => '2.4.19'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_RBAC',
+    'active' => false,
+  ),
+  9 => 
+  array (
+    'package' => 'ksf_FA_Square',
+    'name' => 'ksf_FA_Square',
+    'version' => '2.4.4',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Square',
+    'active' => false,
+  ),
+  10 => 
+  array (
+    'package' => 'ksf_FA_Woocommerce',
+    'name' => 'ksf_FA_Woocommerce',
+    'version' => '2.4.3'-1,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Woocommerce',
+    'active' => false,
+  ),
+  11 => 
+  array (
+    'package' => 'ksf_payment_destinations',
+    'name' => 'ksf_payment_destinations',
+    'version' => '2.4.3'-1,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_payment_destinations',
+    'active' => false,
+  ),
+  12 => 
+  array (
+    'package' => 'ksf_FA_CRM',
+    'name' => 'ksf_FA_CRM',
+    'version' => '2.4.3'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM',
+    'active' => false,
+  ),
+  14 => 
+  array (
+    'package' => 'ksf_FA_ManageGL',
+    'name' => 'ksf_FA_ManageGL',
+    'version' => '2.4.3'-1,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_ManageGL',
+    'active' => false,
+  ),
+  15 => 
+  array (
+    'package' => 'ksf_FA_ImportStagingProcessing',
+    'name' => 'ksf_FA_ImportStagingProcessing',
+    'version' => '2.4.4',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_ImportStagingProcessing',
+    'active' => false,
+  ),
+  18 => 
+  array (
+    'package' => 'ksf_FA_RelatedTo',
+    'name' => 'ksf_FA_RelatedTo',
+    'version' => '2.4.3'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_RelatedTo',
+    'active' => false,
+  ),
+  19 => 
+  array (
+    'package' => 'ksf_FA_Notes',
+    'name' => 'ksf_FA_Notes',
+    'version' => '2.4.3'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Notes',
+    'active' => false,
+  ),
+  20 =>
+  array (
+    'package' => 'ksf_FA_Common',
+    'name' => 'ksf_FA_Common',
+    'version' => '2.4.3'-0,
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_Common',
+    'active' => false,
+  ),
+  21 =>
+  array (
+    'package' => 'ksf_FA_HRM_LeaveApproval',
+    'name' => 'ksf_FA_HRM_LeaveApproval',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_LeaveApproval',
+    'active' => false,
+  ),
+  22 =>
+  array (
+    'package' => 'ksf_FA_HRM_Performance',
+    'name' => 'ksf_FA_HRM_Performance',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_Performance',
+    'active' => false,
+  ),
+  23 =>
+  array (
+    'package' => 'ksf_FA_HRM_Onboarding',
+    'name' => 'ksf_FA_HRM_Onboarding',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_Onboarding',
+    'active' => false,
+  ),
+  24 =>
+  array (
+    'package' => 'ksf_FA_HRM_Training',
+    'name' => 'ksf_FA_HRM_Training',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_Training',
+    'active' => false,
+  ),
+  25 =>
+  array (
+    'package' => 'ksf_FA_HRM_Contracts',
+    'name' => 'ksf_FA_HRM_Contracts',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_Contracts',
+    'active' => false,
+  ),
+  26 =>
+  array (
+    'package' => 'ksf_FA_CRM_Marketing',
+    'name' => 'ksf_FA_CRM_Marketing',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Marketing',
+    'active' => false,
+  ),
+  27 =>
+  array (
+    'package' => 'ksf_FA_CRM_Email',
+    'name' => 'ksf_FA_CRM_Email',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Email',
+    'active' => false,
+  ),
+  28 =>
+  array (
+    'package' => 'ksf_FA_CRM_Helpdesk',
+    'name' => 'ksf_FA_CRM_Helpdesk',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Helpdesk',
+    'active' => false,
+  ),
+  29 =>
+  array (
+    'package' => 'ksf_FA_CRM_Contracts',
+    'name' => 'ksf_FA_CRM_Contracts',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Contracts',
+    'active' => false,
+  ),
+  30 =>
+  array (
+    'package' => 'ksf_FA_CRM_Dashboard',
+    'name' => 'ksf_FA_CRM_Dashboard',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Dashboard',
+    'active' => false,
+  ),
+  31 =>
+  array (
+    'package' => 'ksf_FA_CRM_Activity',
+    'name' => 'ksf_FA_CRM_Activity',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_CRM_Activity',
+    'active' => false,
+  ),
+  32 =>
+  array (
+    'package' => 'ksf_FA_HRM_TimeTrackingPayrollIntegration',
+    'name' => 'ksf_FA_HRM_TimeTrackingPayrollIntegration',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_HRM_TimeTrackingPayrollIntegration',
+    'active' => false,
+  ),
+  33 =>
+  array (
+    'package' => 'ksf_FA_ProjectManagement',
+    'name' => 'ksf_FA_ProjectManagement',
+    'version' => '2.4.0',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/ksf_FA_ProjectManagement',
+    'active' => false,
+  ),
+);return $installed_extensions;

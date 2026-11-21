@@ -1,0 +1,164 @@
+[2026-11-16 00:35:10] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:35:10] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:35:10] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:35:10] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:35:23] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:35:23] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:35:23] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:35:23] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:35:35] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:35:35] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:35:35] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:35:35] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:35:53] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:35:53] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:35:53] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:35:54] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:36:04] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:36:04] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:36:05] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:36:05] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:36:17] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:36:17] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:36:17] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:36:17] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:36:41] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:36:41] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:36:42] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:36:42] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:36:49] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:36:49] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:36:50] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:36:50] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:00] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:00] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:00] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:00] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:09] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:09] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:09] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:09] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:18] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:18] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:18] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:18] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:34] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:34] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:34] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:35] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:44] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:44] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:45] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:45] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:37:57] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:37:57] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:37:57] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:37:58] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:38:08] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:38:08] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:38:09] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:38:09] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:38:16] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:38:16] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:38:17] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:38:17] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 00:38:24] INFO: === Square import started === {"from_date":"2026-08-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 00:38:24] INFO: Found 1 Square location(s) configured
+[2026-11-16 00:38:25] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 00:38:25] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:15:49] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:15:49] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:15:49] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:15:49] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:16:06] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:16:06] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:16:06] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:16:07] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:16:26] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:16:26] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:16:26] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:16:27] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:16:45] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:16:45] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:16:45] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:16:45] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:17:00] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:17:00] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:17:00] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:17:00] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:17:11] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:17:11] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:17:11] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:17:12] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:17:32] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:17:32] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:17:32] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:17:32] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:17:51] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:17:51] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:17:51] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:17:52] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:18:12] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:18:12] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:18:12] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:18:12] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:19:34] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:19:34] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:19:34] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:19:34] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:19:47] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:19:47] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:19:47] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:19:47] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:20:06] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:20:06] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:20:06] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:20:07] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:20:17] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:20:17] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:20:18] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:20:18] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:20:34] INFO: === Square import started === {"from_date":"2020-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:20:34] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:20:34] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:20:34] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:20:49] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:20:49] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:20:49] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:20:49] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 05:21:02] INFO: === Square import started === {"from_date":"2026-01-01","to_date":"2026-12-31","location_filter":"","environment":"sandbox"}
+[2026-11-16 05:21:02] INFO: Found 1 Square location(s) configured
+[2026-11-16 05:21:02] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 05:21:02] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 21:42:27] INFO: === Square import started === {"from_date":"2026-11-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 21:42:27] INFO: Found 1 Square location(s) configured
+[2026-11-16 21:42:27] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-11-16 21:42:27] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-11-16 22:12:51] INFO: === Square import started === {"from_date":"2026-11-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:12:51] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:12:51] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-11-16 22:13:12] INFO: === Square import started === {"from_date":"2026-11-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:13:12] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:13:12] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-11-16 22:13:12] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-11-16 22:13:21] INFO: === Square import started === {"from_date":"2026-01-16","to_date":"2026-11-16","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:13:21] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:13:21] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 22:13:39] INFO: === Square import started === {"from_date":"2026-11-01","to_date":"2026-11-30","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:13:39] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:13:39] INFO: Location Default Test Account (LVYS0BD21EPMD): found 0 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":0}
+[2026-11-16 22:13:39] INFO: Import staging complete: 0 staged, 0 skipped, 1 errors {"staged":0,"skipped":0,"errors":1,"payments_found":0}
+[2026-11-16 22:25:43] INFO: === Square import started === {"from_date":"2026-01-16","to_date":"2026-11-16","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:25:43] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:25:43] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 22:32:27] INFO: === Square import started === {"from_date":"2026-01-16","to_date":"2026-11-16","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:32:27] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:32:27] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 22:32:48] INFO: === Square import started === {"from_date":"2026-01-16","to_date":"2026-11-16","location_filter":"","environment":"sandbox"}
+[2026-11-16 22:32:48] INFO: Found 1 Square location(s) configured
+[2026-11-16 22:32:48] INFO: Location Default Test Account (LVYS0BD21EPMD): found 1 payment(s) {"location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","payment_count":1}
+[2026-11-16 22:32:49] INFO: Staging payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY via ISU (order YUJTbxaZvZyAam9lLdKXtnqKSvdZY) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","square_order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","source_transaction_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","amount":1,"currency":"CAD","location_id":"LVYS0BD21EPMD","location_name":"Default Test Account","line_item_count":1}
+[2026-11-16 22:32:49] ERROR: Payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY failed to stage in ISU (staging ID is 0) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","reason":"staging_id_zero"}
+[2026-11-16 22:32:49] INFO: Payment t8BxD1f7l0VFd9eCld5W9gYyaSOZY staged successfully (ISU staging ID: 0) {"payment_id":"t8BxD1f7l0VFd9eCld5W9gYyaSOZY","order_id":"YUJTbxaZvZyAam9lLdKXtnqKSvdZY","staging_id":0,"amount":1,"currency":"CAD"}
+[2026-11-16 22:32:49] INFO: Import staging complete: 1 staged, 0 skipped, 0 errors {"staged":1,"skipped":0,"errors":0,"payments_found":1}
+[2026-11-16 22:32:49] INFO: === Square import completed === {"from_date":"2026-01-16","to_date":"2026-11-16","location_filter":"","staged":1,"skipped":0,"errors":0,"payments_found":1,"environment":"sandbox"}

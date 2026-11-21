@@ -1,0 +1,2 @@
+{"module":"FA_ProductAttributes","level":"info","message":"getRelatedRecords CALLED","context":{"stockId":"test"},"timestamp":"2026-11-11T07:10:56","hostname":"ksfii_app","pid":78,"user_id":"admin"}
+{"module":"FA_ProductAttributes","level":"info","message":"getRelatedRecords CALLED","context":{"stockId":"test"},"timestamp":"2026-11-11T07:12:56","hostname":"ksfii_app","pid":128,"user_id":"admin"}
